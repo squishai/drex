@@ -36,8 +36,8 @@ impl WriteAheadJournal {
     /// Append one entry to the journal. Uses `O_APPEND` semantics via tokio.
     pub async fn append(&self, entry: &JournalEntry) -> Result<(), StorageError> {
         use tokio::io::AsyncWriteExt;
-        let mut line = serde_json::to_string(entry)
-            .map_err(|e| StorageError::Serialization(e.to_string()))?;
+        let mut line =
+            serde_json::to_string(entry).map_err(|e| StorageError::Serialization(e.to_string()))?;
         line.push('\n');
 
         let mut file = tokio::fs::OpenOptions::new()

@@ -1,0 +1,46 @@
+{
+  "experiment_id": "exp_7_4",
+  "hypothesis": "Meaningful memory management behavior requires at minimum two layers of non-linearity in the controller network.",
+  "outcome": "INCONCLUSIVE",
+  "metrics": {
+    "acc_per_depth": {
+      "0": 0.12203125,
+      "1": 0.11578125,
+      "2": 0.12125,
+      "3": 0.111875
+    },
+    "write_rate_per_depth": {
+      "0": 0.5188408493995667,
+      "1": 0.35537704825401306,
+      "2": 0.4763220250606537,
+      "3": 0.5390927195549011
+    },
+    "write_std_per_depth": {
+      "0": 0.0014273389242589474,
+      "1": 0.00046822321019135416,
+      "2": 0.00023860516375862062,
+      "3": 4.549170262180269e-05
+    },
+    "meaningful_threshold_per_depth": {
+      "0": false,
+      "1": false,
+      "2": false,
+      "3": false
+    },
+    "min_depth_for_meaningful": null
+  },
+  "notes": "Min depth for meaningful behavior: None. depth=0 meaningful: False. depth=1 meaningful: False. depth=2 meaningful: False.",
+  "error": "",
+  "timestamp": "2026-03-08T20:02:11.411949+00:00",
+  "duration_seconds": 24.99350899993442,
+  "config": {
+    "train_steps": 1500,
+    "ctrl_width": 32,
+    "memory_slots": 8,
+    "random_baseline": 0.125,
+    "write_rate_min": 0.05,
+    "write_rate_max": 0.8,
+    "write_std_min": 0.05
+  },
+  "seed": 42
+}

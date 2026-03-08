@@ -1,0 +1,26 @@
+{
+  "experiment_id": "exp_5_4",
+  "hypothesis": "A controller can learn to prefer recomputation for cheap information and retrieval for expensive information.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "retrieval_rate_typeA": 0.0003,
+    "retrieval_rate_typeB": 0.0003,
+    "typeA_acc": 1.0,
+    "typeB_acc": 0.0163,
+    "rate_diff": -0.0
+  },
+  "notes": "Type A (cheap/recompute): retrieval_rate=0.000, acc=1.000. Type B (expensive/retrieve): retrieval_rate=0.000, acc=0.016. Rate difference (B-A)=-0.000. Threshold: A<0.3 AND B>0.6 for SUPPORTED.",
+  "error": "",
+  "timestamp": "2026-03-08T19:06:05.028950+00:00",
+  "duration_seconds": 25.999105000053532,
+  "config": {
+    "vocab_size": 64,
+    "hidden_dim": 64,
+    "memory_slots": 8,
+    "seq_len": 24,
+    "batch_size": 32,
+    "train_steps": 1500,
+    "distant_offset": 20
+  },
+  "seed": 123
+}

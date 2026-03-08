@@ -1,0 +1,25 @@
+{
+  "experiment_id": "exp_1_8",
+  "hypothesis": "A two-stage write decision (coarse filter then fine ranking) outperforms a single-stage write gate.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "single_stage_acc": 0.1466,
+    "two_stage_acc": 0.1315,
+    "gap_two_minus_single": -0.0151
+  },
+  "notes": "Two-stage acc=0.131 vs single-stage acc=0.147. Gap=-0.0151. Stage1 threshold=0.5.",
+  "error": "",
+  "timestamp": "2026-03-08T18:04:15.631487+00:00",
+  "duration_seconds": 40.454042625031434,
+  "config": {
+    "vocab_size": 64,
+    "hidden_dim": 64,
+    "seq_len": 24,
+    "batch_size": 32,
+    "train_steps": 1500,
+    "memory_slots": 6,
+    "num_pairs": 5,
+    "stage1_threshold": 0.5
+  },
+  "seed": 777
+}

@@ -1,10 +1,10 @@
-use std::sync::Arc;
-use std::path::PathBuf;
-use crate::error::DrexError;
-use crate::storage::snapshot::{SnapshotId, SnapshotStore};
-use crate::storage::journal::{WriteAheadJournal, JournalEntry, JournalOp};
-use crate::cache::eviction::{H2OEvictionPolicy, EvictionPolicy};
+use crate::cache::eviction::{EvictionPolicy, H2OEvictionPolicy};
 use crate::cache::registry::SnapshotRegistry;
+use crate::error::DrexError;
+use crate::storage::journal::{JournalEntry, JournalOp, WriteAheadJournal};
+use crate::storage::snapshot::{SnapshotId, SnapshotStore};
+use std::path::PathBuf;
+use std::sync::Arc;
 
 /// Configuration for the memory tier manager.
 #[derive(Debug, Clone)]
@@ -43,14 +43,12 @@ pub struct MemoryTierManager {
 impl MemoryTierManager {
     pub fn new(config: TierConfig) -> Result<Self, DrexError> {
         let store = Arc::new(
-            SnapshotStore::new(&config.base_path, config.compress)
-                .map_err(DrexError::Storage)?,
+            SnapshotStore::new(&config.base_path, config.compress).map_err(DrexError::Storage)?,
         );
         let registry = Arc::new(SnapshotRegistry::new());
         let eviction = Arc::new(H2OEvictionPolicy::new(config.recent_window));
-        let journal = Arc::new(
-            WriteAheadJournal::new(&config.base_path).map_err(DrexError::Storage)?,
-        );
+        let journal =
+            Arc::new(WriteAheadJournal::new(&config.base_path).map_err(DrexError::Storage)?);
         Ok(Self {
             config,
             store,
@@ -77,10 +75,9 @@ impl MemoryTierManager {
         }
 
         let current_step = self.current_step.load(std::sync::atomic::Ordering::Relaxed);
-        let to_evict = self.eviction.top_candidates(
-            self.config.eviction_batch_size,
-            current_step,
-        );
+        let to_evict = self
+            .eviction
+            .top_candidates(self.config.eviction_batch_size, current_step);
 
         let mut evicted = Vec::new();
         for candidate in to_evict {
@@ -136,12 +133,7 @@ impl MemoryTierManager {
     }
 
     /// Promote weights from disk (L3) back to Python (L2/active).
-    pub async fn promote(
-        &self,
-        layer: u32,
-        head: u32,
-        step: u64,
-    ) -> Result<Vec<f32>, DrexError> {
+    pub async fn promote(&self, layer: u32, head: u32, step: u64) -> Result<Vec<f32>, DrexError> {
         let id = SnapshotId::new(layer, head, step);
         let weights = self.store.read(&id).await?;
         Ok(weights)

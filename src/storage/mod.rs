@@ -1,2 +1,2 @@
-pub mod snapshot;
 pub mod journal;
+pub mod snapshot;

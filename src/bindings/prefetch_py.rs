@@ -1,8 +1,8 @@
-use pyo3::prelude::*;
+use crate::bindings::storage_py::PySnapshotStore;
 use crate::prefetch::engine::PrefetchEngine;
 use crate::prefetch::sketch::SketchConfig;
 use crate::storage::snapshot::SnapshotId;
-use crate::bindings::storage_py::PySnapshotStore;
+use pyo3::prelude::*;
 use std::sync::Arc;
 
 /// Python wrapper for PrefetchEngine.
@@ -38,12 +38,8 @@ impl PyPrefetchEngine {
             n_candidates: max_cache_entries,
             score_threshold: 0.0,
         };
-        let engine = PrefetchEngine::new(
-            Arc::clone(&store.inner),
-            d_model,
-            max_cache_entries,
-            config,
-        );
+        let engine =
+            PrefetchEngine::new(Arc::clone(&store.inner), d_model, max_cache_entries, config);
         Ok(Self { inner: engine })
     }
 
@@ -55,13 +51,7 @@ impl PyPrefetchEngine {
     ///     step:     Training/inference step.
     ///     key_vec:  Representative key vector (length d_model), e.g. mean-pooled
     ///               keys from the Titan write step.
-    pub fn register_snapshot(
-        &mut self,
-        layer: u32,
-        head: u32,
-        step: u64,
-        key_vec: Vec<f32>,
-    ) {
+    pub fn register_snapshot(&mut self, layer: u32, head: u32, step: u64, key_vec: Vec<f32>) {
         let id = SnapshotId::new(layer, head, step);
         self.inner.register_snapshot(layer, id, key_vec);
     }
@@ -84,12 +74,7 @@ impl PyPrefetchEngine {
     /// Returns:
     ///     list[float] if the snapshot was prefetched and is ready, else None.
     ///     The snapshot is removed from the cache on retrieval.
-    pub fn consume_prefetched(
-        &self,
-        layer: u32,
-        head: u32,
-        step: u64,
-    ) -> Option<Vec<f32>> {
+    pub fn consume_prefetched(&self, layer: u32, head: u32, step: u64) -> Option<Vec<f32>> {
         let id = SnapshotId::new(layer, head, step);
         self.inner.consume_prefetched(&id)
     }

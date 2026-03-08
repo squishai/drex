@@ -1,0 +1,40 @@
+{
+  "experiment_id": "exp_7_1",
+  "hypothesis": "Gumbel-softmax relaxation produces more stable training than straight-through estimators, and both outperform REINFORCE for discrete memory selection.",
+  "outcome": "SUPPORTED",
+  "metrics": {
+    "STE": {
+      "accuracy": 0.12552083333333333,
+      "loss_variance": 0.009391190484166145,
+      "mean_grad_norm": 1.446843359656632
+    },
+    "Gumbel": {
+      "accuracy": 0.1284375,
+      "loss_variance": 0.007069815415889025,
+      "mean_grad_norm": 1.0596244681812823
+    },
+    "REINFORCE": {
+      "accuracy": 0.1025,
+      "loss_variance": 2.695866584777832,
+      "mean_grad_norm": 0.0
+    },
+    "ranking_by_accuracy": [
+      "Gumbel",
+      "STE",
+      "REINFORCE"
+    ],
+    "ranking_by_stability": [
+      "Gumbel",
+      "STE",
+      "REINFORCE"
+    ]
+  },
+  "notes": "Gumbel most stable: True. Both beat REINFORCE: True. Acc: STE=0.126, Gumbel=0.128, REINFORCE=0.102",
+  "error": "",
+  "timestamp": "2026-03-08T17:05:07.549684+00:00",
+  "duration_seconds": 25.75000654195901,
+  "config": {
+    "train_steps": 2000,
+    "memory_slots": 8
+  }
+}

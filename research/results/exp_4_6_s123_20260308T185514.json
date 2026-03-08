@@ -1,0 +1,26 @@
+{
+  "experiment_id": "exp_4_6",
+  "hypothesis": "For exact recall tasks similarity-based retrieval wins; for inferential completion tasks reconstruction-based retrieval wins.",
+  "outcome": "INCONCLUSIVE",
+  "metrics": {
+    "similarity_exact_acc": 0.0163,
+    "recon_exact_acc": 0.0145,
+    "similarity_inferential_acc": 0.0289,
+    "recon_inferential_acc": 0.034,
+    "sim_wins_exact": false,
+    "rec_wins_inferential": false
+  },
+  "notes": "Exact(Sim=0.0163, Rec=0.0145), Inferential(Sim=0.0289, Rec=0.0340). Specialisation A=False, B=False.",
+  "error": "",
+  "timestamp": "2026-03-08T18:55:14.952574+00:00",
+  "duration_seconds": 13.094092749990523,
+  "config": {
+    "hidden_dim": 64,
+    "vocab_size": 64,
+    "memory_slots": 8,
+    "train_steps": 1500,
+    "batch_size": 32,
+    "win_margin": 0.02
+  },
+  "seed": 123
+}

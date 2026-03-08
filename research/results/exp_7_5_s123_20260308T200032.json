@@ -1,0 +1,24 @@
+{
+  "experiment_id": "exp_7_5",
+  "hypothesis": "A controller's learned policy trained at small scale does not transfer directly to a larger model without additional fine-tuning.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "small_acc": 0.0915625,
+    "zero_shot_transfer_acc": 0.09296875,
+    "fresh_large_acc": 0.12109375,
+    "finetuned_transfer_acc": 0.10125,
+    "transfer_gap": 0.028124999999999997
+  },
+  "notes": "Transfer gap (fresh - zero_shot): 0.028. Supported threshold: gap > 0.10. Refuted threshold: gap <= 0.05.",
+  "error": "",
+  "timestamp": "2026-03-08T20:00:32.702534+00:00",
+  "duration_seconds": 42.70650829200167,
+  "config": {
+    "train_steps": 1500,
+    "finetune_steps": 500,
+    "hidden_dim_sm": 32,
+    "hidden_dim_lg": 64,
+    "memory_slots": 8
+  },
+  "seed": 123
+}

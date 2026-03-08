@@ -1,0 +1,25 @@
+{
+  "experiment_id": "exp_1_1",
+  "hypothesis": "Attention weight correlates positively with memory importance and attention-based memory outperforms random memory on retrieval tasks.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "attention_correlation": -0.5026,
+    "attention_memory_acc": 0.0877,
+    "random_memory_acc": 0.0874,
+    "oracle_memory_acc": 0.0869
+  },
+  "notes": "Pearson r=-0.5026. Attention acc=0.088 vs random=0.087 vs oracle=0.087.",
+  "error": "",
+  "timestamp": "2026-03-08T17:56:19.539964+00:00",
+  "duration_seconds": 124.65790195798036,
+  "config": {
+    "vocab_size": 64,
+    "hidden_dim": 64,
+    "seq_len": 24,
+    "batch_size": 32,
+    "train_steps": 1500,
+    "memory_slots": 8,
+    "important_max": 16
+  },
+  "seed": 777
+}

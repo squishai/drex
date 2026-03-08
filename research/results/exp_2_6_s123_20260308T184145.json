@@ -1,0 +1,28 @@
+{
+  "experiment_id": "exp_2_6",
+  "hypothesis": "A compressor trained on domain A produces meaningfully worse retrieval on domain B, indicating compression overfits to domain.",
+  "outcome": "SUPPORTED",
+  "metrics": {
+    "comp_a_on_a": 0.6103724655508995,
+    "comp_a_on_b": 0.22063969522714616,
+    "comp_b_on_b": 0.6136004021763801,
+    "comp_b_on_a": 0.23423378735780717,
+    "comp_ab_on_a": 0.5299934956431389,
+    "comp_ab_on_b": 0.5336662864685059,
+    "drop_a_cross_domain": 0.38973277032375336,
+    "drop_b_cross_domain": 0.3793666148185729
+  },
+  "notes": "Comp_A: in-domain=0.610, cross-domain=0.221, drop=0.390 (threshold=0.1). Comp_B: in-domain=0.614, cross-domain=0.234, drop=0.379. Mixed compressor: A=0.530, B=0.534.",
+  "error": "",
+  "timestamp": "2026-03-08T18:41:45.112715+00:00",
+  "duration_seconds": 10.561742916936055,
+  "config": {
+    "flat_dim": 256,
+    "bottleneck": 32,
+    "domain_a": "0-64",
+    "domain_b": "64-128",
+    "degradation_threshold": 0.1,
+    "train_steps": 2000
+  },
+  "seed": 123
+}

@@ -1,0 +1,32 @@
+{
+  "experiment_id": "exp_1_5",
+  "hypothesis": "A learned write gate outperforms random write, attention-weighted write, and surprise-driven write on associative recall tasks.",
+  "outcome": "SUPPORTED",
+  "metrics": {
+    "acc_random": 0.120125,
+    "acc_attention": 0.121,
+    "acc_surprise": 0.117625,
+    "acc_learned": 0.12425,
+    "loss_random": 3.149756066799164,
+    "loss_attention": 3.154482197761536,
+    "loss_surprise": 3.1317498588562014,
+    "loss_learned": 3.0535215592384337,
+    "ranking": [
+      "learned",
+      "attention",
+      "random",
+      "surprise"
+    ]
+  },
+  "notes": "Learned gate delta over best baseline: +0.003. Ranking: ['learned', 'attention', 'random', 'surprise'].",
+  "error": "",
+  "timestamp": "2026-03-08T18:01:40.661802+00:00",
+  "duration_seconds": 155.33910979202483,
+  "config": {
+    "vocab_size": 64,
+    "seq_len": 32,
+    "memory_slots": 8,
+    "train_steps": 2000
+  },
+  "seed": 42
+}

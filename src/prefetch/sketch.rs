@@ -94,7 +94,11 @@ impl SketchIndex {
 
     /// Project a d_model-dimensional vector to rank-dimensional sketch space.
     pub fn project(&self, vec: &[f32]) -> Vec<f32> {
-        assert_eq!(vec.len(), self.d_model, "input must have d_model dimensions");
+        assert_eq!(
+            vec.len(),
+            self.d_model,
+            "input must have d_model dimensions"
+        );
         let rank = self.config.rank;
         let mut out = vec![0.0f32; rank];
         for (r, &v) in vec.iter().enumerate() {
@@ -169,7 +173,14 @@ mod tests {
 
     #[test]
     fn test_project_deterministic() {
-        let idx = SketchIndex::new(0, 64, SketchConfig { rank: 8, ..Default::default() });
+        let idx = SketchIndex::new(
+            0,
+            64,
+            SketchConfig {
+                rank: 8,
+                ..Default::default()
+            },
+        );
         let vec: Vec<f32> = (0..64).map(|i| i as f32 / 64.0).collect();
         let p1 = idx.project(&vec);
         let p2 = idx.project(&vec);
@@ -179,11 +190,15 @@ mod tests {
 
     #[test]
     fn test_top_k() {
-        let mut idx = SketchIndex::new(0, 4, SketchConfig {
-            rank: 2,
-            n_candidates: 3,
-            score_threshold: f32::NEG_INFINITY,
-        });
+        let mut idx = SketchIndex::new(
+            0,
+            4,
+            SketchConfig {
+                rank: 2,
+                n_candidates: 3,
+                score_threshold: f32::NEG_INFINITY,
+            },
+        );
         idx.add(SnapshotId::new(0, 0, 1), &[1.0, 0.0, 0.0, 0.0]);
         idx.add(SnapshotId::new(0, 0, 2), &[0.0, 1.0, 0.0, 0.0]);
         idx.add(SnapshotId::new(0, 0, 3), &[0.0, 0.0, 1.0, 0.0]);
@@ -194,8 +209,8 @@ mod tests {
         // The returned ID should have step == 1 or be one of the added entries
         assert!(
             top[0] == SnapshotId::new(0, 0, 1)
-            || top[0] == SnapshotId::new(0, 0, 2)
-            || top[0] == SnapshotId::new(0, 0, 3)
+                || top[0] == SnapshotId::new(0, 0, 2)
+                || top[0] == SnapshotId::new(0, 0, 3)
         );
     }
 }

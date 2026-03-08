@@ -1,0 +1,27 @@
+{
+  "experiment_id": "exp_2_2",
+  "hypothesis": "Attention-based compression produces more retrievable representations than autoencoder compression, especially on inferential recall tasks.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "exact_cosim_autoenc": 0.4715918254852295,
+    "exact_cosim_attention": 0.32085913747549055,
+    "fuzzy_acc_autoenc": 0.2046875,
+    "fuzzy_acc_attention": 0.0,
+    "inferential_acc_autoenc": 0.9978125,
+    "inferential_acc_attention": 0.99046875,
+    "inferential_gain_attn_over_autoenc": -0.007343749999999982
+  },
+  "notes": "Inferential recall: attention=0.990, autoenc=0.998, gain=-0.007. Attention wins on inferential task by >5pp: False. Autoencoder wins all three tasks: True.",
+  "error": "",
+  "timestamp": "2026-03-08T18:35:56.265335+00:00",
+  "duration_seconds": 20.651618457981385,
+  "config": {
+    "flat_dim": 512,
+    "bottleneck": 64,
+    "seq_len": 8,
+    "train_steps": 2000,
+    "noise_std": 0.1,
+    "n_heads": 4
+  },
+  "seed": 123
+}

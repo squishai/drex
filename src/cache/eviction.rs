@@ -91,7 +91,12 @@ impl EvictionPolicy for H2OEvictionPolicy {
                 let (layer, head) = *kv.key();
                 let score = kv.value().clone();
                 let priority = self.compute_priority(&score, current_step);
-                EvictionCandidate { layer, head, score, priority }
+                EvictionCandidate {
+                    layer,
+                    head,
+                    score,
+                    priority,
+                }
             })
             .collect();
 

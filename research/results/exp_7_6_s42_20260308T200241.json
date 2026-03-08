@@ -1,0 +1,30 @@
+{
+  "experiment_id": "exp_7_6",
+  "hypothesis": "The memory controller is measurably vulnerable to inputs designed to maximize write activity, and this vulnerability does not self-correct during training.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "normal_write_rate": 0.5735045701265336,
+    "adversarial_write_rate": 0.5818839371204376,
+    "adversarial_ratio": 1.0146108111955503,
+    "self_corrects": false,
+    "write_rate_at_500": 0.5881532311439515,
+    "write_rate_at_1000": 0.5887086486816406,
+    "write_rate_at_1500": 0.5818839371204376
+  },
+  "notes": "Adversarial ratio: 1.015 (threshold >1.5: False). Self-corrects: False. Checkpoint rates: [0.5881532311439515, 0.5887086486816406, 0.5818839371204376].",
+  "error": "",
+  "timestamp": "2026-03-08T20:02:41.663290+00:00",
+  "duration_seconds": 7.547216625069268,
+  "config": {
+    "train_steps": 1500,
+    "adv_steps": 20,
+    "adv_lr": 0.1,
+    "memory_slots": 8,
+    "checkpoints": [
+      500,
+      1000,
+      1500
+    ]
+  },
+  "seed": 42
+}

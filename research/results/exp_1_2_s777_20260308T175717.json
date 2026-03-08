@@ -1,0 +1,25 @@
+{
+  "experiment_id": "exp_1_2",
+  "hypothesis": "A memory built from high-surprise (high-perplexity) tokens supports better retrieval than attention-based memory.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "surprise_acc": 0.1394,
+    "attention_acc": 0.1442,
+    "baseline_acc": 0.0306,
+    "gap_surprise_minus_attention": -0.0048
+  },
+  "notes": "Surprise acc=0.139, attention acc=0.144, no-memory baseline=0.031. Gap=-0.0048.",
+  "error": "",
+  "timestamp": "2026-03-08T17:57:17.845264+00:00",
+  "duration_seconds": 58.30001587502193,
+  "config": {
+    "vocab_size": 64,
+    "hidden_dim": 64,
+    "seq_len": 24,
+    "batch_size": 32,
+    "train_steps": 1500,
+    "memory_slots": 8,
+    "num_pairs": 6
+  },
+  "seed": 777
+}

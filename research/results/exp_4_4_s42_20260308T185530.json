@@ -1,0 +1,26 @@
+{
+  "experiment_id": "exp_4_4",
+  "hypothesis": "Soft retrieval (weighted average) produces more stable training than hard retrieval (discrete selection), though hard retrieval may achieve higher peak task accuracy.",
+  "outcome": "SUPPORTED",
+  "metrics": {
+    "soft_loss_variance": 3.3e-05,
+    "hard_loss_variance": 7.6e-05,
+    "soft_final_acc": 0.0164,
+    "hard_final_acc": 0.0166,
+    "soft_is_more_stable": true,
+    "hard_is_more_accurate": true
+  },
+  "notes": "Soft var=0.000033 vs Hard var=0.000076; Soft acc=0.0164 vs Hard acc=0.0166.",
+  "error": "",
+  "timestamp": "2026-03-08T18:55:30.735869+00:00",
+  "duration_seconds": 6.09073341707699,
+  "config": {
+    "hidden_dim": 64,
+    "vocab_size": 64,
+    "memory_slots": 8,
+    "train_steps": 1500,
+    "batch_size": 32,
+    "variance_window": 50
+  },
+  "seed": 42
+}

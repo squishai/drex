@@ -1,0 +1,11 @@
+{
+  "experiment_id": "exp_7_1",
+  "hypothesis": "Gumbel-softmax relaxation produces more stable training than straight-through estimators, and both outperform REINFORCE for discrete memory selection.",
+  "outcome": "ERROR",
+  "metrics": {},
+  "notes": "",
+  "error": "Traceback (most recent call last):\n  File \"/Users/wscholl/drex/research/experiments/base.py\", line 71, in execute\n    result = self.run()\n             ^^^^^^^^^^\n  File \"/Users/wscholl/drex/research/experiments/cat7_cross_cutting/exp_7_1_differentiability.py\", line 261, in run\n    results[method] = train_method(method)\n                      ^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/wscholl/drex/research/experiments/cat7_cross_cutting/exp_7_1_differentiability.py\", line 213, in train_method\n    mask_hard, log_prob = select_reinforce(logits_w.detach(), MEMORY_SLOTS)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/wscholl/drex/research/experiments/cat7_cross_cutting/exp_7_1_differentiability.py\", line 143, in select_reinforce\n    log_prob = dist.log_prob(sampled.view(-1)).view(logits.shape[0], k).sum(-1)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/wscholl/Library/Python/3.12/lib/python/site-packages/torch/distributions/categorical.py\", line 148, in log_prob\n    self._validate_sample(value)\n  File \"/Users/wscholl/Library/Python/3.12/lib/python/site-packages/torch/distributions/distribution.py\", line 307, in _validate_sample\n    raise ValueError(\nValueError: Value is not broadcastable with batch_shape+event_shape: torch.Size([256]) vs torch.Size([32]).\n",
+  "timestamp": "2026-03-08T16:44:49.520728+00:00",
+  "duration_seconds": 112.87373741599731,
+  "config": {}
+}

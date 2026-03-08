@@ -1,8 +1,8 @@
-use pyo3::prelude::*;
-use pyo3::exceptions::PyRuntimeError;
-use tokio::runtime::Runtime;
-use crate::error::DrexError;
 use crate::cache::manager::{MemoryTierManager, TierConfig};
+use crate::error::DrexError;
+use pyo3::exceptions::PyRuntimeError;
+use pyo3::prelude::*;
+use tokio::runtime::Runtime;
 
 fn to_py_err<E: std::fmt::Display>(e: E) -> PyErr {
     PyRuntimeError::new_err(e.to_string())
@@ -63,13 +63,7 @@ impl PyMemoryTierManager {
 
     /// Record an attention score for H2O eviction tracking.
     /// Call this once per decode step with the attention weight sum for each head.
-    pub fn record_attention_score(
-        &self,
-        layer: u32,
-        head: u32,
-        step: u64,
-        score: f32,
-    ) {
+    pub fn record_attention_score(&self, layer: u32, head: u32, step: u64, score: f32) {
         self.inner.record_attention_score(layer, head, step, score);
     }
 
@@ -95,7 +89,8 @@ impl PyMemoryTierManager {
         step: u64,
         weights: Vec<f32>,
     ) -> Result<(), DrexError> {
-        self.rt.block_on(self.inner.demote(layer, head, step, &weights))
+        self.rt
+            .block_on(self.inner.demote(layer, head, step, &weights))
     }
 
     /// Promote weights from disk/L3 back to Python/L2.

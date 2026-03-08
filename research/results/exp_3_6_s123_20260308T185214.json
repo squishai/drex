@@ -1,0 +1,26 @@
+{
+  "experiment_id": "exp_3_6",
+  "hypothesis": "A controller can learn to retroactively write tokens it initially skipped once later context reveals their importance.",
+  "outcome": "SUPPORTED",
+  "metrics": {
+    "forward_acc": 0.0391,
+    "two_pass_acc": 0.1719,
+    "acc_gap": 0.1328,
+    "retroactive_write_rate": 0.0833
+  },
+  "notes": "Two-pass vs forward-only accuracy gap: +0.133. Retroactive write rate (fraction of tokens upgraded): 0.083. Forward pass writes 4 slots; revision adds up to 2 more.",
+  "error": "",
+  "timestamp": "2026-03-08T18:52:14.934623+00:00",
+  "duration_seconds": 41.21684541599825,
+  "config": {
+    "vocab_size": 64,
+    "seq_len": 24,
+    "hidden_dim": 64,
+    "memory_slots": 6,
+    "forward_slots": 4,
+    "batch_size": 32,
+    "train_steps": 1500,
+    "num_pairs": 4
+  },
+  "seed": 123
+}

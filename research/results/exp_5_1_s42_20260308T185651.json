@@ -1,0 +1,36 @@
+{
+  "experiment_id": "exp_5_1",
+  "hypothesis": "A learned read gate trained without explicit anti-collapse objectives will learn a degenerate policy (always read or never read) within N training steps.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "A_task_only": {
+      "final_read_rate": 0.15625,
+      "collapsed": false,
+      "mode": "stable"
+    },
+    "B_sparsity": {
+      "final_read_rate": 0.09375,
+      "collapsed": true,
+      "mode": "NEVER"
+    },
+    "C_coverage": {
+      "final_read_rate": 0.15625,
+      "collapsed": false,
+      "mode": "stable"
+    },
+    "D_confidence": {
+      "final_read_rate": 0.65625,
+      "collapsed": false,
+      "mode": "stable"
+    }
+  },
+  "notes": "Regime A collapsed: False (stable). Read rates: A_task_only=0.16, B_sparsity=0.09, C_coverage=0.16, D_confidence=0.66.",
+  "error": "",
+  "timestamp": "2026-03-08T18:56:51.793925+00:00",
+  "duration_seconds": 10.727214250015095,
+  "config": {
+    "train_steps": 1000,
+    "p_needs_memory": 0.4
+  },
+  "seed": 42
+}

@@ -1,0 +1,28 @@
+{
+  "experiment_id": "exp_6_8",
+  "hypothesis": "Periodic offline consolidation (merging memory entries into higher-level representations) improves long-horizon recall without active context.",
+  "outcome": "INCONCLUSIVE",
+  "metrics": {
+    "no_consolidation_acc": 0.018,
+    "consolidation_acc": 0.0213,
+    "gap_consolidation_minus_none": 0.0033,
+    "consolidation_compression_ratio": 2.0,
+    "mean_entries_at_query_time_no_consolidation": 8.0,
+    "mean_entries_at_query_time_consolidation": 8.0
+  },
+  "notes": "Consolidation vs no-consolidation gap: 0.003. Consolidation compresses 8\u21924 entries (2.00x ratio). Mean entries at query: no-cons=8.0, cons=8.0.",
+  "error": "",
+  "timestamp": "2026-03-08T20:00:12.477257+00:00",
+  "duration_seconds": 326.29019654204603,
+  "config": {
+    "hidden_dim": 64,
+    "vocab_size": 64,
+    "seq_len": 64,
+    "batch_size": 32,
+    "train_steps": 1500,
+    "memory_slots": 8,
+    "consolidation_K": 16,
+    "consolidated_out": 4
+  },
+  "seed": 42
+}

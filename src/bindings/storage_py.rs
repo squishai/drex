@@ -1,9 +1,9 @@
-use pyo3::prelude::*;
-use pyo3::exceptions::PyRuntimeError;
 use crate::error::StorageError;
-use crate::storage::snapshot::{SnapshotStore, SnapshotId};
-use tokio::runtime::Runtime;
+use crate::storage::snapshot::{SnapshotId, SnapshotStore};
+use pyo3::exceptions::PyRuntimeError;
+use pyo3::prelude::*;
 use std::sync::Arc;
+use tokio::runtime::Runtime;
 
 fn to_py_err<E: std::fmt::Display>(e: E) -> PyErr {
     PyRuntimeError::new_err(e.to_string())
@@ -86,9 +86,7 @@ impl PySnapshotStore {
         weights: Vec<f32>,
     ) -> Result<(), StorageError> {
         let id = SnapshotId::new(layer, head, step);
-        self.rt
-            .block_on(self.inner.write(id, &weights))
-            .map(|_| ())
+        self.rt.block_on(self.inner.write(id, &weights)).map(|_| ())
     }
 
     /// Read weights from disk.
@@ -165,6 +163,9 @@ impl PySnapshotStore {
     }
 
     fn __repr__(&self) -> String {
-        format!("SnapshotStore(base_path='{}')", self.inner.base_path().display())
+        format!(
+            "SnapshotStore(base_path='{}')",
+            self.inner.base_path().display()
+        )
     }
 }

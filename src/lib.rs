@@ -1,16 +1,14 @@
 use pyo3::prelude::*;
 
-mod error;
-mod storage;
-mod cache;
-mod prefetch;
 mod bindings;
+mod cache;
+mod error;
+mod prefetch;
+mod storage;
 
 use bindings::{
+    cache_py::PyMemoryTierManager, prefetch_py::PyPrefetchEngine, storage_py::PySnapshotMeta,
     storage_py::PySnapshotStore,
-    storage_py::PySnapshotMeta,
-    cache_py::PyMemoryTierManager,
-    prefetch_py::PyPrefetchEngine,
 };
 
 /// drex._sys — Rust systems layer for the Drex LLM architecture.

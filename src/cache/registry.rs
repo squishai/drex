@@ -1,5 +1,5 @@
-use dashmap::DashMap;
 use crate::storage::snapshot::{SnapshotId, SnapshotMetadata};
+use dashmap::DashMap;
 
 /// In-memory index of all snapshots currently on disk.
 ///

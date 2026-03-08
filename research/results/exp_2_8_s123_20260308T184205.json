@@ -1,0 +1,27 @@
+{
+  "experiment_id": "exp_2_8",
+  "hypothesis": "A compressor trained on a fixed distribution degrades gracefully (not catastrophically) under mid-context distribution shift.",
+  "outcome": "INCONCLUSIVE",
+  "metrics": {
+    "quality_domain_a": 0.6050355988740921,
+    "quality_a_in_mixed_seq": 0.6087334457039834,
+    "quality_domain_b_shifted": 0.2901355527341366,
+    "quality_drop": 0.3149000461399555,
+    "catastrophic": false
+  },
+  "notes": "Domain A (in-distribution): 0.605. Domain B (shifted): 0.290. Drop: 0.315 vs catastrophic threshold 0.2. Graceful degradation (drop < threshold): False. Catastrophic failure: False.",
+  "error": "",
+  "timestamp": "2026-03-08T18:42:05.254244+00:00",
+  "duration_seconds": 7.86168558395002,
+  "config": {
+    "flat_dim": 512,
+    "bottleneck": 64,
+    "seq_len": 8,
+    "half_seq": 4,
+    "domain_a": "0-64",
+    "domain_b": "64-128",
+    "catastrophic_threshold": 0.2,
+    "train_steps": 2000
+  },
+  "seed": 123
+}

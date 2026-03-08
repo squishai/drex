@@ -1,5 +1,5 @@
-use std::path::{Path, PathBuf};
 use crate::error::StorageError;
+use std::path::{Path, PathBuf};
 
 /// Uniquely identifies one snapshot (Titans MLP weight dump) on disk.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
@@ -79,7 +79,9 @@ impl SnapshotSerializer for FlatfileSerializer {
         }
         let payload = &data[8..];
         if payload.len() % 4 != 0 {
-            return Err(StorageError::Corrupt("payload length not divisible by 4".into()));
+            return Err(StorageError::Corrupt(
+                "payload length not divisible by 4".into(),
+            ));
         }
         let weights = payload
             .chunks_exact(4)
@@ -146,7 +148,10 @@ impl SnapshotStore {
         } else {
             Box::new(FlatfileSerializer)
         };
-        Ok(Self { base_path, serializer })
+        Ok(Self {
+            base_path,
+            serializer,
+        })
     }
 
     pub fn base_path(&self) -> &Path {
@@ -193,8 +198,8 @@ impl SnapshotStore {
             compressed: self.serializer.is_compressed(),
         };
 
-        let meta_json = serde_json::to_string(&meta)
-            .map_err(|e| StorageError::Serialization(e.to_string()))?;
+        let meta_json =
+            serde_json::to_string(&meta).map_err(|e| StorageError::Serialization(e.to_string()))?;
         tokio::fs::write(self.meta_path(&id), meta_json).await?;
 
         Ok(meta)
@@ -271,7 +276,9 @@ impl SnapshotStore {
             }
             let payload = &data[8..];
             if payload.len() % 4 != 0 {
-                return Err(StorageError::Corrupt("payload length not divisible by 4".into()));
+                return Err(StorageError::Corrupt(
+                    "payload length not divisible by 4".into(),
+                ));
             }
             Ok(payload
                 .chunks_exact(4)

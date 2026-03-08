@@ -1,0 +1,30 @@
+{
+  "experiment_id": "exp_7_8",
+  "hypothesis": "Curriculum training (one controller component at a time) produces more stable controller behavior than joint training from the start.",
+  "outcome": "INCONCLUSIVE",
+  "metrics": {
+    "joint_acc": 0.10953125,
+    "curriculum_acc": 0.075,
+    "joint_loss_variance": 0.005812551826238632,
+    "curriculum_loss_variance": 0.0013660236727446318,
+    "joint_gate_collapse": false,
+    "curriculum_gate_collapse": false,
+    "joint_write_collapsed": false,
+    "joint_read_collapsed": false,
+    "curriculum_write_collapsed": false,
+    "curriculum_read_collapsed": false
+  },
+  "notes": "Curriculum acc >= joint acc: False. Curriculum loss_var < joint loss_var: True. Joint acc=0.110, Curriculum acc=0.075. Joint var=0.00581, Curriculum var=0.00137.",
+  "error": "",
+  "timestamp": "2026-03-08T20:01:23.920645+00:00",
+  "duration_seconds": 22.035729166003875,
+  "config": {
+    "train_steps": 1500,
+    "phase1_end": 500,
+    "phase2_end": 1000,
+    "memory_slots": 8,
+    "stability_window": 200,
+    "collapse_threshold": 0.02
+  },
+  "seed": 123
+}

@@ -1,0 +1,31 @@
+{
+  "experiment_id": "exp_1_7",
+  "hypothesis": "For a fixed storage budget, infrequent writes with high compression outperform frequent writes with low compression on downstream retrieval.",
+  "outcome": "INCONCLUSIVE",
+  "metrics": {
+    "freq_acc": 0.0658,
+    "infreq_acc": 0.0582,
+    "gap_infreq_minus_freq": -0.0076,
+    "freq_budget_floats": 256,
+    "infreq_budget_floats": 256
+  },
+  "notes": "Infreq acc=0.058 vs freq acc=0.066. Gap=-0.0076. Budget: freq=256 floats, infreq=256 floats.",
+  "error": "",
+  "timestamp": "2026-03-08T18:03:56.282908+00:00",
+  "duration_seconds": 56.771320207975805,
+  "config": {
+    "vocab_size": 64,
+    "hidden_dim": 64,
+    "seq_len": 48,
+    "batch_size": 32,
+    "train_steps": 1500,
+    "num_pairs": 8,
+    "freq_stride": 4,
+    "freq_slots": 16,
+    "freq_dim": 16,
+    "infreq_stride": 16,
+    "infreq_slots": 4,
+    "infreq_dim": 64
+  },
+  "seed": 42
+}

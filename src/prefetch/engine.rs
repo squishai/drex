@@ -1,8 +1,8 @@
+use crate::prefetch::sketch::{SketchConfig, SketchIndex};
+use crate::storage::snapshot::{SnapshotId, SnapshotStore};
+use dashmap::DashMap;
 use std::collections::HashMap;
 use std::sync::Arc;
-use dashmap::DashMap;
-use crate::storage::snapshot::{SnapshotId, SnapshotStore};
-use crate::prefetch::sketch::{SketchIndex, SketchConfig};
 
 /// Async speculative prefetch engine.
 ///
@@ -47,12 +47,7 @@ impl PrefetchEngine {
 
     /// Register a snapshot in this layer's sketch index.
     /// Called after a successful `demote` from the manager.
-    pub fn register_snapshot(
-        &mut self,
-        layer: u32,
-        id: SnapshotId,
-        key_vec: Vec<f32>,
-    ) {
+    pub fn register_snapshot(&mut self, layer: u32, id: SnapshotId, key_vec: Vec<f32>) {
         let d_model = self.d_model;
         let config = self.sketch_config.clone();
         let idx = self

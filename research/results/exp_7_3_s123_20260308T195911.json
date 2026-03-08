@@ -1,0 +1,25 @@
+{
+  "experiment_id": "exp_7_3",
+  "hypothesis": "A controller trained on factual QA generalizes its memory management policies to reasoning tasks but not to generation tasks.",
+  "outcome": "INCONCLUSIVE",
+  "metrics": {
+    "factual_acc": 0.09390625,
+    "reasoning_acc": 0.054375,
+    "generation_acc": 0.0015642033847158537,
+    "factual_to_reasoning_gap": 0.03953125,
+    "factual_to_generation_gap": 0.09234204661528414,
+    "reasoning_transfers": true,
+    "generation_fails": false
+  },
+  "notes": "Reasoning gap=0.040 (threshold <0.15: True). Generation gap=0.092 (threshold >0.20: False).",
+  "error": "",
+  "timestamp": "2026-03-08T19:59:11.628187+00:00",
+  "duration_seconds": 10.943398082978092,
+  "config": {
+    "train_steps": 1500,
+    "memory_slots": 8,
+    "reasoning_gap_threshold": 0.15,
+    "generation_gap_threshold": 0.2
+  },
+  "seed": 123
+}
