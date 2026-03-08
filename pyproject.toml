@@ -1,0 +1,53 @@
+[build-system]
+requires = ["maturin>=1.7,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "drex"
+version = "0.1.0"
+description = "Novel LLM architecture with tiered memory (L1 sliding window, L2 Infini-Attention, L3 Titans disk cache)"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+dependencies = [
+    "torch>=2.3.0",
+    "numpy>=1.26",
+    "transformers>=4.40",
+    "datasets>=2.19",
+    "tokenizers>=0.19",
+    "tqdm>=4.66",
+    "einops>=0.7",
+    "safetensors>=0.4",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "ipykernel>=6.29",
+    "jupyter>=1.0",
+    "black>=24.0",
+    "ruff>=0.6",
+    "mypy>=1.10",
+]
+
+[tool.maturin]
+# Python source tree — maturin includes this as part of the built wheel
+python-source = "python"
+# The Rust _sys lib becomes importable as drex._sys.
+# Cargo.toml [lib] name = "_sys" must match the part after the last dot here.
+module-name = "drex._sys"
+features = ["extension-module"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests/python"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+strict = false
+ignore_missing_imports = true

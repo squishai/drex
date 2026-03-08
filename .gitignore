@@ -1,6 +1,30 @@
-# Build output
+# Rust build output
 /target/
-Cargo.lock
+# Note: Cargo.lock is intentionally committed for reproducibility (this is not a published library)
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.so
+*.pyd
+*.egg-info/
+dist/
+*.whl
+.venv/
+.mypy_cache/
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+notebooks/*.ipynb
+!notebooks/.gitkeep
+
+# L3 snapshot cache (runtime data, not source)
+/tmp/drex_l3/
+drex_l3/
+*.snap
+*.meta
+journal.ndjson
 
 # IDE
 .idea/

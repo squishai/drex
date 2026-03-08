@@ -2,6 +2,54 @@
 name = "drex"
 version = "0.1.0"
 edition = "2021"
+description = "Systems layer for the Drex LLM architecture — disk I/O, memory tier management, prefetch"
+
+# CRITICAL: name = "_sys" makes this importable as drex._sys from Python.
+# crate-type cdylib produces the .so extension; rlib allows `cargo test`.
+[lib]
+name = "_sys"
+crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-# Add your dependencies here
+# PyO3 bridge (extension-module feature gated separately so `cargo test` works)
+pyo3 = "0.22"
+
+# Async runtime for disk I/O
+tokio = { version = "1", features = ["full"] }
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+bincode = "2"
+
+# Compression
+zstd = "0.13"
+
+# Concurrent data structures
+dashmap = "6"
+
+# Error handling
+thiserror = "1"
+anyhow = "1"
+
+# Byte utilities
+bytes = "1"
+
+# Checksums
+crc32fast = "1"
+
+# Memory-mapped file I/O (for large weight arrays, avoids double-copy)
+memmap2 = "0.9"
+
+# Logging/tracing
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[dev-dependencies]
+tempfile = "3"
+tokio-test = "0.4"
+
+# Gating extension-module here (not on pyo3 directly) lets `cargo test` link
+# libpython normally while `maturin develop/build` enables it for the .so build.
+[features]
+extension-module = ["pyo3/extension-module"]
