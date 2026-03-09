@@ -1,0 +1,35 @@
+{
+  "experiment_id": "exp_3_5",
+  "hypothesis": "Downstream retrieval quality degrades measurably when write latency exceeds a specific token distance threshold.",
+  "outcome": "SUPPORTED",
+  "metrics": {
+    "acc_at_latency_0": 0.2156,
+    "acc_at_latency_2": 0.2375,
+    "acc_at_latency_4": 0.2016,
+    "acc_at_latency_8": 0.0406,
+    "acc_at_latency_16": 0.0312,
+    "latency_threshold": 8,
+    "acc_range": 0.2062
+  },
+  "notes": "Baseline (L=0): 0.216. Accuracy range across latencies: 0.206. First threshold where drop >0.05: 8. Flat (no degradation): False.",
+  "error": "",
+  "timestamp": "2026-03-09T00:14:11.510155+00:00",
+  "duration_seconds": 103.62089345802087,
+  "config": {
+    "vocab_size": 64,
+    "seq_len": 32,
+    "hidden_dim": 64,
+    "memory_slots": 6,
+    "batch_size": 32,
+    "train_steps": 1500,
+    "latencies": [
+      0,
+      2,
+      4,
+      8,
+      16
+    ],
+    "num_pairs": 4
+  },
+  "seed": 123
+}

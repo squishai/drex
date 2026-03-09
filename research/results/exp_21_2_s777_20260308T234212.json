@@ -1,0 +1,28 @@
+{
+  "experiment_id": "exp_21_2",
+  "hypothesis": "Hindsight oracle labels (which writes were causally relevant) provide a stronger training signal than task loss alone (+3% accuracy).",
+  "outcome": "REFUTED",
+  "metrics": {
+    "acc_A": 0.0344,
+    "acc_B": 0.0306,
+    "acc_gap": -0.0038,
+    "gate_quality_r": 0.2249
+  },
+  "notes": "Task-only: acc=0.0344. Oracle-augmented: acc=0.0306. gap=-0.0038, gate_quality_r=0.2249.",
+  "error": "",
+  "timestamp": "2026-03-08T23:42:12.125278+00:00",
+  "duration_seconds": 18.01213445805479,
+  "config": {
+    "vocab_size": 64,
+    "hidden_dim": 64,
+    "seq_len": 24,
+    "memory_slots": 8,
+    "num_pairs": 4,
+    "pretrain_steps": 500,
+    "train_steps": 400,
+    "batch": 32,
+    "lambda_": 0.3,
+    "oracle_freq": 0.2
+  },
+  "seed": 777
+}

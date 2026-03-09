@@ -1,0 +1,28 @@
+{
+  "experiment_id": "exp_9_3",
+  "hypothesis": "When the memory controller achieves >70% domain A accuracy before domain B training, EWC with lambda=5.0 reduces catastrophic forgetting to <50% of standard fine-tuning's forgetting.",
+  "outcome": "INCONCLUSIVE",
+  "metrics": {
+    "acc_a_before": 0.2006,
+    "acc_a_after_std": 0.1194,
+    "acc_a_after_ewc": 0.1431,
+    "forgetting_std": 0.0813,
+    "forgetting_ewc": 0.0575,
+    "forgetting_ratio": 0.7077,
+    "phase1_steps": 1000
+  },
+  "notes": "Precondition failed: acc_A_before=0.201 < 0.70.",
+  "error": "",
+  "timestamp": "2026-03-09T01:14:34.415802+00:00",
+  "duration_seconds": 11.578259875066578,
+  "config": {
+    "vocab_size": 128,
+    "hidden_dim": 64,
+    "seq_len": 24,
+    "num_pairs": 3,
+    "phase1_steps": 1000,
+    "phase2_steps": 500,
+    "ewc_lambda": 5.0
+  },
+  "seed": 777
+}

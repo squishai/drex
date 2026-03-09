@@ -1,0 +1,66 @@
+{
+  "experiment_id": "exp_7_2",
+  "hypothesis": "There exists a maximum controller complexity (measured in parameter count) beyond which the controller's overhead exceeds its efficiency contribution.",
+  "outcome": "SUPPORTED",
+  "metrics": {
+    "acc_per_complexity": {
+      "Tiny": 0.12203125,
+      "Small": 0.09390625,
+      "Medium": 0.12265625,
+      "Large": 0.10828125,
+      "XL": 0.104375
+    },
+    "params_per_complexity": {
+      "Tiny": 65,
+      "Small": 4225,
+      "Medium": 16897,
+      "Large": 164865,
+      "XL": 427521
+    },
+    "flops_per_complexity": {
+      "Tiny": 64,
+      "Small": 4160,
+      "Medium": 16640,
+      "Large": 164096,
+      "XL": 426240
+    },
+    "efficiency_ratio_per_complexity": {
+      "Tiny": 0.0,
+      "Small": -0.006737515755360065,
+      "Medium": 0.00011239988114518264,
+      "Large": -0.0017541632748579459,
+      "XL": -0.0020083612849882103
+    },
+    "optimal_complexity_level": "Medium",
+    "peaks_early": true,
+    "declines_at_large_xl": true,
+    "largest_is_best": false
+  },
+  "notes": "Peak efficiency at: Medium. Efficiency ratios: {'Tiny': 0.0, 'Small': -0.006737515755360065, 'Medium': 0.00011239988114518264, 'Large': -0.0017541632748579459, 'XL': -0.0020083612849882103}. Acc: {'Tiny': 0.12203125, 'Small': 0.09390625, 'Medium': 0.12265625, 'Large': 0.10828125, 'XL': 0.104375}.",
+  "error": "",
+  "timestamp": "2026-03-09T01:07:40.597948+00:00",
+  "duration_seconds": 45.36015595798381,
+  "config": {
+    "train_steps": 1500,
+    "memory_slots": 8,
+    "complexity_widths": {
+      "Tiny": [],
+      "Small": [
+        64
+      ],
+      "Medium": [
+        256
+      ],
+      "Large": [
+        512,
+        256
+      ],
+      "XL": [
+        512,
+        512,
+        256
+      ]
+    }
+  },
+  "seed": 777
+}

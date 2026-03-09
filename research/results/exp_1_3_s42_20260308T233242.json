@@ -1,0 +1,25 @@
+{
+  "experiment_id": "exp_1_3",
+  "hypothesis": "Storing tokens where gradient magnitude is highest produces memories that generalize better than attention-selected memories.",
+  "outcome": "INCONCLUSIVE",
+  "metrics": {
+    "gradient_acc": 0.1068,
+    "attention_acc": 0.09,
+    "random_acc": 0.1086,
+    "gap_gradient_minus_attention": 0.0168
+  },
+  "notes": "Gradient acc=0.107, attention=0.090, random=0.109. Gap=+0.0168.",
+  "error": "",
+  "timestamp": "2026-03-08T23:32:42.313173+00:00",
+  "duration_seconds": 45.72603420796804,
+  "config": {
+    "vocab_size": 64,
+    "hidden_dim": 64,
+    "seq_len": 24,
+    "batch_size": 32,
+    "train_steps": 1500,
+    "memory_slots": 8,
+    "num_pairs": 6
+  },
+  "seed": 42
+}

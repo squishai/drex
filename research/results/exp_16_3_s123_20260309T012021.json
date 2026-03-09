@@ -1,0 +1,40 @@
+{
+  "experiment_id": "exp_16_3",
+  "hypothesis": "Parametric memory scales more gracefully with seq_len than slot memory (higher accuracy retention at 4x length).",
+  "outcome": "SUPPORTED",
+  "metrics": {
+    "acc_slot": {
+      "24": 0.0781,
+      "48": 0.0437
+    },
+    "acc_parametric": {
+      "24": 0.025,
+      "48": 0.025
+    },
+    "retention_slot": 0.5595,
+    "retention_parametric": 1.0,
+    "retention_diff": 0.4405
+  },
+  "notes": "Parametric retention=1.000 vs slot retention=0.560; diff=0.440 > 0.15. Scales more gracefully.",
+  "error": "",
+  "timestamp": "2026-03-09T01:20:21.350912+00:00",
+  "duration_seconds": 13.843875416903757,
+  "config": {
+    "vocab_size": 64,
+    "hidden_dim": 32,
+    "seq_lens": [
+      24,
+      48
+    ],
+    "num_pairs_per_len": [
+      4,
+      8
+    ],
+    "memory_slots": 8,
+    "steps": 300,
+    "batch": 8,
+    "inference_lr": 0.01,
+    "lr": 0.0003
+  },
+  "seed": 123
+}

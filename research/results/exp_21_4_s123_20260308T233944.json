@@ -1,0 +1,31 @@
+{
+  "experiment_id": "exp_21_4",
+  "hypothesis": "Feedforward controller + hindsight distillation is the strongest write policy (outperforms either alone and LSTM baseline).",
+  "outcome": "REFUTED",
+  "metrics": {
+    "acc_A": 0.0325,
+    "acc_B": 0.0394,
+    "acc_C": 0.0319,
+    "acc_D": 0.0244,
+    "acc_E": 0.0294,
+    "gap_over_best_other": -0.01,
+    "gap_over_lstm_baseline": -0.0031,
+    "combination_is_best": false
+  },
+  "notes": "A(LSTM+task)=0.0325  B(FF+task)=0.0394  C(FF+oracle)=0.0319  D(LSTM+oracle)=0.0244  E(FF+hindsight)=0.0294. gap_over_best=-0.0100  combination_is_best=False.",
+  "error": "",
+  "timestamp": "2026-03-08T23:39:44.380891+00:00",
+  "duration_seconds": 36.34102745808195,
+  "config": {
+    "vocab_size": 64,
+    "hidden_dim": 64,
+    "seq_len": 24,
+    "memory_slots": 8,
+    "num_pairs": 4,
+    "pretrain_steps": 500,
+    "train_steps": 400,
+    "batch": 32,
+    "oracle_lambda": 0.3
+  },
+  "seed": 123
+}

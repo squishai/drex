@@ -1,0 +1,37 @@
+{
+  "experiment_id": "exp_7_9",
+  "hypothesis": "The controller's write and read decisions are interpretable (non-random, correlating with human-meaningful features) in their simplest form before any task-specific training.",
+  "outcome": "SUPPORTED",
+  "metrics": {
+    "untrained": {
+      "corr_punct_vs_gate": -0.04292309832615016,
+      "corr_numeric_vs_gate": 0.062230228406146365,
+      "corr_rare_vs_gate": 0.05964993663278326,
+      "corr_position_vs_gate": -0.007663376223129312,
+      "gate_mean": 0.5098945501997757,
+      "gate_std": 0.14566865030346648,
+      "gate_nonrandom": true
+    },
+    "trained": {
+      "corr_punct_vs_gate": -0.04737232132992592,
+      "corr_numeric_vs_gate": 0.07565185113162798,
+      "corr_rare_vs_gate": 0.05533937902980347,
+      "corr_position_vs_gate": -0.003904769403413813,
+      "gate_mean": 0.508506625003065,
+      "gate_std": 0.150474495515319,
+      "gate_nonrandom": true
+    },
+    "interpretability_score_trained": 0.05945451716378578,
+    "interpretability_score_untrained": 0.05493442112169326,
+    "heatmaps_saved_to": "/Users/wscholl/drex/research/results/interpretability"
+  },
+  "notes": "Interp score: trained=0.059 untrained=0.055. Gate is non-random. Heatmaps saved to results/interpretability/.",
+  "error": "",
+  "timestamp": "2026-03-09T01:09:57.393606+00:00",
+  "duration_seconds": 11.469721290981397,
+  "config": {
+    "train_steps": 1000,
+    "n_probe_seqs": 500
+  },
+  "seed": 777
+}

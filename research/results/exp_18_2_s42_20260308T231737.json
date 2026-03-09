@@ -1,0 +1,27 @@
+{
+  "experiment_id": "exp_18_2",
+  "hypothesis": "Learned demotion controller discovers frequency-not-recency policy (corr_access > 0.15, corr_recency < -0.10).",
+  "outcome": "INCONCLUSIVE",
+  "metrics": {
+    "n_demotion_events": 4099,
+    "corr_access": 0.1891,
+    "corr_recency": 0.3095,
+    "corr_content_norm": 0.2108
+  },
+  "notes": "corr_access=0.189 > 0.15 but corr_recency=0.310 > -0.10",
+  "error": "",
+  "timestamp": "2026-03-08T23:17:37.409490+00:00",
+  "duration_seconds": 54.74581170792226,
+  "config": {
+    "VOCAB_SIZE": 64,
+    "HIDDEN_DIM": 64,
+    "SEQ_LEN": 64,
+    "FAST_SLOTS": 16,
+    "SLOW_SLOTS": 64,
+    "NUM_PAIRS": 6,
+    "STEPS": 500,
+    "BATCH": 32,
+    "EVAL_SEQS": 100
+  },
+  "seed": 42
+}

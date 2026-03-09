@@ -138,13 +138,27 @@ def summarise_experiment(eid: str, runs: list[dict]) -> dict[str, Any]:
 # ── Markdown report ───────────────────────────────────────────────────────────
 
 CATEGORY_NAMES = {
-    "exp_1": "Category 1 — What To Write",
-    "exp_2": "Category 2 — How To Write (Compression)",
-    "exp_3": "Category 3 — When To Write",
-    "exp_4": "Category 4 — What To Read",
-    "exp_5": "Category 5 — When To Read",
-    "exp_6": "Category 6 — How To Forget",
-    "exp_7": "Category 7 — Cross-Cutting",
+    "exp_1":  "Category 1 — What To Write",
+    "exp_2":  "Category 2 — How To Write (Compression)",
+    "exp_3":  "Category 3 — When To Write",
+    "exp_4":  "Category 4 — What To Read",
+    "exp_5":  "Category 5 — When To Read",
+    "exp_6":  "Category 6 — How To Forget",
+    "exp_7":  "Category 7 — Cross-Cutting",
+    "exp_8":  "Category 8 — Mechanistic Investigations (Phase 2)",
+    "exp_9":  "Category 9 — Inconclusive Redesigns (Phase 2)",
+    "exp_10": "Category 10 — Retroactive Writing Mechanism (Phase 2)",
+    "exp_11": "Category 11 — Read Bottleneck Interventions (Phase 2)",
+    "exp_12": "Category 12 — Compression Hard Regimes (Phase 2)",
+    "exp_13": "Category 13 — Compositional Retrieval at Scale (Phase 2)",
+    "exp_14": "Category 14 — System Integration (Phase 2)",
+    "exp_15": "Category 15 — Delta Rule / Associative Matrix Writes (Phase 3)",
+    "exp_16": "Category 16 — Online Gradient Descent Memory / Titans-Style (Phase 3)",
+    "exp_17": "Category 17 — Prospective / Query-Conditioned Writing (Phase 3)",
+    "exp_18": "Category 18 — Tiered Memory Architecture (Phase 3)",
+    "exp_19": "Category 19 — Sparse Hopfield Addressing (Phase 3)",
+    "exp_20": "Category 20 — Three-Gate Coordinated Controller (Phase 3)",
+    "exp_21": "Category 21 — Feedforward Controller + Hindsight Distillation (Phase 3)",
 }
 
 

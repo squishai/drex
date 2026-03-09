@@ -1,0 +1,29 @@
+{
+  "experiment_id": "exp_21_1",
+  "hypothesis": "A feedforward-only memory controller achieves higher external memory utilization than an LSTM controller at equal parameter count.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "acc_A": 0.0269,
+    "acc_B": 0.0384,
+    "util_A": 0.1542,
+    "util_B": 0.0175,
+    "acc_gap": 0.0116,
+    "util_gap": -0.1368,
+    "params_A": 10545,
+    "params_B": 9473
+  },
+  "notes": "LSTM: acc=0.0269 util=0.1542. FF: acc=0.0384 util=0.0175. acc_gap=0.0116 util_gap=-0.1368.",
+  "error": "",
+  "timestamp": "2026-03-08T23:38:36.911342+00:00",
+  "duration_seconds": 6.61661745805759,
+  "config": {
+    "vocab_size": 64,
+    "hidden_dim": 32,
+    "seq_len": 24,
+    "memory_slots": 8,
+    "num_pairs": 4,
+    "steps": 400,
+    "batch": 32
+  },
+  "seed": 123
+}

@@ -1,0 +1,28 @@
+{
+  "experiment_id": "exp_14_2",
+  "hypothesis": "Write-first curriculum (train write gate before enabling reads) outperforms joint training from step 0.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "acc_A": 0.2094,
+    "acc_B": 0.1812,
+    "write_quality_at_1000_A": 1.0,
+    "write_quality_at_1000_B": 1.0,
+    "acc_diff_B_minus_A": -0.0281,
+    "wq_diff_B_minus_A": 0.0
+  },
+  "notes": "Joint training A >= curriculum B - 0.01: acc_A=0.209, acc_B=0.181.",
+  "error": "",
+  "timestamp": "2026-03-08T23:10:38.793719+00:00",
+  "duration_seconds": 6.631547124939971,
+  "config": {
+    "VOCAB_SIZE": 64,
+    "SEQ_LEN": 24,
+    "HIDDEN_DIM": 64,
+    "MEMORY_SLOTS": 6,
+    "NUM_PAIRS": 4,
+    "PHASE1": 250,
+    "PHASE2": 250,
+    "BATCH": 32
+  },
+  "seed": 42
+}

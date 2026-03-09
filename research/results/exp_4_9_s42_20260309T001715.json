@@ -1,0 +1,20 @@
+{
+  "experiment_id": "exp_4_9",
+  "hypothesis": "A learned retrieval mechanism can be trained to retrieve two separate memory entries and compose them to answer questions neither entry alone can answer.",
+  "outcome": "SUPPORTED",
+  "metrics": {
+    "single_hop_accuracy": 0.9684375,
+    "two_hop_accuracy": 1.0,
+    "random_baseline": 0.0625,
+    "compositional_gap": -0.03156250000000005
+  },
+  "notes": "Single-hop=0.968, Two-hop=1.000, Gap=-0.032, Random=0.062.",
+  "error": "",
+  "timestamp": "2026-03-09T00:17:15.947078+00:00",
+  "duration_seconds": 8.566521249944344,
+  "config": {
+    "train_steps": 3000,
+    "threshold": 0.4
+  },
+  "seed": 42
+}

@@ -1,0 +1,42 @@
+{
+  "experiment_id": "exp_5_2",
+  "hypothesis": "Optimal read frequency is task-dependent and cannot be determined by a single fixed schedule across task types.",
+  "outcome": "SUPPORTED",
+  "metrics": {
+    "optimal_freq_task1": 4,
+    "optimal_freq_task2": 2,
+    "optimal_freq_task3": 4,
+    "frequencies_differ": true,
+    "factual_qa_freq1": 0.995625,
+    "factual_qa_freq2": 0.996875,
+    "factual_qa_freq4": 0.9975,
+    "factual_qa_freq8": 0.994375,
+    "seq_completion_freq1": 0.99,
+    "seq_completion_freq2": 0.998125,
+    "seq_completion_freq4": 0.993125,
+    "seq_completion_freq8": 0.995,
+    "pattern_matching_freq1": 0.95125,
+    "pattern_matching_freq2": 0.94125,
+    "pattern_matching_freq4": 0.980625,
+    "pattern_matching_freq8": 0.945625
+  },
+  "notes": "Optimal frequencies \u2014 task1(factual_qa):4, task2(seq_completion):2, task3(pattern_matching):4. Frequencies differ: True. Meaningful accuracy gap between frequencies: True.",
+  "error": "",
+  "timestamp": "2026-03-09T00:23:17.105296+00:00",
+  "duration_seconds": 354.3109972079983,
+  "config": {
+    "vocab_size": 64,
+    "hidden_dim": 64,
+    "memory_slots": 8,
+    "seq_len": 24,
+    "batch_size": 32,
+    "train_steps": 1500,
+    "read_freqs": [
+      1,
+      2,
+      4,
+      8
+    ]
+  },
+  "seed": 42
+}

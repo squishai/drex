@@ -1,0 +1,28 @@
+{
+  "experiment_id": "exp_19_2",
+  "hypothesis": "Hopfield energy write criterion (write only if \u0394E < 0) produces <35% write rate with >3% accuracy improvement.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "acc_A": 0.1291,
+    "acc_B": 0.0297,
+    "acc_C": 0.1228,
+    "write_rate_B": 0.8214,
+    "write_rate_C": 0.1367,
+    "acc_gap_B_minus_A": -0.0994
+  },
+  "notes": "Energy writes too frequent (0.8214) or acc dropped vs learned gate.",
+  "error": "",
+  "timestamp": "2026-03-08T23:28:26.433660+00:00",
+  "duration_seconds": 43.7845509579638,
+  "config": {
+    "VOCAB_SIZE": 64,
+    "HIDDEN_DIM": 64,
+    "MEMORY_SLOTS": 8,
+    "SEQ_LEN": 24,
+    "NUM_PAIRS": 5,
+    "STEPS": 400,
+    "BATCH": 32,
+    "LR": 0.0003
+  },
+  "seed": 42
+}

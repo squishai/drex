@@ -1,0 +1,32 @@
+{
+  "experiment_id": "exp_11_2",
+  "hypothesis": "Read-before-write duplicate suppression (skip write if cosine similarity to any existing memory slot > 0.8) improves retrieval F1 by >3% without reducing recall by >5%.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "precision_A": 0.2256,
+    "recall_A": 0.7163,
+    "f1_A": 0.3432,
+    "write_rate_A": 0.381,
+    "precision_B": 0.1856,
+    "recall_B": 0.9187,
+    "f1_B": 0.3088,
+    "write_rate_B": 0.3714,
+    "f1_gain": -0.0343,
+    "recall_drop": -0.2025
+  },
+  "notes": "F1_B=0.309 not > F1_A=0.343 by 0.01.",
+  "error": "",
+  "timestamp": "2026-03-08T23:09:08.930938+00:00",
+  "duration_seconds": 53.05567141599022,
+  "config": {
+    "VOCAB_SIZE": 64,
+    "HIDDEN_DIM": 64,
+    "SEQ_LEN": 24,
+    "MEMORY_SLOTS": 8,
+    "NUM_PAIRS": 4,
+    "TRAIN_STEPS": 600,
+    "BATCH_SIZE": 32,
+    "DEDUP_THRESHOLD": 0.8
+  },
+  "seed": 777
+}

@@ -1,0 +1,26 @@
+{
+  "experiment_id": "exp_12_1",
+  "hypothesis": "At 64x compression with 100-way gallery discrimination, retrieval-objective compressor achieves >=15% higher Acc@1 than reconstruction-objective compressor.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "acc1_A": 1.0,
+    "acc1_B": 1.0,
+    "retrieval_gap": 0.0,
+    "recon_cosim_A": 0.1153,
+    "recon_cosim_B": 0.0053
+  },
+  "notes": "Both models >80% Acc@1 or gap <5%.",
+  "error": "",
+  "timestamp": "2026-03-08T23:10:21.382103+00:00",
+  "duration_seconds": 15.032900082995184,
+  "config": {
+    "EMBED_DIM": 32,
+    "N_TOKENS": 16,
+    "FLAT_DIM": 512,
+    "BOTTLENECK": 8,
+    "TRAIN_STEPS": 3000,
+    "BATCH_SIZE": 64,
+    "GALLERY_SIZE": 100
+  },
+  "seed": 777
+}

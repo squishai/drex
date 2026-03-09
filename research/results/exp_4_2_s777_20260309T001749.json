@@ -1,0 +1,24 @@
+{
+  "experiment_id": "exp_4_2",
+  "hypothesis": "Multi-vector retrieval captures more relevant content than single-vector retrieval for queries with multi-faceted information needs.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "single_acc": 0.9744,
+    "multi_acc": 0.9545,
+    "single_loss": 0.4819,
+    "multi_loss": 0.5983,
+    "gap_multi_minus_single": -0.0199
+  },
+  "notes": "Multi acc=0.9545 vs Single acc=0.9744, gap=-0.0199 (threshold +0.03 for SUPPORTED).",
+  "error": "",
+  "timestamp": "2026-03-09T00:17:49.317518+00:00",
+  "duration_seconds": 37.06222612503916,
+  "config": {
+    "hidden_dim": 64,
+    "vocab_size": 64,
+    "memory_slots": 8,
+    "train_steps": 1500,
+    "batch_size": 32
+  },
+  "seed": 777
+}

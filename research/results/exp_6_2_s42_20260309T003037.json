@@ -1,0 +1,25 @@
+{
+  "experiment_id": "exp_6_2",
+  "hypothesis": "Graceful degradation via iterative compression outperforms hard eviction for long-context tasks where storage budget is the binding constraint.",
+  "outcome": "INCONCLUSIVE",
+  "metrics": {
+    "lru_acc": 0.0333,
+    "compression_acc": 0.0289,
+    "gap_compression_minus_lru": -0.0044,
+    "avg_compression_level_at_query_time": 1.9333
+  },
+  "notes": "Compression vs LRU gap: -0.004. Average compression level (0=full, 1=half, 2=quarter): 1.933.",
+  "error": "",
+  "timestamp": "2026-03-09T00:30:37.395873+00:00",
+  "duration_seconds": 109.09160649997648,
+  "config": {
+    "hidden_dim": 64,
+    "vocab_size": 64,
+    "seq_len": 48,
+    "batch_size": 32,
+    "train_steps": 1500,
+    "memory_slots": 4,
+    "budget_floats": 256
+  },
+  "seed": 42
+}

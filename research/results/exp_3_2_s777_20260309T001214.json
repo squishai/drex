@@ -1,0 +1,37 @@
+{
+  "experiment_id": "exp_3_2",
+  "hypothesis": "A learned write gate trained without explicit anti-collapse objectives will learn to never write (or always write) within N training steps on standard tasks.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "A_no_signal": {
+      "final_write_rate": 0.1927083283662796,
+      "collapsed_zero": false,
+      "collapsed_always": false
+    },
+    "B_entropy": {
+      "final_write_rate": 0.7447916865348816,
+      "collapsed_zero": false,
+      "collapsed_always": false
+    },
+    "C_reconstruction": {
+      "final_write_rate": 0.2786458432674408,
+      "collapsed_zero": false,
+      "collapsed_always": false
+    },
+    "D_penalty": {
+      "final_write_rate": 0.9505208134651184,
+      "collapsed_zero": false,
+      "collapsed_always": true
+    }
+  },
+  "notes": "Regime A collapsed: False. Other regimes collapsed: True. Write rates: A_no_signal=0.19, B_entropy=0.74, C_reconstruction=0.28, D_penalty=0.95.",
+  "error": "",
+  "timestamp": "2026-03-09T00:12:14.129489+00:00",
+  "duration_seconds": 17.31388466700446,
+  "config": {
+    "train_steps": 1000,
+    "vocab_size": 64,
+    "collapse_threshold": 0.05
+  },
+  "seed": 777
+}

@@ -1,0 +1,28 @@
+{
+  "experiment_id": "exp_1_6",
+  "hypothesis": "Cosine-similarity deduplication at write time improves retrieval precision without dangerous information loss.",
+  "outcome": "INCONCLUSIVE",
+  "metrics": {
+    "standard_precision": 0.1197,
+    "standard_coverage": 1.0,
+    "dedup_precision": 0.1036,
+    "dedup_coverage": 1.0,
+    "precision_delta": -0.016,
+    "coverage_delta": 0.0
+  },
+  "notes": "Dedup: precision=0.104 (std=0.120), coverage=1.000 (std=1.000). Threshold=0.7.",
+  "error": "",
+  "timestamp": "2026-03-08T23:38:39.156661+00:00",
+  "duration_seconds": 65.47898899996653,
+  "config": {
+    "vocab_size": 64,
+    "hidden_dim": 64,
+    "seq_len": 24,
+    "batch_size": 32,
+    "train_steps": 1500,
+    "memory_slots": 8,
+    "num_pairs": 6,
+    "dedup_threshold": 0.7
+  },
+  "seed": 777
+}

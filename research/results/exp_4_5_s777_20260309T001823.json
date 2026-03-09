@@ -1,0 +1,37 @@
+{
+  "experiment_id": "exp_4_5",
+  "hypothesis": "Simultaneous cross-tier retrieval achieves better recall than sequential cascading retrieval.",
+  "outcome": "INCONCLUSIVE",
+  "metrics": {
+    "sequential_acc": 0.0156,
+    "simultaneous_acc": 0.0163,
+    "gap_sim_minus_seq": 0.0006,
+    "avg_tiers_queried_sequential": 3.0
+  },
+  "notes": "Simultaneous acc=0.0163 vs Sequential acc=0.0156, gap=+0.0006 (threshold +0.02 for SUPPORTED). Sequential avg tiers queried=3.00.",
+  "error": "",
+  "timestamp": "2026-03-09T00:18:23.928918+00:00",
+  "duration_seconds": 12.172094958950765,
+  "config": {
+    "hidden_dim": 64,
+    "vocab_size": 64,
+    "tier_specs": [
+      [
+        4,
+        64
+      ],
+      [
+        8,
+        32
+      ],
+      [
+        16,
+        16
+      ]
+    ],
+    "confidence_thr": 0.6,
+    "train_steps": 1500,
+    "batch_size": 32
+  },
+  "seed": 777
+}

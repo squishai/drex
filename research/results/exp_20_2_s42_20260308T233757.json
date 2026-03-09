@@ -1,0 +1,30 @@
+{
+  "experiment_id": "exp_20_2",
+  "hypothesis": "Explicit read accuracy auxiliary loss reduces the read bottleneck more effectively than implicit task loss.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "acc_A": 0.1672,
+    "acc_B": 0.1691,
+    "acc_C": 0.1762,
+    "oracle_read_acc_A": 0.1578,
+    "oracle_read_acc_B": 0.1628,
+    "oracle_read_acc_C": 0.1744,
+    "acc_gap_B_minus_A": 0.0019,
+    "oracle_gap_B_minus_A": 0.005
+  },
+  "notes": "Task acc unchanged (gap=0.0019 <= 0.005).",
+  "error": "",
+  "timestamp": "2026-03-08T23:37:57.387617+00:00",
+  "duration_seconds": 8.985566790914163,
+  "config": {
+    "VOCAB_SIZE": 64,
+    "HIDDEN_DIM": 64,
+    "SEQ_LEN": 24,
+    "MEMORY_SLOTS": 6,
+    "NUM_PAIRS": 4,
+    "STEPS": 400,
+    "BATCH": 32,
+    "LR": 0.0003
+  },
+  "seed": 42
+}

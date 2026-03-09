@@ -1,0 +1,23 @@
+{
+  "experiment_id": "exp_13_2",
+  "hypothesis": "Three-hop compositional retrieval retains >50% of two-hop accuracy (degradation_ratio > 0.50) at hidden_dim=64.",
+  "outcome": "SUPPORTED",
+  "metrics": {
+    "acc_single": 0.0312,
+    "acc_two": 0.0312,
+    "acc_three": 0.125,
+    "degradation_ratio": 4.0
+  },
+  "notes": "Three-hop retains 4.00 of two-hop accuracy (>0.50).",
+  "error": "",
+  "timestamp": "2026-03-08T23:10:26.313868+00:00",
+  "duration_seconds": 0.8487677919911221,
+  "config": {
+    "KB_SIZE": 32,
+    "HIDDEN_DIM": 64,
+    "VOCAB_SIZE": 128,
+    "STEPS": 500,
+    "BATCH": 32
+  },
+  "seed": 777
+}

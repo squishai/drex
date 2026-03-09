@@ -1,0 +1,55 @@
+{
+  "experiment_id": "exp_16_2",
+  "hypothesis": "Skipping MLP memory updates for low-surprise tokens achieves same accuracy with >40% fewer update steps.",
+  "outcome": "INCONCLUSIVE",
+  "metrics": {
+    "baseline_acc": 0.045,
+    "baseline_write_rate": 1.0,
+    "per_threshold": {
+      "0.0": {
+        "acc": 0.045,
+        "write_rate": 1.0
+      },
+      "0.3": {
+        "acc": 0.03,
+        "write_rate": 1.0
+      },
+      "0.6": {
+        "acc": 0.055,
+        "write_rate": 1.0
+      },
+      "1.0": {
+        "acc": 0.0375,
+        "write_rate": 1.0
+      },
+      "1.5": {
+        "acc": 0.0325,
+        "write_rate": 1.0
+      }
+    },
+    "pareto_found": false,
+    "pareto_threshold": null
+  },
+  "notes": "Smooth degradation curve; no clear pareto knee found.",
+  "error": "",
+  "timestamp": "2026-03-09T01:19:52.502070+00:00",
+  "duration_seconds": 18.394677457981743,
+  "config": {
+    "vocab_size": 64,
+    "hidden_dim": 32,
+    "seq_len": 24,
+    "num_pairs": 5,
+    "train_steps": 300,
+    "batch_size": 8,
+    "inference_lr": 0.01,
+    "lr": 0.0003,
+    "s_values": [
+      0.0,
+      0.3,
+      0.6,
+      1.0,
+      1.5
+    ]
+  },
+  "seed": 777
+}

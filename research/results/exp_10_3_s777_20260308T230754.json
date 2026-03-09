@@ -1,0 +1,37 @@
+{
+  "experiment_id": "exp_10_3",
+  "hypothesis": "The retroactive writing accuracy gain scales with sequence length (Pearson r > 0.8 across seq_len 24, 32, 48, 64).",
+  "outcome": "INCONCLUSIVE",
+  "metrics": {
+    "acc_fwd_24": 0.1875,
+    "acc_fwd_32": 0.1656,
+    "acc_fwd_48": 0.0422,
+    "acc_fwd_64": 0.0297,
+    "acc_retro_24": 0.1344,
+    "acc_retro_32": 0.0422,
+    "acc_retro_48": 0.0328,
+    "acc_retro_64": 0.0484,
+    "gap_24": -0.0531,
+    "gap_32": -0.1234,
+    "gap_48": -0.0094,
+    "gap_64": 0.0188,
+    "pearson_r": 0.7726
+  },
+  "notes": "Pearson r=0.773 \u2014 scaling relationship inconclusive.",
+  "error": "",
+  "timestamp": "2026-03-08T23:07:54.165770+00:00",
+  "duration_seconds": 88.49119958293159,
+  "config": {
+    "VOCAB_SIZE": 64,
+    "HIDDEN_DIM": 48,
+    "TRAIN_STEPS": 500,
+    "BATCH_SIZE": 32,
+    "SEQ_LENS": [
+      24,
+      32,
+      48,
+      64
+    ]
+  },
+  "seed": 777
+}

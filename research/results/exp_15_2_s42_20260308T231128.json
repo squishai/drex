@@ -1,0 +1,29 @@
+{
+  "experiment_id": "exp_15_2",
+  "hypothesis": "The correction term in the delta rule is essential \u2014 Hebbian M += v*k^T degrades by >10% on key-interference tasks.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "delta_acc_clean": 0.1125,
+    "delta_acc_interfered": 0.095,
+    "hebbian_acc_clean": 0.1144,
+    "hebbian_acc_interfered": 0.1125,
+    "norm_hebbian_acc_clean": 0.1106,
+    "norm_hebbian_acc_interfered": 0.1113,
+    "delta_vs_hebbian_gap_on_interference": -0.0175
+  },
+  "notes": "Hebbian acc_int=0.113 within 0.03 of delta acc_int=0.095.",
+  "error": "",
+  "timestamp": "2026-03-08T23:11:28.020105+00:00",
+  "duration_seconds": 28.136248958995566,
+  "config": {
+    "vocab_size": 64,
+    "hidden_dim": 32,
+    "seq_len": 32,
+    "num_pairs": 6,
+    "interference_fraction": 0.5,
+    "steps": 400,
+    "batch": 32,
+    "lr": 0.0003
+  },
+  "seed": 42
+}

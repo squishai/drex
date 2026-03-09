@@ -1,0 +1,47 @@
+{
+  "experiment_id": "exp_2_1",
+  "hypothesis": "There exists a compression ratio threshold beyond which recall fidelity degrades catastrophically rather than gracefully.",
+  "outcome": "INCONCLUSIVE",
+  "metrics": {
+    "cosine_sims": {
+      "2": 0.05153126137331128,
+      "4": 0.0529413902759552,
+      "8": 0.0529619930498302,
+      "16": 0.21879877135157585,
+      "32": 0.19834844186902045,
+      "64": 0.14751436822116376,
+      "100": 0.12108224090188742
+    },
+    "mse_values": {
+      "2": 1.006354712843895,
+      "4": 1.0058459934592248,
+      "8": 1.0058454754948616,
+      "16": 0.9603269374370575,
+      "32": 0.9688609480857849,
+      "64": 0.9862692961096764,
+      "100": 0.9936515825986862
+    },
+    "max_single_step_drop": 0.05083407364785669,
+    "cliff_at_ratio": 32,
+    "cliff_after_ratio": 64,
+    "catastrophic_cliff_detected": false
+  },
+  "notes": "Largest quality drop: 0.051 between 32x and 64x compression. Cosine sim at 2x=0.052, at 100x=0.121.",
+  "error": "",
+  "timestamp": "2026-03-09T00:04:51.078862+00:00",
+  "duration_seconds": 1267.3952430420322,
+  "config": {
+    "flat_dim": 4096,
+    "ratios": [
+      2,
+      4,
+      8,
+      16,
+      32,
+      64,
+      100
+    ],
+    "train_steps": 3000
+  },
+  "seed": 777
+}

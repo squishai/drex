@@ -1,0 +1,44 @@
+{
+  "experiment_id": "exp_6_4",
+  "hypothesis": "A controller can learn which memories deserve protection (never evict) without explicit supervision, and performance degrades predictably outside an optimal protected-set size.",
+  "outcome": "INCONCLUSIVE",
+  "metrics": {
+    "acc_at_K_0": 0.0183,
+    "acc_at_K_1": 0.0208,
+    "acc_at_K_2": 0.0338,
+    "acc_at_K_3": 0.0427,
+    "acc_at_K_4": 0.053,
+    "acc_at_K_5": 0.063,
+    "protection_recall_at_K_0": 0.0,
+    "protection_recall_at_K_1": 0.1009,
+    "protection_recall_at_K_2": 0.0931,
+    "protection_recall_at_K_3": 0.0413,
+    "protection_recall_at_K_4": 0.1758,
+    "protection_recall_at_K_5": 0.3758,
+    "optimal_K": 5,
+    "optimal_K_acc": 0.063,
+    "protection_recall_at_optimal_K": 0.3758
+  },
+  "notes": "Optimal K=5 with acc=0.063. K=0 acc=0.018, K=5 acc=0.063. Interior peak detected: False.",
+  "error": "",
+  "timestamp": "2026-03-09T00:43:28.993172+00:00",
+  "duration_seconds": 421.59056795795914,
+  "config": {
+    "hidden_dim": 64,
+    "vocab_size": 64,
+    "seq_len": 24,
+    "batch_size": 32,
+    "train_steps": 1500,
+    "memory_slots": 8,
+    "K_values": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "critical_tok_thresh": 8
+  },
+  "seed": 123
+}

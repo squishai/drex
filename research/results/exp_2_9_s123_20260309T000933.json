@@ -1,0 +1,24 @@
+{
+  "experiment_id": "exp_2_9",
+  "hypothesis": "Minimizing reconstruction loss and maximizing downstream retrieval accuracy are fundamentally different objectives and produce measurably different compressed representations.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "recon_a_cosine": 0.41353761206070583,
+    "recon_b_cosine": 0.3972331120570501,
+    "retrieval_acc1_a": 1.0,
+    "retrieval_acc1_b": 1.0,
+    "recon_gap": 0.016304500003655742,
+    "retrieval_gap": 0.0,
+    "objectives_diverge": false
+  },
+  "notes": "Reconstruction A=0.414 vs B=0.397 (gap 0.016). Retrieval A=1.000 vs B=1.000 (gap 0.000). Diverge=False.",
+  "error": "",
+  "timestamp": "2026-03-09T00:09:33.071781+00:00",
+  "duration_seconds": 190.68425670801662,
+  "config": {
+    "flat_dim": 2048,
+    "bottleneck_dim": 256,
+    "train_steps": 3000
+  },
+  "seed": 123
+}

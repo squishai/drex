@@ -1,0 +1,46 @@
+{
+  "experiment_id": "exp_10_1",
+  "hypothesis": "The retroactive writing benefit decays to <5% accuracy gain when the revision gate's lookahead window is fewer than 6 tokens.",
+  "outcome": "INCONCLUSIVE",
+  "metrics": {
+    "acc_w0": 0.2641,
+    "acc_w2": 0.1641,
+    "acc_w4": 0.1641,
+    "acc_w6": 0.2047,
+    "acc_w8": 0.2125,
+    "acc_w24": 0.2047,
+    "gap_w0": 0.0,
+    "gap_w2": -0.1,
+    "gap_w4": -0.1,
+    "gap_w6": -0.0594,
+    "gap_w8": -0.0516,
+    "gap_w24": -0.0594,
+    "gap_at_24": -0.0594,
+    "gap_at_4": -0.1,
+    "max_gap_minus_min_gap": 0.1
+  },
+  "notes": "gap@24=-0.059, gap@4=-0.100 \u2014 pattern inconclusive.",
+  "error": "",
+  "timestamp": "2026-03-08T23:05:22.588640+00:00",
+  "duration_seconds": 76.3858328750357,
+  "config": {
+    "VOCAB_SIZE": 64,
+    "SEQ_LEN": 24,
+    "HIDDEN_DIM": 64,
+    "MEMORY_SLOTS": 6,
+    "FORWARD_SLOTS": 4,
+    "RETRO_SLOTS": 2,
+    "NUM_PAIRS": 4,
+    "TRAIN_STEPS": 500,
+    "BATCH_SIZE": 32,
+    "WINDOW_SIZES": [
+      0,
+      2,
+      4,
+      6,
+      8,
+      24
+    ]
+  },
+  "seed": 777
+}

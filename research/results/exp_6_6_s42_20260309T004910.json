@@ -1,0 +1,25 @@
+{
+  "experiment_id": "exp_6_6",
+  "hypothesis": "The memory controller suffers measurable catastrophic forgetting of its learned policies when fine-tuned on a new domain, absent explicit anti-forgetting mechanisms.",
+  "outcome": "INCONCLUSIVE",
+  "metrics": {
+    "acc_a_before": 0.22671875,
+    "acc_a_after_std": 0.0190625,
+    "acc_a_after_ewc": 0.0228125,
+    "acc_b_std": 0.10609375,
+    "acc_b_ewc": 0.125,
+    "forgetting_std": 0.20765625,
+    "forgetting_ewc": 0.20390625,
+    "forgetting_reduction_pct": 1.8058690744920878
+  },
+  "notes": "Standard forgetting: 0.208. EWC forgetting: 0.204. Significant: True.",
+  "error": "",
+  "timestamp": "2026-03-09T00:49:10.036725+00:00",
+  "duration_seconds": 15.629048709059134,
+  "config": {
+    "phase1": 1500,
+    "phase2": 1500,
+    "ewc_lambda": 1.0
+  },
+  "seed": 42
+}

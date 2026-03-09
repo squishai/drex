@@ -1,0 +1,27 @@
+{
+  "experiment_id": "exp_6_1",
+  "hypothesis": "A learned importance-scored eviction policy significantly outperforms LRU on tasks requiring retention of low-frequency but high-importance information.",
+  "outcome": "SUPPORTED",
+  "metrics": {
+    "lru_acc": 0.0195,
+    "lfu_acc": 0.0594,
+    "random_acc": 0.022,
+    "learned_acc": 0.0591,
+    "learned_vs_lru_gap": 0.0395,
+    "eviction_policy_ranking": "lfu(0.059) > learned(0.059) > random(0.022) > lru(0.020)"
+  },
+  "notes": "Learned vs LRU gap: 0.040. Threshold for SUPPORTED: >0.03. Ranking: lfu(0.059) > learned(0.059) > random(0.022) > lru(0.020).",
+  "error": "",
+  "timestamp": "2026-03-09T00:28:48.300726+00:00",
+  "duration_seconds": 109.6946701669367,
+  "config": {
+    "hidden_dim": 64,
+    "vocab_size": 64,
+    "seq_len": 32,
+    "batch_size": 32,
+    "train_steps": 1500,
+    "memory_slots": 8,
+    "important_thresh": 10
+  },
+  "seed": 42
+}

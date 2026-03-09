@@ -1,0 +1,36 @@
+{
+  "experiment_id": "exp_4_8",
+  "hypothesis": "Retrieval quality degrades non-linearly as the number of near-duplicate entries in memory increases, with a specific saturation point.",
+  "outcome": "INCONCLUSIVE",
+  "metrics": {
+    "acc_at_N_0": 0.0172,
+    "acc_at_N_2": 0.0167,
+    "acc_at_N_4": 0.016,
+    "acc_at_N_8": 0.0144,
+    "acc_at_N_12": 0.0148,
+    "acc_at_N_16": 0.0152,
+    "degradation_is_nonlinear": true,
+    "saturation_point_N": 4
+  },
+  "notes": "Accuracy is flat across N values; no interference detected.",
+  "error": "",
+  "timestamp": "2026-03-09T00:19:02.200906+00:00",
+  "duration_seconds": 19.120977374957874,
+  "config": {
+    "hidden_dim": 64,
+    "vocab_size": 64,
+    "memory_slots": 16,
+    "n_values": [
+      0,
+      2,
+      4,
+      8,
+      12,
+      16
+    ],
+    "near_dup_std": 0.05,
+    "train_steps": 1500,
+    "batch_size": 32
+  },
+  "seed": 777
+}

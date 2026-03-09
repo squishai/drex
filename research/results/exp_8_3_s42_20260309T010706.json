@@ -1,0 +1,27 @@
+{
+  "experiment_id": "exp_8_3",
+  "hypothesis": "The write-evict correlation collapse (r=0.990 in exp_6_7) is gradient aliasing \u2014 both gates receive identical gradient from shared loss. Oracle pre-training of each gate on independent labels breaks this, yielding write-evict correlation < 0.5.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "write_evict_corr_A": 0.0727,
+    "write_evict_corr_B": 0.8963,
+    "write_evict_corr_C": -0.2069,
+    "acc_A": 0.1844,
+    "acc_B": 0.2156,
+    "acc_C": 0.1219
+  },
+  "notes": "Condition A (joint): corr=0.0727, acc=0.184. Condition B (oracle pretrain): corr=0.8963, acc=0.216. Condition C (grad isolation): corr=-0.2069, acc=0.122.",
+  "error": "",
+  "timestamp": "2026-03-09T01:07:06.596779+00:00",
+  "duration_seconds": 21.160229917033575,
+  "config": {
+    "vocab_size": 64,
+    "hidden_dim": 64,
+    "seq_len": 24,
+    "num_pairs": 4,
+    "memory_slots": 8,
+    "pretrain_steps": 200,
+    "joint_steps": 600
+  },
+  "seed": 42
+}

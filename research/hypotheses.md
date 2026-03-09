@@ -323,3 +323,340 @@ The controller's write and read decisions are interpretable (non-random, correla
 with human-meaningful features) in their simplest form before any task-specific
 training. (PRIORITY)
 *Status: UNTESTED*
+
+---
+
+## Category 8: Mechanistic Investigations (Phase 2)
+
+**H-8.1 — Attention Anti-Correlation is Normalization Artifact**
+The Pearson r = −0.503 correlation between attention weight and write-gate importance
+is an artifact of softmax normalization; raw pre-softmax dot products will show
+positive or near-zero correlation with the same importance signal.
+*Status: UNTESTED*
+
+**H-8.2 — Gate Equilibrium Scales With Task Demand**
+The natural ~16–20% write-gate equilibrium observed across 3 independent experiments
+scales with task memory demand: higher KV-pair density drives higher equilibrium
+write rate (Pearson r > 0.8 across difficulty levels).
+*Status: UNTESTED*
+
+**H-8.3 — Write-Evict Collapse is Gradient Aliasing**
+The write-evict collapse (r = 0.990) observed in exp_6_7 is caused by gradient
+aliasing from a shared task loss; oracle pre-training on independent labels before
+joint fine-tuning breaks the collapse and produces r < 0.5.
+*Status: UNTESTED*
+
+**H-8.4 — Write Gate Exploits Position as Content Proxy**
+The learned write gate relies on token position as a proxy for content importance;
+removing positional embeddings degrades gate quality significantly (accuracy drop
+> 0.5%) while position correlation drops below 0.05.
+*Status: UNTESTED*
+
+---
+
+## Category 9: Inconclusive Redesigns (Phase 2)
+
+**H-9.1 — Compression Objective Gap at 64× Compression**
+At 64× compression with a 100-way gallery, an InfoNCE retrieval objective produces
+>15% absolute Acc@1 gain over an MSE reconstruction objective, confirming that
+the Phase 1 result was inconclusive only because 8× was too easy.
+*Status: UNTESTED*
+
+**H-9.2 — Null Retrieval With Balanced Distribution**
+A memory controller trained on a 50/50 null/retrieval split achieves F1 > 0.60
+on both null detection and genuine retrieval, demonstrating real selectivity rather
+than distributional shortcut exploitation.
+*Status: UNTESTED*
+
+**H-9.3 — EWC Effectiveness With Strong Domain-A Baseline**
+Elastic Weight Consolidation reduces forward transfer forgetting by > 50% relative
+to unregularized sequential training when the domain-A baseline accuracy exceeds 70%.
+*Status: UNTESTED*
+
+**H-9.4 — Protected Slots Interior Optimum Above K=5**
+The write-accuracy peak for protected memory slots lies at K > 5 when MEMORY_SLOTS = 12;
+the Phase 1 result (K=5 best, at K_max) was truncated and does not represent a true
+interior optimum.
+*Status: UNTESTED*
+
+**H-9.5 — Write Budget Non-Uniform Allocation on Biased Task**
+A learned write budget produces measurably non-uniform slot allocation (Gini > 0.50)
+and accuracy gain > 5% over uniform allocation when the task structure requires
+concentrated writes in one segment of the sequence.
+*Status: UNTESTED*
+
+---
+
+## Category 10: Retroactive Writing Mechanism (Phase 2)
+
+**H-10.1 — Retroactive Benefit Decays With Lookahead Window**
+The accuracy benefit of retroactive writing falls below 5% of its full-sequence
+value when the lookahead window is restricted to fewer than 6 tokens of right context.
+*Status: UNTESTED*
+
+**H-10.2 — Retroactive Gain is Primarily New-Write, Not Re-Encoding**
+More than 80% of the combined retroactive accuracy gain comes from writing previously
+skipped tokens (new-write), not from re-encoding already-written tokens with updated
+context (overwrite).
+*Status: UNTESTED*
+
+**H-10.3 — Retroactive Gain Scales With Sequence Length**
+The absolute accuracy benefit of retroactive writing increases monotonically with
+sequence length (Pearson r > 0.8) across seq_len ∈ {24, 32, 48, 64}.
+*Status: UNTESTED*
+
+---
+
+## Category 11: Read Bottleneck Interventions (Phase 2)
+
+**H-11.1 — Two-Step Query Former Reduces Read Bottleneck**
+A two-step query former (linear projection followed by cross-attention over the
+last 4 hidden states) improves oracle read accuracy by > 10% compared to a single
+linear query projection, directly addressing the bottleneck identified in exp_7_7.
+*Status: UNTESTED*
+
+**H-11.2 — Read-Before-Write Deduplication Improves Retrieval**
+Suppressing writes for tokens with cosine similarity > 0.8 to existing memory
+improves retrieval F1 by > 3% without reducing recall by more than 5%.
+*Status: UNTESTED*
+
+**H-11.3 — Optimal Suppression Threshold Varies By Task Type**
+The optimal read-suppression confidence threshold from exp_5_6 varies by more than
+0.15 across factual, pattern, and completion retrieval tasks, indicating that a
+single universal threshold cannot be optimal.
+*Status: UNTESTED*
+
+---
+
+## Category 12: Compression Hard Regimes (Phase 2)
+
+**H-12.1 — Retrieval Objective Dominates at 64× Compression**
+At 64× token compression with a 100-way gallery, a retrieval (InfoNCE) training
+objective outperforms a reconstruction (MSE) objective by > 15% absolute Acc@1.
+*Status: UNTESTED*
+
+**H-12.2 — Extended LR Warmup Rescues Gradient-Starved Compression**
+The 2×–8× compression failure in exp_2_1 is gradient starvation from a too-wide
+bottleneck; a cosine LR schedule with extended warmup recovers > 10% training
+accuracy relative to constant LR at the same step budget.
+*Status: UNTESTED*
+
+---
+
+## Category 13: Compositional Retrieval at Scale (Phase 2)
+
+**H-13.1 — Two-Hop Regularization Persists With Interference**
+The accuracy advantage of two-hop compositional retrieval (exp_4_9) persists
+at a 64-entity knowledge base with 40% near-duplicate interference, with
+the gap remaining ≥ the original 2-hop advantage on the interference subset.
+*Status: UNTESTED*
+
+**H-13.2 — Three-Hop Chain Is Feasible At Hidden Dim 64**
+Three-hop chain retrieval is achievable with hidden_dim=64; accuracy degrades
+less than 50% relative to two-hop accuracy on the same knowledge base.
+*Status: UNTESTED*
+
+---
+
+## Category 14: System Integration (Phase 2)
+
+**H-14.1 — Retroactive Write and Read Suppression Are Super-Additive**
+Combining retroactive writing (cat10) and read confidence suppression (cat11)
+produces accuracy gains that are super-additive (combined gain > sum of individual
+gains + 1%), because each mechanism targets an independent bottleneck.
+*Status: UNTESTED*
+
+**H-14.2 — Write-First Curriculum Outperforms Joint Training**
+Training the write gate for 1000 steps before adding read-head training produces
+higher final accuracy than joint training from step 0, because the write gate first
+learns a stable policy before the read head introduces competing gradients.
+*Status: UNTESTED*
+
+**H-14.3 — Cosine Gumbel Temperature Annealing Improves Accuracy**
+Annealing Gumbel-softmax temperature from 1.0 to 0.1 via cosine schedule improves
+final accuracy by > 2% compared to a constant temperature of 0.5, because gradual
+discretization prevents early collapse to a near-deterministic policy.
+*Status: UNTESTED*
+
+---
+
+## Category 15: Delta Rule / Associative Matrix Writes (Phase 3)
+
+**H-15.1 — Delta Rule Outperforms Slot Write Via Interference Correction**
+Delta rule matrix writes (M += (v − Mk^T/‖k‖²)k^T) outperform standard fixed-slot
+writes by > 5% accuracy due to explicit interference correction, which prevents
+over-writing when multiple keys share similarity.
+*Status: UNTESTED*
+
+**H-15.2 — Correction Term is Critical for Key-Interference Tasks**
+Removing the correction term from the delta rule (degrading to Hebbian M += vk^T)
+causes accuracy to drop > 10% on tasks where 50% of keys are deliberately set to
+interfering (near-duplicate) values.
+*Status: UNTESTED*
+
+**H-15.3 — Energy-Gated Delta Rule Achieves Sparse Writes at Low Cost**
+An energy-gated delta rule (write only when ΔE < 0) achieves > 90% of the accuracy
+of continuous writes while reducing write rate to < 70%, because the energy
+criterion naturally gates out redundant or interference-increasing writes.
+*Status: UNTESTED*
+
+**H-15.4 — Delta Rule Outperforms Outer-Product Write on Overwrite Tasks**
+On tasks requiring key overwrite (same key appearing twice with different values),
+delta rule writes outperform Larimar-style outer-product writes (M += vk^T) by
+> 10% accuracy, because the correction term explicitly handles prior associations.
+*Status: UNTESTED*
+
+---
+
+## Category 16: Online Gradient Descent Memory / Titans-Style (Phase 3)
+
+**H-16.1 — Parametric MLP Memory Outperforms Slot Memory at Matched Budget**
+A parametric MLP memory updated via 1 SGD step per token outperforms a fixed-slot
+memory array at a matched parameter budget (≈256 params each) on associative recall,
+because gradient steps enable finer-grained interference management than slot-level
+writes.
+*Status: UNTESTED*
+
+**H-16.2 — Surprise-Gated Updates Recover Accuracy at Reduced Step Count**
+A surprise-gated parametric memory (update skipped for low-surprise tokens, as
+measured by L2 distance from running mean) achieves accuracy within 2% of full
+updates while reducing update steps by > 40% at the optimal surprise threshold.
+*Status: UNTESTED*
+
+**H-16.3 — Parametric Memory Scales Better With Sequence Length Than Slot Memory**
+Parametric MLP memory retains a higher fraction of peak accuracy as sequence length
+scales from 24 to 96 tokens compared to slot-based memory (accuracy retention ratio
+difference > 15%), because gradient steps adapt the representation to sequence length.
+*Status: UNTESTED*
+
+---
+
+## Category 17: Prospective / Query-Conditioned Writing (Phase 3)
+
+**H-17.1 — Query-Conditioned Write Gate Outperforms Context-Only Gate**
+A write gate conditioned on a predicted future query type outperforms a context-only
+gate by > 5% on multi-query-type tasks, because anticipating query structure enables
+proactive selection of task-relevant tokens.
+*Status: UNTESTED*
+
+**H-17.2 — K-Token Lookahead Async Write Has an Optimal Lookahead Distance**
+An asynchronous write gate that decides K steps before the write token uses lookahead
+context to outperform a same-time gate by > 3% at some K ∈ {2, 4, 6}.
+*Status: UNTESTED*
+
+**H-17.3 — Prospective and Retroactive Writing are Redundant Mechanisms**
+Combining prospective write (query-conditioned gate) and retroactive write (revision
+gate) yields less than 1.5× the accuracy gain of either mechanism alone, because both
+mechanisms compensate for the same forward-pass gate limitation.
+*Status: UNTESTED*
+
+**H-17.4 — Query-Conditioned Write Gain Scales With Query Predictability**
+The accuracy advantage of query-conditioned writing correlates linearly (r > 0.85)
+with the predictability of query type from context, because the write gate can only
+exploit query information it can reliably predict.
+*Status: UNTESTED*
+
+---
+
+## Category 18: Tiered Memory Architecture (Phase 3)
+
+**H-18.1 — Two-Tier Memory Outperforms Flat Memory on Long-Context Tasks**
+A two-tier memory (16-slot fast + 64-slot slow with learned demotion) outperforms
+a flat 64-slot memory by > 5% on tasks where critical pairs are seeded early and
+must survive 64-token contexts.
+*Status: UNTESTED*
+
+**H-18.2 — Learned Demotion Controller Discovers Frequency Over Recency**
+A trained demotion controller learns a frequency-based policy rather than a
+recency-based policy, producing positive correlation (> 0.15) between access
+count and demotion probability and negative correlation (< −0.10) with recency.
+*Status: UNTESTED*
+
+**H-18.3 — Tiered Memory Has a Capacity Crossover Point**
+Flat memory is more parameter-efficient below ~32 total slots; tiered architecture
+outperforms flat above that threshold, with a crossover point in the range [16, 64].
+*Status: UNTESTED*
+
+**H-18.4 — Simultaneous Cross-Tier Retrieval Outperforms Sequential**
+Parallel attention over both memory tiers simultaneously outperforms cascaded
+sequential retrieval (fast first, then slow if confidence low) by > 3% accuracy,
+because sequential retrieval introduces greedy commitment errors.
+*Status: UNTESTED*
+
+---
+
+## Category 19: Sparse Hopfield Addressing (Phase 3)
+
+**H-19.1 — Sparse Hopfield Retrieval Outperforms Soft Attention on Interference**
+Sparse Hopfield retrieval (top-k=2 SparseMAP-style masking) outperforms standard
+soft attention by > 5% precision@1 on tasks with 40% near-duplicate interference,
+because hard zeros suppress spurious activation from interfering patterns.
+*Status: UNTESTED*
+
+**H-19.2 — Energy Write Criterion Produces Sparse Writes at Accuracy Gain**
+Writing to Hopfield memory only when the energy change ΔE < 0 produces a write
+rate < 35% while improving accuracy by > 3%, because the energy criterion
+filters writes that would increase interference.
+*Status: UNTESTED*
+
+**H-19.3 — Sparse Hopfield Sustains Capacity Longer Before Cliff**
+Sparse Hopfield addressing maintains retrieval accuracy for at least 2 more
+patterns than dense soft attention before catastrophic capacity cliff, as measured
+by the pattern count at which accuracy drops below 50%.
+*Status: UNTESTED*
+
+---
+
+## Category 20: Three-Gate Coordinated Controller (Phase 3)
+
+**H-20.1 — Write Sparsity Auxiliary Loss Improves Accuracy and Gate Health**
+An L1 auxiliary loss targeting ~15% write rate equilibrium improves downstream
+task accuracy while keeping write rate in the healthy range [5%, 35%], avoiding
+the degenerate modes observed in exp_3_2.
+*Status: UNTESTED*
+
+**H-20.2 — Read Accuracy Auxiliary Loss Reduces Read Bottleneck**
+An explicit cross-entropy auxiliary loss on oracle read accuracy (with detached
+gradients to the write gate) reduces the read bottleneck identified in exp_7_7
+more than implicit task-loss signal alone (oracle read accuracy gain > 5%).
+*Status: UNTESTED*
+
+**H-20.3 — Combined Auxiliary Losses Outperform Any Single Auxiliary**
+A three-gate controller trained with all auxiliary losses (write sparsity + read
+accuracy + forget usefulness) outperforms any single-auxiliary or no-auxiliary
+baseline by > 2% accuracy, because each loss targets an independent failure mode.
+*Status: UNTESTED*
+
+**H-20.4 — Optimal Auxiliary Weight Range is [0.01, 0.1]**
+Task accuracy is maximized at auxiliary loss weight λ ∈ [0.01, 0.1]; at λ < 0.01
+the auxiliary has no effect, and at λ > 0.1 it dominates the task signal.
+*Status: UNTESTED*
+
+---
+
+## Category 21: Feedforward Controller + Hindsight Distillation (Phase 3)
+
+**H-21.1 — Feedforward Controller Achieves Higher Memory Utilization**
+A feedforward-only controller (no recurrence) achieves higher external memory
+utilization (measured by slot-access entropy) than an LSTM controller at equal
+parameter count, because recurrent controllers can short-circuit memory access
+via their hidden state.
+*Status: UNTESTED*
+
+**H-21.2 — Hindsight Oracle Labels Improve Write Gate Training Signal**
+A write gate trained with hindsight oracle labels (retroactively marking which
+writes were causally necessary for correct predictions) achieves higher task
+accuracy than end-to-end gradient training on the same task and step budget.
+*Status: UNTESTED*
+
+**H-21.3 — Distilled Gate Outperforms End-to-End Learned Gate**
+A write gate distilled from oracle hindsight labels via alternating BCE + task
+training achieves higher accuracy than an end-to-end trained gate, because the
+oracle supervision provides a cleaner gradient signal for sparse discrete decisions.
+*Status: UNTESTED*
+
+**H-21.4 — Feedforward Controller + Hindsight Distillation is Strongest Write Policy**
+Combining a feedforward controller with hindsight oracle distillation produces
+higher accuracy than any single-mechanism baseline (LSTM+task, FF+task, LSTM+oracle),
+representing the strongest overall write policy tested in Phase 3.
+*Status: UNTESTED*

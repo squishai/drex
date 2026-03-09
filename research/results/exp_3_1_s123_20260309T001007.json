@@ -1,0 +1,28 @@
+{
+  "experiment_id": "exp_3_1",
+  "hypothesis": "Event-driven writing (learned gate) produces better memory coverage than writing every N tokens for a fixed storage budget.",
+  "outcome": "SUPPORTED",
+  "metrics": {
+    "continuous_acc": 0.0266,
+    "event_driven_acc": 0.0312,
+    "continuous_coverage": 0.25,
+    "event_driven_coverage": 0.3088,
+    "acc_delta": 0.0047,
+    "coverage_delta": 0.0588
+  },
+  "notes": "Event-driven acc delta: +0.005. Coverage delta: +0.059. Stride used for continuous: 4. Top-k=6 used for event-driven.",
+  "error": "",
+  "timestamp": "2026-03-09T00:10:07.521048+00:00",
+  "duration_seconds": 34.4415801250143,
+  "config": {
+    "vocab_size": 64,
+    "seq_len": 24,
+    "hidden_dim": 64,
+    "memory_slots": 6,
+    "batch_size": 32,
+    "train_steps": 1500,
+    "num_pairs": 4,
+    "stride": 4
+  },
+  "seed": 123
+}

@@ -1,0 +1,26 @@
+{
+  "experiment_id": "exp_5_7",
+  "hypothesis": "When local attention and external memory produce conflicting predictions, a learned arbitration policy outperforms both fixed-priority policies.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "attn_only_acc": 0.5106,
+    "mem_only_acc": 0.5006,
+    "arbitrated_acc": 0.4825,
+    "arbitration_advantage": -0.0281,
+    "best_fixed_policy_acc": 0.5106
+  },
+  "notes": "attn_only_acc=0.511, mem_only_acc=0.501, arbitrated_acc=0.482. Arbitration advantage over best fixed: -0.0281. SUPPORTED requires advantage > 0.05 over BOTH fixed policies.",
+  "error": "",
+  "timestamp": "2026-03-09T00:26:58.600680+00:00",
+  "duration_seconds": 39.887003874988295,
+  "config": {
+    "vocab_size": 64,
+    "hidden_dim": 64,
+    "memory_slots": 8,
+    "seq_len": 24,
+    "batch_size": 32,
+    "train_steps": 1500,
+    "local_window": 3
+  },
+  "seed": 42
+}

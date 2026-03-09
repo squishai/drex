@@ -1,0 +1,41 @@
+{
+  "experiment_id": "exp_2_4",
+  "hypothesis": "There exists an optimal chunk size for compression beyond which quality degrades independent of compression ratio.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "quality_at_4": 0.6424564844369889,
+    "quality_at_8": 0.47277233079075814,
+    "quality_at_16": 0.3401713007688522,
+    "quality_at_32": 0.22739030681550504,
+    "quality_at_64": 0.15308643668889999,
+    "optimal_chunk_size": 4,
+    "quality_range": 0.4893700477480889,
+    "is_monotone_decrease": true,
+    "is_flat": false,
+    "clear_peak_detected": false,
+    "cosine_sim": {
+      "4": 0.6424564844369889,
+      "8": 0.47277233079075814,
+      "16": 0.3401713007688522,
+      "32": 0.22739030681550504,
+      "64": 0.15308643668889999
+    }
+  },
+  "notes": "Quality scores [0.642, 0.473, 0.34, 0.227, 0.153] for chunk sizes [4, 8, 16, 32, 64]. Best quality at chunk_size=4 (index 0). Clear peak at middle: False. Monotone decrease: True. Flat: False.",
+  "error": "",
+  "timestamp": "2026-03-09T00:05:46.285486+00:00",
+  "duration_seconds": 222.12090291595086,
+  "config": {
+    "chunk_sizes": [
+      4,
+      8,
+      16,
+      32,
+      64
+    ],
+    "bottleneck": 64,
+    "hidden_dim": 64,
+    "train_steps": 2000
+  },
+  "seed": 42
+}

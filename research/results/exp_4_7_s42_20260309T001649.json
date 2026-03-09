@@ -1,0 +1,21 @@
+{
+  "experiment_id": "exp_4_7",
+  "hypothesis": "A learned read gate can be trained to return null on tasks where most queries have no relevant memory content, without explicit null supervision.",
+  "outcome": "SUPPORTED",
+  "metrics": {
+    "null_precision": 1.0,
+    "null_recall": 0.7995625,
+    "null_f1": 0.8886187615045323,
+    "retrieval_rate_on_matches": 0.0,
+    "p_relevant": 0.2
+  },
+  "notes": "Null precision 1.000 vs threshold 0.7.",
+  "error": "",
+  "timestamp": "2026-03-09T00:16:49.931098+00:00",
+  "duration_seconds": 7.136668917024508,
+  "config": {
+    "train_steps": 2000,
+    "p_relevant": 0.2
+  },
+  "seed": 42
+}

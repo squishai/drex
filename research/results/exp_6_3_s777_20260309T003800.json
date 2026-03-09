@@ -1,0 +1,26 @@
+{
+  "experiment_id": "exp_6_3",
+  "hypothesis": "A controller can learn to evict domain-mismatched memories when input distribution shifts, without explicit domain labels.",
+  "outcome": "SUPPORTED",
+  "metrics": {
+    "lru_phase2_acc": 0.0364,
+    "selective_phase2_acc": 0.1128,
+    "gap_selective_minus_lru": 0.0764,
+    "selective_eviction_rate_for_phase1_entries": 0.7012
+  },
+  "notes": "Selective vs LRU gap on phase-2 queries: 0.076. Eviction rate for phase-1 entries: 0.701.",
+  "error": "",
+  "timestamp": "2026-03-09T00:38:00.077616+00:00",
+  "duration_seconds": 310.43595041695517,
+  "config": {
+    "hidden_dim": 64,
+    "vocab_size": 64,
+    "seq_len": 24,
+    "batch_size": 32,
+    "train_steps": 1500,
+    "memory_slots": 8,
+    "phase1_len": 12,
+    "phase2_len": 12
+  },
+  "seed": 777
+}

@@ -1,0 +1,28 @@
+{
+  "experiment_id": "exp_3_3",
+  "hypothesis": "Writing later in context (more processed representations) outperforms early writing (raw representations) for inferential tasks.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "early_write_acc": 1.0,
+    "late_write_acc": 1.0,
+    "early_final_loss": 0.041,
+    "late_final_loss": 0.0054,
+    "acc_gap": 0.0
+  },
+  "notes": "Late vs early accuracy gap: +0.000. Threshold for SUPPORTED: >0.02. Task: inferential rule application (4 rules, 3 examples).",
+  "error": "",
+  "timestamp": "2026-03-09T00:13:26.221777+00:00",
+  "duration_seconds": 72.09238225000445,
+  "config": {
+    "vocab_size": 64,
+    "seq_len": 24,
+    "hidden_dim": 64,
+    "memory_slots": 6,
+    "batch_size": 32,
+    "train_steps": 1500,
+    "n_heads": 4,
+    "n_rules": 4,
+    "n_examples": 3
+  },
+  "seed": 777
+}

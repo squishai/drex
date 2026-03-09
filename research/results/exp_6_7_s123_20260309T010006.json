@@ -1,0 +1,25 @@
+{
+  "experiment_id": "exp_6_7",
+  "hypothesis": "Joint optimization of write and evict decisions outperforms treating them as independent operations when storage pressure is constant.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "independent_acc": 0.0642,
+    "joint_acc": 0.0294,
+    "gap_joint_minus_independent": -0.0348,
+    "write_evict_correlation_independent": -0.1911,
+    "write_evict_correlation_joint": 0.9904
+  },
+  "notes": "Joint vs independent gap: -0.035. Write-evict correlation \u2014 independent: -0.191, joint: 0.990.",
+  "error": "",
+  "timestamp": "2026-03-09T01:00:06.902322+00:00",
+  "duration_seconds": 586.6665046670241,
+  "config": {
+    "hidden_dim": 64,
+    "vocab_size": 64,
+    "seq_len": 24,
+    "batch_size": 32,
+    "train_steps": 1500,
+    "memory_slots": 4
+  },
+  "seed": 123
+}

@@ -1,0 +1,31 @@
+{
+  "experiment_id": "exp_19_1",
+  "hypothesis": "Sparse Hopfield retrieval (sparsemax top-k=2) outperforms standard softmax attention by >5% precision@1 on 40% interference tasks.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "acc_A": 0.0228,
+    "acc_B": 0.0175,
+    "acc_C": 0.0316,
+    "precision_A": 0.0,
+    "precision_B": 0.0,
+    "precision_C": 0.0316,
+    "acc_gap_B_minus_A": -0.0053,
+    "precision_gap_B_minus_A": 0.0
+  },
+  "notes": "Soft attention matches or beats sparse on interference tasks.",
+  "error": "",
+  "timestamp": "2026-03-08T23:27:42.647679+00:00",
+  "duration_seconds": 13.862097749952227,
+  "config": {
+    "VOCAB_SIZE": 128,
+    "HIDDEN_DIM": 64,
+    "MEMORY_SLOTS": 16,
+    "SEQ_LEN": 32,
+    "NUM_PAIRS": 6,
+    "INTERFERENCE_FRACTION": 0.4,
+    "STEPS": 400,
+    "BATCH": 32,
+    "LR": 0.0003
+  },
+  "seed": 42
+}

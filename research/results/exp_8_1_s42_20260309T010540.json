@@ -1,0 +1,23 @@
+{
+  "experiment_id": "exp_8_1",
+  "hypothesis": "The attention-importance anti-correlation (r=-0.503 from exp_1_1) is caused by softmax normalization forcing zero-sum redistribution, not a semantic mismatch \u2014 removing normalization will produce positive or near-zero correlation.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "pearson_r_softmax": 0.268,
+    "pearson_r_raw": -0.1062,
+    "pearson_r_entropic": 0.1387
+  },
+  "notes": "Softmax r=0.2680, raw dot-product r=-0.1062, entropy-normalized r=0.1387. Hypothesis: raw should be > 0.05 while softmax < -0.10.",
+  "error": "",
+  "timestamp": "2026-03-09T01:05:40.948882+00:00",
+  "duration_seconds": 6.3205020419554785,
+  "config": {
+    "vocab_size": 64,
+    "hidden_dim": 32,
+    "seq_len": 24,
+    "num_pairs": 4,
+    "train_steps": 1000,
+    "batch_size": 32
+  },
+  "seed": 42
+}

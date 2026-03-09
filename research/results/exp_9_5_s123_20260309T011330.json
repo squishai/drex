@@ -1,0 +1,33 @@
+{
+  "experiment_id": "exp_9_5",
+  "hypothesis": "With all KV pairs concentrated in block 1 (positions 0-7 of 32), an adaptive write budget allocator learns non-uniform allocation (Gini > 0.5, block-1 fraction > 0.60), outperforming uniform allocation by > 5%.",
+  "outcome": "SUPPORTED",
+  "metrics": {
+    "uniform_acc": 0.1588,
+    "adaptive_acc": 0.2269,
+    "acc_delta": 0.0681,
+    "block1_allocation_frac": 0.9738,
+    "gini_coefficient": 0.7363,
+    "mean_block_weights": [
+      0.9738,
+      0.0004,
+      0.0004,
+      0.0255
+    ]
+  },
+  "notes": "Uniform acc=0.159, adaptive acc=0.227, delta=0.068. Block-1 fraction=0.974, Gini=0.736. Block weights: [0.974, 0.0, 0.0, 0.026].",
+  "error": "",
+  "timestamp": "2026-03-09T01:13:30.949837+00:00",
+  "duration_seconds": 43.59738479193766,
+  "config": {
+    "vocab_size": 64,
+    "seq_len": 32,
+    "hidden_dim": 64,
+    "memory_slots": 8,
+    "n_blocks": 4,
+    "num_pairs": 4,
+    "train_steps": 2000,
+    "block_size": 8
+  },
+  "seed": 123
+}

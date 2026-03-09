@@ -1,0 +1,28 @@
+{
+  "experiment_id": "exp_5_3",
+  "hypothesis": "Anticipatory retrieval (predicting need before it arises) improves latency without measurably hurting task quality.",
+  "outcome": "INCONCLUSIVE",
+  "metrics": {
+    "reactive_acc": 0.99,
+    "predictive_acc": 0.9838,
+    "reactive_read_rate": 0.125,
+    "predictive_read_rate": 0.405,
+    "acc_gap": 0.0062
+  },
+  "notes": "Reactive: acc=0.990, read_rate=0.125. Predictive: acc=0.984, read_rate=0.405. Acc gap: 0.0062 (positive = reactive better). Read rate reduction: -0.2800.",
+  "error": "",
+  "timestamp": "2026-03-09T00:25:17.017288+00:00",
+  "duration_seconds": 84.14052141702268,
+  "config": {
+    "vocab_size": 64,
+    "hidden_dim": 64,
+    "memory_slots": 8,
+    "seq_len": 24,
+    "batch_size": 32,
+    "train_steps": 1500,
+    "entropy_thresh": 2.5,
+    "pred_horizon": 2,
+    "hist_len": 4
+  },
+  "seed": 123
+}

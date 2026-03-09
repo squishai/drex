@@ -1,0 +1,26 @@
+{
+  "experiment_id": "exp_6_5",
+  "hypothesis": "A biologically-inspired memory decay function (Ebbinghaus-style) improves long-horizon task performance compared to instant eviction.",
+  "outcome": "INCONCLUSIVE",
+  "metrics": {
+    "lru_acc": 0.0205,
+    "ebbinghaus_acc": 0.0241,
+    "gap_ebbinghaus_minus_lru": 0.0036,
+    "learned_stability_S": 11.3669,
+    "mean_retention_at_query_time": 0.75
+  },
+  "notes": "Ebbinghaus vs LRU gap: 0.004. Learned S=11.367 steps. Mean retention at query: 0.750.",
+  "error": "",
+  "timestamp": "2026-03-09T00:50:02.347131+00:00",
+  "duration_seconds": 393.2469786249567,
+  "config": {
+    "hidden_dim": 64,
+    "vocab_size": 64,
+    "seq_len": 48,
+    "batch_size": 32,
+    "train_steps": 1500,
+    "memory_slots": 8,
+    "decay_threshold": 0.05
+  },
+  "seed": 123
+}

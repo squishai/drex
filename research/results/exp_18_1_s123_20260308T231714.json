@@ -1,0 +1,29 @@
+{
+  "experiment_id": "exp_18_1",
+  "hypothesis": "Two-tier memory (16-slot fast + 64-slot slow with learned demotion) outperforms flat 64-slot memory by >5% on long-context tasks.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "acc_A": 0.0323,
+    "acc_B": 0.0295,
+    "acc_C": 0.0323,
+    "gap_B": -0.0029,
+    "gap_C": 0.0,
+    "slow_coverage_B": 0.4087,
+    "slow_coverage_C": 0.4252
+  },
+  "notes": "Flat memory matches tiered (gap=-0.003)",
+  "error": "",
+  "timestamp": "2026-03-08T23:17:14.881226+00:00",
+  "duration_seconds": 192.60373570898082,
+  "config": {
+    "VOCAB_SIZE": 64,
+    "HIDDEN_DIM": 64,
+    "SEQ_LEN": 64,
+    "FAST_SLOTS": 16,
+    "SLOW_SLOTS": 64,
+    "NUM_PAIRS": 6,
+    "STEPS": 400,
+    "BATCH": 32
+  },
+  "seed": 123
+}

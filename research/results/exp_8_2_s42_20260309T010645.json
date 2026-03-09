@@ -1,0 +1,46 @@
+{
+  "experiment_id": "exp_8_2",
+  "hypothesis": "The natural ~16-20% gate activity equilibrium is not fixed by architecture but scales with task memory demand \u2014 harder tasks requiring more KV pairs will drive equilibrium write rates upward.",
+  "outcome": "SUPPORTED",
+  "metrics": {
+    "pearson_r_difficulty_vs_rate": 0.8423,
+    "write_rate_variance": 0.012991,
+    "write_rates": [
+      0.3564,
+      0.4239,
+      0.3966,
+      0.6134
+    ],
+    "accuracies": [
+      0.6582,
+      0.3398,
+      0.2227,
+      0.0801
+    ],
+    "kv_levels": [
+      1,
+      2,
+      4,
+      6
+    ]
+  },
+  "notes": "KV levels [1, 2, 4, 6]: write rates [0.3564, 0.4239, 0.3966, 0.6134]. Pearson r=0.8423, variance=0.012991.",
+  "error": "",
+  "timestamp": "2026-03-09T01:06:45.428924+00:00",
+  "duration_seconds": 64.44632129196543,
+  "config": {
+    "vocab_size": 64,
+    "hidden_dim": 64,
+    "seq_len": 32,
+    "memory_slots": 8,
+    "train_steps": 2000,
+    "batch_size": 32,
+    "kv_levels": [
+      1,
+      2,
+      4,
+      6
+    ]
+  },
+  "seed": 42
+}

@@ -1,0 +1,27 @@
+{
+  "experiment_id": "exp_5_5",
+  "hypothesis": "Confidence-gated cascading retrieval matches full-depth retrieval quality at significantly lower average compute cost.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "full_acc": 0.9613,
+    "cascading_acc": 0.3962,
+    "full_tiers_avg": 3.0,
+    "cascading_tiers_avg": 1.169,
+    "compute_savings_pct": 61.02
+  },
+  "notes": "Full-depth: acc=0.961, tiers=3.00. Cascading: acc=0.396, tiers=1.17. Acc drop=0.5650. Compute savings=61.0%. Threshold: acc_drop<=0.02 AND casc_tiers<2.0 for SUPPORTED.",
+  "error": "",
+  "timestamp": "2026-03-09T00:26:13.120040+00:00",
+  "duration_seconds": 38.12867229199037,
+  "config": {
+    "vocab_size": 64,
+    "hidden_dim": 64,
+    "memory_slots": 8,
+    "n_tiers": 3,
+    "seq_len": 24,
+    "batch_size": 32,
+    "train_steps": 1500,
+    "confidence_stop": 0.7
+  },
+  "seed": 123
+}

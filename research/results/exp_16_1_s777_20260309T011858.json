@@ -1,0 +1,29 @@
+{
+  "experiment_id": "exp_16_1",
+  "hypothesis": "Parametric MLP memory (1 gradient step per token) outperforms fixed-slot memory at matched parameter count.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "acc_slot": 0.0425,
+    "acc_parametric": 0.02,
+    "acc_gap": -0.0225,
+    "param_count_slot_storage": 256,
+    "param_count_mlp": 552
+  },
+  "notes": "Slot acc=0.043 >= parametric acc=0.020 - 0.02.",
+  "error": "",
+  "timestamp": "2026-03-09T01:18:58.017417+00:00",
+  "duration_seconds": 5.447424541926011,
+  "config": {
+    "vocab_size": 64,
+    "hidden_dim": 32,
+    "seq_len": 24,
+    "num_pairs": 5,
+    "memory_slots": 8,
+    "train_steps": 300,
+    "batch_size": 8,
+    "inference_lr": 0.01,
+    "lr": 0.0003,
+    "mlp_inner": 8
+  },
+  "seed": 777
+}

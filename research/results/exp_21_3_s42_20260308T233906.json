@@ -1,0 +1,30 @@
+{
+  "experiment_id": "exp_21_3",
+  "hypothesis": "Write gate distilled from oracle labels (trained primarily on oracle supervision) achieves higher accuracy than end-to-end learned gate.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "acc_A": 0.0344,
+    "acc_B": 0.035,
+    "acc_C": 0.0394,
+    "gate_quality_A": -0.0062,
+    "gate_quality_B": 0.0191,
+    "gate_quality_C": 0.1079,
+    "acc_gap_BA": 0.0006,
+    "quality_gap_BA": 0.0253
+  },
+  "notes": "A(e2e): acc=0.0344 gq=-0.0062. B(distilled): acc=0.0350 gq=0.0191. C(mixed): acc=0.0394 gq=0.1079. acc_gap(B-A)=0.0006 quality_gap=0.0253.",
+  "error": "",
+  "timestamp": "2026-03-08T23:39:06.074629+00:00",
+  "duration_seconds": 19.392366457963362,
+  "config": {
+    "vocab_size": 64,
+    "hidden_dim": 64,
+    "seq_len": 24,
+    "memory_slots": 8,
+    "num_pairs": 4,
+    "pretrain_steps": 500,
+    "train_steps": 400,
+    "batch": 32
+  },
+  "seed": 42
+}

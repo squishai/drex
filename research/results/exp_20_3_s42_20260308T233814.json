@@ -1,0 +1,34 @@
+{
+  "experiment_id": "exp_20_3",
+  "hypothesis": "Three-gate controller with all auxiliary losses combined outperforms any single-auxiliary system.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "acc_A": 0.2353,
+    "acc_B": 0.2506,
+    "acc_C": 0.2425,
+    "acc_D": 0.2334,
+    "acc_E": 0.2431,
+    "best_single_aux": 0.2506,
+    "gap_E_minus_best_single": -0.0075,
+    "gap_E_minus_A": 0.0078
+  },
+  "notes": "No-auxiliary baseline (acc_A=0.2353) nearly matches full system (acc_E=0.2431).",
+  "error": "",
+  "timestamp": "2026-03-08T23:38:14.786792+00:00",
+  "duration_seconds": 17.3925246669678,
+  "config": {
+    "VOCAB_SIZE": 64,
+    "HIDDEN_DIM": 64,
+    "SEQ_LEN": 24,
+    "MEMORY_SLOTS": 8,
+    "NUM_PAIRS": 4,
+    "STEPS": 400,
+    "BATCH": 32,
+    "K_WRITE": 4,
+    "LR": 0.0003,
+    "LAMBDA_W": 0.1,
+    "LAMBDA_R": 0.1,
+    "LAMBDA_F": 0.05
+  },
+  "seed": 42
+}

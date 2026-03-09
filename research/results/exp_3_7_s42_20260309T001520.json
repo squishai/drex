@@ -1,0 +1,45 @@
+{
+  "experiment_id": "exp_3_7",
+  "hypothesis": "A controller given a fixed write budget learns to allocate it non-uniformly in a way that improves performance over uniform allocation.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "uniform_acc": 0.2172,
+    "adaptive_acc": 0.2437,
+    "acc_delta": 0.0266,
+    "allocation_gini": 0.1639,
+    "allocation_per_block": [
+      1.9859,
+      1.0,
+      1.0234,
+      1.9906
+    ],
+    "uniform_alloc_per_block": [
+      1.0,
+      1.0,
+      2.0,
+      2.0
+    ]
+  },
+  "notes": "Adaptive vs uniform accuracy delta: +0.027. Allocation Gini coefficient: 0.164 (threshold 0.3). Adaptive per-block: [1.99, 1.0, 1.02, 1.99]. Uniform per-block: [1.0, 1.0, 2.0, 2.0] (fixed: [1, 1, 2, 2]).",
+  "error": "",
+  "timestamp": "2026-03-09T00:15:20.036528+00:00",
+  "duration_seconds": 45.54669295903295,
+  "config": {
+    "vocab_size": 64,
+    "seq_len": 32,
+    "hidden_dim": 64,
+    "memory_slots": 6,
+    "batch_size": 32,
+    "train_steps": 1500,
+    "n_blocks": 4,
+    "block_size": 8,
+    "uniform_slots": [
+      1,
+      1,
+      2,
+      2
+    ],
+    "num_pairs": 4
+  },
+  "seed": 42
+}

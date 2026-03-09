@@ -1,0 +1,28 @@
+{
+  "experiment_id": "exp_2_3",
+  "hypothesis": "A controller can learn without supervision which information should be stored exactly (numbers, names) vs approximately (context, themes).",
+  "outcome": "INCONCLUSIVE",
+  "metrics": {
+    "avg_error_exact": 1.0724404633037921e-05,
+    "avg_error_approx": 0.00036285092137404716,
+    "error_ratio": 33.8341319439065,
+    "high_precision_rate_for_exact": 0.9968954166769981,
+    "high_precision_rate_for_approx": 0.9852124348282814
+  },
+  "notes": "avg_error_exact=0.0000, avg_error_approx=0.0004, diff (approx-exact)=+0.0004. HP rate: exact=0.997, approx=0.985. System learned to protect exact tokens: True.",
+  "error": "",
+  "timestamp": "2026-03-09T00:05:13.867532+00:00",
+  "duration_seconds": 2.9379972079768777,
+  "config": {
+    "vocab_size": 256,
+    "hidden_dim": 64,
+    "low_dim": 16,
+    "exact_token_max": 32,
+    "approx_token_max": 128,
+    "exact_loss_weight": 8.0,
+    "approx_loss_weight": 1.0,
+    "precision_penalty": 0.05,
+    "train_steps": 2000
+  },
+  "seed": 777
+}

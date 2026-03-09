@@ -1,0 +1,61 @@
+{
+  "experiment_id": "exp_12_2",
+  "hypothesis": "The 2x-8x compression training failure is gradient starvation from wide bottleneck, not structural \u2014 LR warmup restores training.",
+  "outcome": "INCONCLUSIVE",
+  "metrics": {
+    "ratio2_schedA_cosim_final": 0.6031,
+    "ratio2_schedA_cosim_100": 0.407,
+    "ratio2_schedB_cosim_final": 0.3842,
+    "ratio2_schedB_cosim_100": 0.0314,
+    "ratio2_schedC_cosim_final": 0.0111,
+    "ratio2_schedC_cosim_100": 0.0168,
+    "ratio4_schedA_cosim_final": 0.4535,
+    "ratio4_schedA_cosim_100": 0.3377,
+    "ratio4_schedB_cosim_final": 0.3287,
+    "ratio4_schedB_cosim_100": 0.0279,
+    "ratio4_schedC_cosim_final": 0.0259,
+    "ratio4_schedC_cosim_100": 0.025,
+    "ratio8_schedA_cosim_final": 0.3344,
+    "ratio8_schedA_cosim_100": 0.2616,
+    "ratio8_schedB_cosim_final": 0.2577,
+    "ratio8_schedB_cosim_100": 0.0202,
+    "ratio8_schedC_cosim_final": 0.0277,
+    "ratio8_schedC_cosim_100": 0.0196,
+    "ratio16_schedA_cosim_final": 0.2255,
+    "ratio16_schedA_cosim_100": 0.2029,
+    "ratio16_schedB_cosim_final": 0.1977,
+    "ratio16_schedB_cosim_100": 0.0237,
+    "ratio16_schedC_cosim_final": 0.0151,
+    "ratio16_schedC_cosim_100": 0.003,
+    "a_fails_at_2x_4x": 0,
+    "warmup_restores_at_2x_4x": 0,
+    "b_still_bad_count": 0
+  },
+  "notes": "A does not fail at 2x-4x; hypothesis conditions not triggered.",
+  "error": "",
+  "timestamp": "2026-03-08T23:10:07.626215+00:00",
+  "duration_seconds": 2.6851727080065757,
+  "config": {
+    "INPUT_DIM": 64,
+    "COMPRESSION_RATIOS": [
+      2,
+      4,
+      8,
+      16
+    ],
+    "BOTTLENECKS": [
+      32,
+      16,
+      8,
+      4
+    ],
+    "TRAIN_STEPS": 300,
+    "BATCH_SIZE": 64,
+    "MEASURE_STEPS": [
+      100,
+      200,
+      300
+    ]
+  },
+  "seed": 42
+}

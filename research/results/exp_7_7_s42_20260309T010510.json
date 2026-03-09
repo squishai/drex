@@ -1,0 +1,36 @@
+{
+  "experiment_id": "exp_7_7",
+  "hypothesis": "Write quality (not read quality, compression ratio, or eviction policy) is the first performance bottleneck encountered during controller training.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "bottleneck_order": [
+      "read_accuracy",
+      "eviction_correctness",
+      "write_quality",
+      "compression_fidelity"
+    ],
+    "bottleneck_at_20pct_training": "read_accuracy",
+    "bottleneck_at_50pct_training": "read_accuracy",
+    "final_write_quality": 0.8068113625049591,
+    "final_read_accuracy": 0.059375,
+    "final_compression_fidelity": 0.8068113625049591,
+    "final_eviction_correctness": 0.3703125,
+    "early_averages": {
+      "write_quality": 0.5195778893306852,
+      "read_accuracy": 0.030859374999999998,
+      "compression_fidelity": 0.5195778893306852,
+      "eviction_correctness": 0.2119791666666667
+    }
+  },
+  "notes": "Bottleneck at 20%: read_accuracy. Bottleneck at 50%: read_accuracy. Order (lowest first): ['read_accuracy', 'eviction_correctness', 'write_quality', 'compression_fidelity'].",
+  "error": "",
+  "timestamp": "2026-03-09T01:05:10.323318+00:00",
+  "duration_seconds": 9.70587104104925,
+  "config": {
+    "train_steps": 1500,
+    "log_every": 50,
+    "compress_dim": 32,
+    "memory_slots": 8
+  },
+  "seed": 42
+}

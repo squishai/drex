@@ -1,0 +1,36 @@
+{
+  "experiment_id": "exp_4_3",
+  "hypothesis": "There exists an optimal retrieval depth (top-k) beyond which additional retrieved entries introduce more noise than signal.",
+  "outcome": "INCONCLUSIVE",
+  "metrics": {
+    "acc_at_k_1": 0.0161,
+    "acc_at_k_2": 0.0149,
+    "acc_at_k_4": 0.015,
+    "acc_at_k_8": 0.0171,
+    "acc_at_k_12": 0.0175,
+    "acc_at_k_16": 0.0158,
+    "optimal_k": 12,
+    "peak_acc": 0.0175,
+    "acc_at_max_k": 0.0158
+  },
+  "notes": "Accuracy is flat across k values (range=0.0026).",
+  "error": "",
+  "timestamp": "2026-03-09T00:16:17.283835+00:00",
+  "duration_seconds": 16.901160707930103,
+  "config": {
+    "hidden_dim": 64,
+    "vocab_size": 64,
+    "memory_slots": 16,
+    "k_values": [
+      1,
+      2,
+      4,
+      8,
+      12,
+      16
+    ],
+    "train_steps": 1500,
+    "batch_size": 32
+  },
+  "seed": 42
+}

@@ -1,0 +1,29 @@
+{
+  "experiment_id": "exp_14_1",
+  "hypothesis": "Combining retroactive write and read confidence suppression yields super-additive accuracy gains.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "acc_A": 0.2109,
+    "acc_B": 0.2047,
+    "acc_C": 0.1359,
+    "acc_D": 0.0734,
+    "gap_B": -0.0063,
+    "gap_C": -0.075,
+    "gap_D": -0.1375,
+    "super_additive": false
+  },
+  "notes": "gap_D=-0.138 < max(gap_B,gap_C)+0.005=-0.001.",
+  "error": "",
+  "timestamp": "2026-03-08T23:10:32.160321+00:00",
+  "duration_seconds": 22.27327845909167,
+  "config": {
+    "VOCAB_SIZE": 64,
+    "SEQ_LEN": 24,
+    "HIDDEN_DIM": 64,
+    "MEMORY_SLOTS": 6,
+    "NUM_PAIRS": 4,
+    "STEPS": 500,
+    "BATCH": 32
+  },
+  "seed": 42
+}

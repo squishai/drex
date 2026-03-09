@@ -1,0 +1,26 @@
+{
+  "experiment_id": "exp_13_1",
+  "hypothesis": "The two-hop retrieval regularization effect (exp_4_9) persists at 64-entity KB with 40% near-duplicate interference.",
+  "outcome": "SUPPORTED",
+  "metrics": {
+    "single_hop_acc": 0.0625,
+    "two_hop_acc": 0.125,
+    "two_hop_vs_single_gap": 0.0625,
+    "interference_sh_acc": 0.08,
+    "interference_th_acc": 0.2,
+    "interference_gap": 0.12
+  },
+  "notes": "Two-hop acc within 5% of single-hop on interference subset (gap=0.120).",
+  "error": "",
+  "timestamp": "2026-03-08T23:10:12.178849+00:00",
+  "duration_seconds": 1.2957311669597402,
+  "config": {
+    "KB_SIZE": 64,
+    "HIDDEN_DIM": 64,
+    "NEAR_DUP_FRACTION": 0.4,
+    "STEPS": 500,
+    "BATCH": 32,
+    "VOCAB_SIZE": 128
+  },
+  "seed": 123
+}

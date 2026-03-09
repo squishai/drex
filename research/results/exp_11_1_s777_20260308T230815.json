@@ -1,0 +1,37 @@
+{
+  "experiment_id": "exp_11_1",
+  "hypothesis": "A two-step query former (linear -> cross-attention over last 4 hidden states -> linear) shifts the bottleneck away from read accuracy (identified in exp_7_7).",
+  "outcome": "REFUTED",
+  "metrics": {
+    "oracle_acc_A_final": 0.2922,
+    "normal_acc_A": 0.2109,
+    "oracle_acc_A_step0.2": 0.1203,
+    "oracle_acc_A_step0.5": 0.2516,
+    "oracle_acc_A_step1.0": 0.2922,
+    "oracle_acc_B_final": 0.175,
+    "normal_acc_B": 0.1656,
+    "oracle_acc_B_step0.2": 0.1062,
+    "oracle_acc_B_step0.5": 0.1203,
+    "oracle_acc_B_step1.0": 0.175,
+    "oracle_acc_C_final": 0.1953,
+    "normal_acc_C": 0.2,
+    "oracle_acc_C_step0.2": 0.1328,
+    "oracle_acc_C_step0.5": 0.1625,
+    "oracle_acc_C_step1.0": 0.1953,
+    "oracle_acc_B_minus_A": -0.1172
+  },
+  "notes": "oracle_read_acc_B=0.175 not > oracle_read_acc_A=0.292 by 0.02.",
+  "error": "",
+  "timestamp": "2026-03-08T23:08:15.873369+00:00",
+  "duration_seconds": 21.70509524992667,
+  "config": {
+    "VOCAB_SIZE": 64,
+    "HIDDEN_DIM": 64,
+    "SEQ_LEN": 24,
+    "MEMORY_SLOTS": 8,
+    "NUM_PAIRS": 4,
+    "TRAIN_STEPS": 600,
+    "BATCH_SIZE": 32
+  },
+  "seed": 777
+}

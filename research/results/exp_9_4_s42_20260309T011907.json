@@ -1,0 +1,60 @@
+{
+  "experiment_id": "exp_9_4",
+  "hypothesis": "With MEMORY_SLOTS=12 and K extended to 0-10, an interior optimum exists at K=3-6 \u2014 fewer protected slots are insufficient to cover all 3 critical items, more wastes capacity on non-critical entries, creating a U-shaped accuracy curve.",
+  "outcome": "SUPPORTED",
+  "metrics": {
+    "accuracies": [
+      0.0381,
+      0.1575,
+      0.1031,
+      0.1837,
+      0.1062,
+      0.1638
+    ],
+    "critical_accuracies": [
+      0.0279,
+      0.1462,
+      0.1161,
+      0.19,
+      0.1144,
+      0.1644
+    ],
+    "noncritical_accuracies": [
+      0.0571,
+      0.1701,
+      0.0844,
+      0.1779,
+      0.0963,
+      0.1652
+    ],
+    "k_opt": 3,
+    "max_acc": 0.1838,
+    "min_acc": 0.0381,
+    "acc_range": 0.1456,
+    "interior_peak_exists": true,
+    "is_monotone": false,
+    "is_flat": false
+  },
+  "notes": "K values [0, 2, 4, 6, 8, 10], accs [0.038, 0.158, 0.103, 0.184, 0.106, 0.164]. Optimal K=3, max_acc=0.184. Interior peak: True.",
+  "error": "",
+  "timestamp": "2026-03-09T01:19:07.500740+00:00",
+  "duration_seconds": 28.29205200006254,
+  "config": {
+    "vocab_size": 64,
+    "hidden_dim": 64,
+    "seq_len": 32,
+    "memory_slots": 12,
+    "num_pairs": 5,
+    "num_critical": 3,
+    "train_steps": 500,
+    "k_values": [
+      0,
+      2,
+      4,
+      6,
+      8,
+      10
+    ]
+  },
+  "seed": 42
+}

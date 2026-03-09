@@ -1,0 +1,27 @@
+{
+  "experiment_id": "exp_1_4",
+  "hypothesis": "Diversity-driven storage (maximally dissimilar entries) outperforms importance-driven storage on recall tasks.",
+  "outcome": "INCONCLUSIVE",
+  "metrics": {
+    "importance_acc": 0.1444,
+    "diversity_acc": 0.1377,
+    "importance_mean_pairwise_sim": 0.5095,
+    "diversity_mean_pairwise_sim": 0.3732,
+    "gap_diversity_minus_importance": -0.0067
+  },
+  "notes": "Diversity acc=0.138 vs importance acc=0.144. Gap=-0.0067. Diversity sim=0.3732 vs importance sim=0.5095.",
+  "error": "",
+  "timestamp": "2026-03-08T23:33:15.593612+00:00",
+  "duration_seconds": 37.201830707956105,
+  "config": {
+    "vocab_size": 64,
+    "hidden_dim": 64,
+    "seq_len": 24,
+    "batch_size": 32,
+    "train_steps": 1500,
+    "memory_slots": 8,
+    "num_pairs": 6,
+    "diversity_lambda": 0.1
+  },
+  "seed": 123
+}

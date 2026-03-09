@@ -1,0 +1,26 @@
+{
+  "experiment_id": "exp_14_3",
+  "hypothesis": "Cosine-annealed Gumbel temperature (1.0->0.1) produces higher final accuracy than constant temperature 0.5 by >2%.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "acc_A": 0.1906,
+    "acc_B": 0.175,
+    "acc_C": 0.1531,
+    "diff_C_vs_A": -0.0375
+  },
+  "notes": "Constant A >= cosine C - 0.01: acc_A=0.191, acc_C=0.153.",
+  "error": "",
+  "timestamp": "2026-03-08T23:11:07.577076+00:00",
+  "duration_seconds": 11.760461583035067,
+  "config": {
+    "VOCAB_SIZE": 64,
+    "SEQ_LEN": 24,
+    "HIDDEN_DIM": 64,
+    "MEMORY_SLOTS": 6,
+    "NUM_PAIRS": 4,
+    "K_WRITE": 3,
+    "STEPS": 500,
+    "BATCH": 32
+  },
+  "seed": 777
+}

@@ -1,0 +1,29 @@
+{
+  "experiment_id": "exp_8_4",
+  "hypothesis": "The learned write gate's small advantage over random selection (exp_1_5 +0.003) comes from exploiting token position as proxy for importance, not from detecting semantic content.",
+  "outcome": "INCONCLUSIVE",
+  "metrics": {
+    "acc_A": 0.2162,
+    "acc_B": 0.0362,
+    "acc_C": 0.0331,
+    "pos_corr_A": -0.192,
+    "pos_corr_B": 0.1947,
+    "pos_corr_C": -0.0243,
+    "content_corr_A": 0.3843,
+    "content_corr_B": -0.3907,
+    "content_corr_C": -0.0104
+  },
+  "notes": "A (full): acc=0.216, pos_r=-0.1920. B (pos-blind): acc=0.036. C (pos-only): acc=0.033. acc_A - acc_B = 0.1800.",
+  "error": "",
+  "timestamp": "2026-03-09T01:09:24.432632+00:00",
+  "duration_seconds": 51.2931264169747,
+  "config": {
+    "vocab_size": 64,
+    "hidden_dim": 64,
+    "seq_len": 24,
+    "num_pairs": 4,
+    "memory_slots": 6,
+    "train_steps": 2000
+  },
+  "seed": 123
+}

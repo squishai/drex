@@ -1,0 +1,29 @@
+{
+  "experiment_id": "exp_15_3",
+  "hypothesis": "Energy-gated delta rule (write only when delta_E < 0) achieves >90% accuracy of continuous write at <70% write rate.",
+  "outcome": "SUPPORTED",
+  "metrics": {
+    "acc_A_continuous": 0.1381,
+    "write_rate_A": 1.0,
+    "acc_B_energy_gated": 0.1269,
+    "write_rate_B": 0.5192,
+    "acc_ratio_B": 0.9186,
+    "acc_C_learned_gate": 0.1537,
+    "write_rate_C": 0.0698,
+    "acc_ratio_C": 1.1131
+  },
+  "notes": "Energy gate: acc_ratio=0.919>0.90, write_rate=0.519<0.70. Hypothesis confirmed.",
+  "error": "",
+  "timestamp": "2026-03-08T23:11:58.849030+00:00",
+  "duration_seconds": 26.502364792046137,
+  "config": {
+    "vocab_size": 64,
+    "hidden_dim": 32,
+    "seq_len": 24,
+    "num_pairs": 5,
+    "steps": 400,
+    "batch": 32,
+    "lr": 0.0003
+  },
+  "seed": 123
+}

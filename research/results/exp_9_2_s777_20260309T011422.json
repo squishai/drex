@@ -1,0 +1,39 @@
+{
+  "experiment_id": "exp_9_2",
+  "hypothesis": "With a 50/50 null-to-retrieval query distribution (fixing exp_4_7's degenerate 80% null), a learned read gate achieves null precision > 0.65 and retrieval recall > 0.65, outperforming always-null and always-retrieve baselines on harmonic F1.",
+  "outcome": "SUPPORTED",
+  "metrics": {
+    "null_precision_A": 0.7921,
+    "null_recall_A": 0.8344,
+    "null_f1_A": 0.8127,
+    "retrieval_recall_A": 0.7849,
+    "is_degenerate_A": false,
+    "null_precision_B": 0.0,
+    "null_recall_B": 0.0,
+    "null_f1_B": 0.0,
+    "retrieval_recall_B": 0.9419,
+    "is_degenerate_B": true,
+    "null_precision_C": 0.4919,
+    "null_recall_C": 1.0,
+    "null_f1_C": 0.6594,
+    "retrieval_recall_C": 0.0,
+    "is_degenerate_C": true,
+    "null_precision_D": 0.9386,
+    "null_recall_D": 0.7851,
+    "null_f1_D": 0.855,
+    "retrieval_recall_D": 0.7806,
+    "is_degenerate_D": false
+  },
+  "notes": "Cond A (learned, p=0.5): null_f1=0.813, retr_recall=0.785, degenerate=False. Cond B (always-retrieve): null_f1=0.000. Cond D (p=0.2 control): degenerate=False.",
+  "error": "",
+  "timestamp": "2026-03-09T01:14:22.835901+00:00",
+  "duration_seconds": 55.68172079208307,
+  "config": {
+    "vocab_size": 128,
+    "hidden_dim": 64,
+    "memory_size": 8,
+    "train_steps": 3000,
+    "batch_size": 64
+  },
+  "seed": 777
+}

@@ -1,0 +1,29 @@
+{
+  "experiment_id": "exp_17_3",
+  "hypothesis": "Prospective and retroactive writing are redundant \u2014 their combination yields <1.5x the gain of either alone.",
+  "outcome": "INCONCLUSIVE",
+  "metrics": {
+    "acc_A": 0.1488,
+    "acc_B": 0.1511,
+    "acc_C": 0.0544,
+    "acc_D": 0.1541,
+    "gap_B": 0.0023,
+    "gap_C": -0.0945,
+    "gap_D": 0.0052,
+    "multiplier": 2.3103
+  },
+  "notes": "gap_B=0.002 or gap_C=-0.094 too small for valid comparison",
+  "error": "",
+  "timestamp": "2026-03-08T23:13:47.876285+00:00",
+  "duration_seconds": 23.058925083023496,
+  "config": {
+    "VOCAB_SIZE": 64,
+    "SEQ_LEN": 32,
+    "HIDDEN_DIM": 64,
+    "MEMORY_SLOTS": 8,
+    "NUM_PAIRS": 4,
+    "STEPS": 400,
+    "BATCH": 32
+  },
+  "seed": 777
+}

@@ -1,0 +1,33 @@
+{
+  "experiment_id": "exp_17_2",
+  "hypothesis": "K-token lookahead async write gate outperforms same-time write by >3% at some K in {2, 4, 6}.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "acc_K0": 0.2077,
+    "acc_K2": 0.0321,
+    "acc_K4": 0.194,
+    "acc_K6": 0.0315,
+    "best_k": 4,
+    "best_gap": -0.0137
+  },
+  "notes": "All lookahead K within 0.02 of K=0 (best gap=-0.014)",
+  "error": "",
+  "timestamp": "2026-03-08T23:13:03.291732+00:00",
+  "duration_seconds": 23.152915333979763,
+  "config": {
+    "VOCAB_SIZE": 64,
+    "HIDDEN_DIM": 64,
+    "SEQ_LEN": 32,
+    "MEMORY_SLOTS": 8,
+    "NUM_PAIRS": 4,
+    "STEPS": 400,
+    "BATCH": 32,
+    "K_VALUES": [
+      0,
+      2,
+      4,
+      6
+    ]
+  },
+  "seed": 123
+}

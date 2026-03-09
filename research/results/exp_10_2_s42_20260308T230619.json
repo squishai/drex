@@ -1,0 +1,30 @@
+{
+  "experiment_id": "exp_10_2",
+  "hypothesis": "The retroactive writing benefit comes primarily (>80%) from adding new entries never written in the forward pass, not from re-encoding existing forward-pass entries with full context.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "acc_A": 0.2297,
+    "acc_B": 0.1984,
+    "acc_C": 0.2313,
+    "acc_D": 0.2562,
+    "new_write_fraction": -1.1765,
+    "gain_B_over_A": -0.0312,
+    "gain_C_over_A": 0.0016,
+    "gain_D_over_A": 0.0266
+  },
+  "notes": "Overwrite gain (0.002) exceeds new-write gain (-0.031) by >0.03.",
+  "error": "",
+  "timestamp": "2026-03-08T23:06:19.774427+00:00",
+  "duration_seconds": 60.70836279192008,
+  "config": {
+    "VOCAB_SIZE": 64,
+    "SEQ_LEN": 24,
+    "HIDDEN_DIM": 64,
+    "MEMORY_SLOTS": 6,
+    "FORWARD_SLOTS": 4,
+    "NUM_PAIRS": 4,
+    "TRAIN_STEPS": 600,
+    "BATCH_SIZE": 32
+  },
+  "seed": 42
+}

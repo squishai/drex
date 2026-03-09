@@ -1,0 +1,28 @@
+{
+  "experiment_id": "exp_15_1",
+  "hypothesis": "A delta rule associative matrix write outperforms standard slot write by >5% due to built-in interference correction.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "acc_delta": 0.1087,
+    "acc_slot": 0.105,
+    "acc_gap": 0.0038,
+    "interference_slot": 0.5177,
+    "interference_delta": 0.9668,
+    "interference_gap": -0.4491
+  },
+  "notes": "Slot memory acc=0.105 >= delta acc=0.109 - 0.02.",
+  "error": "",
+  "timestamp": "2026-03-08T23:11:03.712455+00:00",
+  "duration_seconds": 10.529127166955732,
+  "config": {
+    "vocab_size": 64,
+    "hidden_dim": 32,
+    "seq_len": 24,
+    "num_pairs": 6,
+    "train_steps": 400,
+    "batch_size": 32,
+    "memory_slots": 8,
+    "lr": 0.0003
+  },
+  "seed": 123
+}

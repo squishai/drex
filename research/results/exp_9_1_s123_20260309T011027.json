@@ -1,0 +1,28 @@
+{
+  "experiment_id": "exp_9_1",
+  "hypothesis": "At 64x compression with 100-way gallery discrimination, retrieval-objective compressor achieves at least 15% higher Acc@1 than reconstruction-objective compressor, because 64x bottleneck forces genuine tradeoffs between fidelity and discriminability.",
+  "outcome": "REFUTED",
+  "metrics": {
+    "acc_at1_autoencoder": 1.0,
+    "acc_at1_contrastive": 1.0,
+    "retrieval_gap": 0.0,
+    "recon_cosim_ae": 0.1867,
+    "recon_cosim_cl": -0.0
+  },
+  "notes": "AE Acc@1=1.0000, CL Acc@1=1.0000, gap=0.0000. Recon cosim: AE=0.1867, CL(dummy dec)=-0.0000.",
+  "error": "",
+  "timestamp": "2026-03-09T01:10:27.915798+00:00",
+  "duration_seconds": 63.48201383301057,
+  "config": {
+    "vocab_size": 256,
+    "embed_dim": 64,
+    "seq_len": 32,
+    "flat_dim": 2048,
+    "bottleneck": 32,
+    "gallery_size": 100,
+    "train_steps": 3000,
+    "temperature": 0.07,
+    "noise_std": 0.1
+  },
+  "seed": 123
+}
