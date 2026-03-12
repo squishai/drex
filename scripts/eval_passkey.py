@@ -13,6 +13,9 @@ Evaluate a trained checkpoint:
 
 Custom sweep:
     python scripts/eval_passkey.py --lengths 2048 4096 8192 --trials 20
+
+Report write rates alongside accuracy (requires --use-episodic-memory):
+    python scripts/eval_passkey.py --report-write-rate
 """
 
 from __future__ import annotations
@@ -26,6 +29,7 @@ import torch
 sys.path.insert(0, str(Path(__file__).parent.parent / "python"))
 
 from drex.eval.passkey import PasskeyBenchmark
+from drex.models.memory import MemoryModule
 from drex.models.transformer import DrexConfig, DrexTransformer
 from drex.utils.config import load_checkpoint
 
@@ -48,6 +52,8 @@ def _make_model(args: argparse.Namespace, device: torch.device) -> DrexTransform
         dropout=0.0,
         use_l3=args.use_l3,
         l3_base_path=args.l3_path,
+        use_episodic_memory=args.use_episodic_memory,
+        episodic_gate_thresh=args.episodic_gate_thresh,
     )
     model = DrexTransformer(config).to(device)
 
@@ -59,6 +65,46 @@ def _make_model(args: argparse.Namespace, device: torch.device) -> DrexTransform
 
     model.eval()
     return model
+
+
+def _collect_write_rates(model: DrexTransformer) -> list[float]:
+    """Return last_write_rate() from every MemoryModule in the model."""
+    return [m.last_write_rate() for m in model.modules() if isinstance(m, MemoryModule)]
+
+
+def _report_write_rates(
+    model: DrexTransformer,
+    lengths: list[int],
+    device: torch.device,
+    vocab_size: int = 256,
+) -> None:
+    """
+    Run a single forward pass per context length and print a write-rate table.
+
+    Each pass uses a randomly-generated token sequence of the target length so
+    that the model's MemoryModule.last_write_rate() reflects that exact length.
+    """
+    print("\nWrite-rate sweep (MemoryModule OR-gate firing fraction per layer):")
+    header = f"{'Context':>10}" + "  mean_wr  min_wr  max_wr"
+    sep = "-" * len(header)
+    print(sep)
+    print(header)
+    print(sep)
+
+    with torch.no_grad():
+        for length in sorted(lengths):
+            ids = torch.randint(0, vocab_size, (1, length), device=device)
+            model(ids)
+            rates = _collect_write_rates(model)
+            if not rates:
+                print(f"  {length:>8,}  (no MemoryModule instances found)")
+                continue
+            mean_wr = sum(rates) / len(rates)
+            print(
+                f"  {length:>8,}  {mean_wr:>7.3f}  {min(rates):>6.3f}  {max(rates):>6.3f}"
+            )
+    print(sep)
+    print()
 
 
 def _print_table(results: dict[int, dict[int, float]]) -> None:
@@ -136,6 +182,15 @@ def run_eval(args: argparse.Namespace) -> None:
         print("\n[note] Accuracy is near chance — the model has not been trained yet.")
         print("       Run scripts/train.py first, then re-evaluate with --checkpoint.")
 
+    # Optional write-rate report
+    if args.report_write_rate:
+        if not args.use_episodic_memory:
+            print(
+                "\n[note] --report-write-rate has no effect without --use-episodic-memory."
+            )
+        else:
+            _report_write_rates(model, args.lengths, device)
+
 
 # ---------------------------------------------------------------------------
 # CLI
@@ -171,6 +226,14 @@ def _parser() -> argparse.ArgumentParser:
     # L3
     p.add_argument("--use-l3", action="store_true")
     p.add_argument("--l3-path", type=str, default="/tmp/drex_l3")
+
+    # Episodic memory (Phase 13)
+    p.add_argument("--use-episodic-memory", action="store_true",
+                   help="Enable MemoryModule per layer (Phase 13 validated architecture)")
+    p.add_argument("--episodic-gate-thresh", type=float, default=0.70,
+                   help="OR-gate threshold for MemoryModule (thresh*=0.70 per exp_48_1)")
+    p.add_argument("--report-write-rate", action="store_true",
+                   help="Print MemoryModule write-rate table after accuracy sweep")
 
     # Infrastructure
     p.add_argument("--device", type=str, default="auto",

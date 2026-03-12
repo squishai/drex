@@ -66,6 +66,44 @@ class TestDrexLayer:
         out.sum().backward()
         assert x.grad is not None
 
+    def test_episodic_memory_output_shape(self, device):
+        """episodic_mem branch: output shape unchanged when use_episodic_memory=True."""
+        dev = torch.device(device)
+        epi_cfg = DrexConfig(
+            d_model=64, n_heads=4, n_layers=1,
+            ff_mult=2, vocab_size=256,
+            window_size=32, max_seq_len=64,
+            dropout=0.0, use_episodic_memory=True, episodic_gate_thresh=0.70,
+        )
+        layer = DrexLayer(epi_cfg).to(dev)
+        B, S = 2, 16
+        d_k = epi_cfg.d_model // epi_cfg.n_heads
+        from drex.models.memory import LayerState
+        state = LayerState.zeros(B, epi_cfg.n_heads, d_k, d_k, dev)
+        x = torch.randn(B, S, epi_cfg.d_model, device=dev)
+        out, _ = layer(x, state)
+        assert out.shape == (B, S, epi_cfg.d_model)
+
+    def test_episodic_memory_backward(self, device):
+        """Gradients flow through the episodic_mem residual branch."""
+        dev = torch.device(device)
+        epi_cfg = DrexConfig(
+            d_model=64, n_heads=4, n_layers=1,
+            ff_mult=2, vocab_size=256,
+            window_size=32, max_seq_len=64,
+            dropout=0.0, use_episodic_memory=True, episodic_gate_thresh=0.70,
+        )
+        layer = DrexLayer(epi_cfg).to(dev)
+        B, S = 1, 12
+        d_k = epi_cfg.d_model // epi_cfg.n_heads
+        from drex.models.memory import LayerState
+        state = LayerState.zeros(B, epi_cfg.n_heads, d_k, d_k, dev)
+        x = torch.randn(B, S, epi_cfg.d_model, device=dev, requires_grad=True)
+        out, _ = layer(x, state)
+        out.sum().backward()
+        assert x.grad is not None
+        assert not torch.isnan(x.grad).any()
+
 
 # ---------------------------------------------------------------------------
 # DrexTransformer
@@ -180,6 +218,73 @@ class TestDrexTransformer:
         logits, _ = ckpt_model(ids)
         logits.sum().backward()
         assert any(p.grad is not None for p in ckpt_model.parameters())
+
+    def test_episodic_memory_logit_shape(self, cfg, device):
+        """DrexTransformer with use_episodic_memory=True returns correct logit shape."""
+        dev = torch.device(device)
+        epi_cfg = DrexConfig(
+            d_model=cfg.d_model, n_heads=cfg.n_heads, n_layers=cfg.n_layers,
+            ff_mult=cfg.ff_mult, vocab_size=cfg.vocab_size,
+            window_size=cfg.window_size, max_seq_len=cfg.max_seq_len,
+            dropout=0.0, use_episodic_memory=True, episodic_gate_thresh=0.70,
+        )
+        epi_model = DrexTransformer(epi_cfg).to(dev)
+        B, S = 2, 16
+        ids = torch.randint(0, cfg.vocab_size, (B, S), device=dev)
+        logits, states = epi_model(ids)
+        assert logits.shape == (B, S, cfg.vocab_size)
+        assert len(states) == cfg.n_layers
+
+    def test_episodic_memory_no_nan(self, cfg, device):
+        """DrexTransformer with episodic memory produces no NaN/Inf outputs."""
+        dev = torch.device(device)
+        epi_cfg = DrexConfig(
+            d_model=cfg.d_model, n_heads=cfg.n_heads, n_layers=cfg.n_layers,
+            ff_mult=cfg.ff_mult, vocab_size=cfg.vocab_size,
+            window_size=cfg.window_size, max_seq_len=cfg.max_seq_len,
+            dropout=0.0, use_episodic_memory=True, episodic_gate_thresh=0.70,
+        )
+        epi_model = DrexTransformer(epi_cfg).to(dev)
+        B, S = 2, 12
+        ids = torch.randint(0, cfg.vocab_size, (B, S), device=dev)
+        logits, _ = epi_model(ids)
+        assert not torch.isnan(logits).any()
+        assert not torch.isinf(logits).any()
+
+    def test_episodic_memory_backward(self, cfg, device):
+        """Gradients flow to all parameters when episodic memory is enabled."""
+        dev = torch.device(device)
+        epi_cfg = DrexConfig(
+            d_model=cfg.d_model, n_heads=cfg.n_heads, n_layers=cfg.n_layers,
+            ff_mult=cfg.ff_mult, vocab_size=cfg.vocab_size,
+            window_size=cfg.window_size, max_seq_len=cfg.max_seq_len,
+            dropout=0.0, use_episodic_memory=True, episodic_gate_thresh=0.70,
+        )
+        epi_model = DrexTransformer(epi_cfg).to(dev)
+        B, S = 2, 8
+        ids = torch.randint(0, cfg.vocab_size, (B, S), device=dev)
+        logits, _ = epi_model(ids)
+        logits.sum().backward()
+        assert any(p.grad is not None for p in epi_model.parameters())
+
+    def test_episodic_memory_gradient_checkpointing(self, cfg, device):
+        """Gradient checkpointing + episodic memory: forward completes, backward works."""
+        dev = torch.device(device)
+        ckpt_epi_cfg = DrexConfig(
+            d_model=cfg.d_model, n_heads=cfg.n_heads, n_layers=cfg.n_layers,
+            ff_mult=cfg.ff_mult, vocab_size=cfg.vocab_size,
+            window_size=cfg.window_size, max_seq_len=cfg.max_seq_len,
+            dropout=0.0, gradient_checkpointing=True,
+            use_episodic_memory=True, episodic_gate_thresh=0.70,
+        )
+        ckpt_epi_model = DrexTransformer(ckpt_epi_cfg).to(dev)
+        ckpt_epi_model.train()
+        B, S = 1, 8
+        ids = torch.randint(0, cfg.vocab_size, (B, S), device=dev)
+        logits, _ = ckpt_epi_model(ids)
+        assert logits.shape == (B, S, cfg.vocab_size)
+        logits.sum().backward()
+        assert any(p.grad is not None for p in ckpt_epi_model.parameters())
 
 
 # ---------------------------------------------------------------------------

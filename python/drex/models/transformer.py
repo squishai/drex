@@ -20,7 +20,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from drex.models.attention import HybridAttention
-from drex.models.memory import LayerState
+from drex.models.memory import LayerState, MemoryModule
 
 if TYPE_CHECKING:
     from drex.models.memory import L3MemoryBridge
@@ -40,6 +40,8 @@ class DrexConfig:
     use_l3: bool = False       # enable L3 disk cache (requires Rust extension)
     l3_base_path: str = "/tmp/drex_l3"
     l3_compress: bool = False
+    use_episodic_memory: bool = False   # enable MemoryModule per layer (Phase 13)
+    episodic_gate_thresh: float = 0.70  # OR-gate threshold (exp_48_1, Phase 12)
 
 
 class FeedForward(nn.Module):
@@ -78,6 +80,18 @@ class DrexLayer(nn.Module):
         self.norm1 = nn.LayerNorm(config.d_model)
         self.norm2 = nn.LayerNorm(config.d_model)
 
+        # Episodic/semantic memory module (optional, Phase 13)
+        self.episodic_mem: Optional[MemoryModule] = (
+            MemoryModule(config.d_model, gate_thresh=config.episodic_gate_thresh)
+            if config.use_episodic_memory
+            else None
+        )
+        self.norm_mem: Optional[nn.LayerNorm] = (
+            nn.LayerNorm(config.d_model)
+            if config.use_episodic_memory
+            else None
+        )
+
     def forward(
         self,
         x: torch.Tensor,       # (B, S, d_model)
@@ -90,6 +104,13 @@ class DrexLayer(nn.Module):
 
         # Pre-norm + residual for feed-forward
         x = x + self.ff(self.norm2(x))
+
+        # Episodic/semantic memory: read from accumulated context;
+        # add retrieval as a residual at the last (query) token position.
+        if self.episodic_mem is not None and self.norm_mem is not None:
+            mem_r = self.episodic_mem(self.norm_mem(x))   # (B, d_model)
+            x = x.clone()
+            x[:, -1] = x[:, -1] + mem_r
 
         new_state = LayerState(memory=new_memory, step=layer_state.step + 1)
 

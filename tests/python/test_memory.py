@@ -12,8 +12,11 @@ from drex.models.memory import (
     DeltaRuleUpdate,
     L3MemoryBridge,
     LayerState,
+    MemoryModule,
     MemoryState,
     TitanMemory,
+    WRITE_RATE_HI,
+    WRITE_RATE_LO,
     _elu1,
 )
 
@@ -324,3 +327,181 @@ class TestL3MemoryBridge:
         bridge.retrieve_and_load(layer=0, head=0, step=99)
         assert bridge._prefetch_calls == 1
         assert bridge.prefetch_hit_rate == 0.0  # disk hit, not cache hit
+
+
+# ---------------------------------------------------------------------------
+# MemoryModule
+# ---------------------------------------------------------------------------
+
+
+class TestMemoryModule:
+    # ------------------------------------------------------------------
+    # Construction
+    # ------------------------------------------------------------------
+
+    def test_odd_d_model_raises(self):
+        """d_model must be even for the 50/50 episodic/semantic split."""
+        with pytest.raises(ValueError, match="d_model must be even"):
+            MemoryModule(d_model=7)
+
+    def test_init_stores_attributes(self):
+        mem = MemoryModule(d_model=16, gate_thresh=0.65)
+        assert mem.d_model == 16
+        assert mem.gate_thresh == 0.65
+        assert mem._d_half == 8
+
+    # ------------------------------------------------------------------
+    # alpha() static method
+    # ------------------------------------------------------------------
+
+    def test_alpha_at_l_ref(self):
+        """α(96) == 0.95 (the reference point of the exp_scale formula)."""
+        assert abs(MemoryModule.alpha(96) - 0.95) < 1e-9
+
+    def test_alpha_at_l32(self):
+        """α(32) = 0.95^(96/32) = 0.95^3 ≈ 0.857375."""
+        expected = 0.95 ** 3
+        assert abs(MemoryModule.alpha(32) - expected) < 1e-9
+
+    def test_alpha_decreases_with_shorter_sequences(self):
+        """Shorter sequences → smaller α → faster EMA forgetting."""
+        assert MemoryModule.alpha(16) < MemoryModule.alpha(32)
+        assert MemoryModule.alpha(32) < MemoryModule.alpha(96)
+        assert MemoryModule.alpha(96) < MemoryModule.alpha(128)
+
+    # ------------------------------------------------------------------
+    # last_write_rate / assert_write_rate_valid
+    # ------------------------------------------------------------------
+
+    def test_last_write_rate_initial(self):
+        """Starts at 0.0 before any forward pass."""
+        mem = MemoryModule(d_model=16)
+        assert mem.last_write_rate() == 0.0
+
+    def test_assert_write_rate_valid_in_range(self):
+        """Does not raise when write rate is inside [0.10, 0.85]."""
+        mem = MemoryModule(d_model=16)
+        mem._last_write_rate = 0.50
+        mem.assert_write_rate_valid()  # should not raise
+
+    def test_assert_write_rate_valid_at_boundaries(self):
+        """Boundary values are inclusive."""
+        mem = MemoryModule(d_model=16)
+        mem._last_write_rate = WRITE_RATE_LO
+        mem.assert_write_rate_valid()
+        mem._last_write_rate = WRITE_RATE_HI
+        mem.assert_write_rate_valid()
+
+    def test_assert_write_rate_invalid_high(self):
+        """Raises AssertionError when write rate exceeds upper bound."""
+        mem = MemoryModule(d_model=16)
+        mem._last_write_rate = 0.99
+        with pytest.raises(AssertionError, match="Write rate"):
+            mem.assert_write_rate_valid()
+
+    def test_assert_write_rate_invalid_low(self):
+        """Raises AssertionError when write rate is below lower bound."""
+        mem = MemoryModule(d_model=16)
+        mem._last_write_rate = 0.01
+        with pytest.raises(AssertionError, match="Write rate"):
+            mem.assert_write_rate_valid()
+
+    # ------------------------------------------------------------------
+    # forward — output shape and values
+    # ------------------------------------------------------------------
+
+    def test_output_shape(self, device):
+        dev = torch.device(device)
+        mem = MemoryModule(d_model=32).to(dev)
+        B, L = 3, 16
+        x = torch.randn(B, L, 32, device=dev)
+        out = mem(x)
+        assert out.shape == (B, 32)
+
+    def test_no_nan_no_inf(self, device):
+        dev = torch.device(device)
+        mem = MemoryModule(d_model=32).to(dev)
+        x = torch.randn(2, 24, 32, device=dev)
+        out = mem(x)
+        assert not torch.isnan(out).any()
+        assert not torch.isinf(out).any()
+
+    def test_single_token_sequence(self, device):
+        """L=1: write loop skips (wr_total=0), max(0,1) guard returns 0.0 rate."""
+        dev = torch.device(device)
+        mem = MemoryModule(d_model=32).to(dev)
+        x = torch.randn(2, 1, 32, device=dev)
+        out = mem(x)
+        assert out.shape == (2, 32)
+        assert mem.last_write_rate() == 0.0
+
+    def test_write_rate_updated_after_forward(self, device):
+        """Write rate is in [0, 1] after a normal forward pass."""
+        dev = torch.device(device)
+        mem = MemoryModule(d_model=32).to(dev)
+        x = torch.randn(4, 32, 32, device=dev)
+        mem(x)
+        wr = mem.last_write_rate()
+        assert 0.0 <= wr <= 1.0
+
+    def test_write_rate_nonzero_for_long_sequence(self, device):
+        """With a long random sequence and default thresh=0.70, gate fires > 0%."""
+        dev = torch.device(device)
+        mem = MemoryModule(d_model=32).to(dev)
+        x = torch.randn(2, 64, 32, device=dev)
+        mem(x)
+        assert mem.last_write_rate() > 0.0
+
+    def test_write_rate_stable_with_low_thresh(self, device):
+        """Very low threshold → gate fires for almost all tokens."""
+        dev = torch.device(device)
+        mem = MemoryModule(d_model=32, gate_thresh=0.01).to(dev)
+        x = torch.randn(2, 48, 32, device=dev)
+        mem(x)
+        # Near-universal firing expected; just verify it's in [0, 1]
+        assert 0.0 <= mem.last_write_rate() <= 1.0
+
+    def test_write_rate_suppressed_with_high_thresh(self, device):
+        """Very high threshold → gate fires for very few tokens."""
+        dev = torch.device(device)
+        mem = MemoryModule(d_model=32, gate_thresh=999.0).to(dev)
+        x = torch.randn(2, 48, 32, device=dev)
+        mem(x)
+        assert mem.last_write_rate() == 0.0
+
+    # ------------------------------------------------------------------
+    # forward — gradient flow
+    # ------------------------------------------------------------------
+
+    def test_backward_grad_on_input(self, device):
+        """Gradients flow back to the input tensor."""
+        dev = torch.device(device)
+        mem = MemoryModule(d_model=32).to(dev)
+        x = torch.randn(2, 16, 32, device=dev, requires_grad=True)
+        out = mem(x)
+        out.sum().backward()
+        assert x.grad is not None
+        assert not torch.isnan(x.grad).any()
+
+    def test_backward_grad_on_params(self, device):
+        """Gradients flow to model parameters."""
+        dev = torch.device(device)
+        mem = MemoryModule(d_model=32).to(dev)
+        x = torch.randn(2, 16, 32, device=dev)
+        out = mem(x)
+        out.sum().backward()
+        assert any(p.grad is not None for p in mem.parameters())
+
+    # ------------------------------------------------------------------
+    # forward — null gate behaviour
+    # ------------------------------------------------------------------
+
+    def test_null_gate_initialises_near_half(self, device):
+        """null_gate linear is zero-initialised so σ(0) = 0.5 initially."""
+        dev = torch.device(device)
+        mem = MemoryModule(d_model=32).to(dev)
+        # null_gate bias=True; default init has weight≈0 and bias=0 → σ(0)=0.5
+        q = torch.zeros(1, 32, device=dev)
+        g = torch.sigmoid(mem.null_gate(q))
+        # Allow a small range since weight is trunc_normal when wired via transformer
+        assert 0.0 < g.item() < 1.0

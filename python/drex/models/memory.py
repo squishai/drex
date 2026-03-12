@@ -1,5 +1,8 @@
 """
-drex.models.memory — L2 and L3 memory components.
+drex.models.memory — associative memory components.
+
+MemoryModule: Episodic/semantic split delta-rule memory with length-adaptive EMA and
+  relative-norm write gate (validated Phases 11-12).
 
 L2: Infini-Attention matrix memory (per-head M and z vectors).
 L3: Titans-style MLP weight snapshots; L3MemoryBridge coordinates with the Rust layer.
@@ -283,3 +286,165 @@ class L3MemoryBridge:
         if self._prefetch_calls == 0:
             return 0.0
         return self._prefetch_hits / self._prefetch_calls
+
+
+# ---------------------------------------------------------------------------
+# Episodic/semantic associative MemoryModule (Phase 13 — validated Phases 11-12)
+# ---------------------------------------------------------------------------
+
+# EMA decay formula: α(L) = ALPHA_REF ^ (L_REF / L)
+# Keeps τ/L ≈ 0.21 constant across L=32–128 (exp_47_3, Phase 11).
+_ALPHA_REF: float = 0.95
+_L_REF: int = 96
+
+# Acceptable write-rate window during training (exp_45, Phase 9).
+WRITE_RATE_LO: float = 0.10
+WRITE_RATE_HI: float = 0.85
+
+
+class MemoryModule(nn.Module):
+    """
+    Episodic/semantic split associative memory with length-adaptive EMA decay
+    and a relative-vector-norm write gate.
+
+    Validated architecture (Phases 11-12):
+      - Two d_half×d_half matrices: M_sem (semantic) and M_epi (episodic,
+        recency-weighted writes).
+      - Delta-rule update: Δ = (k − vp) ⊗ k̂, EMA update M += (1−α)·Δ.
+      - Length-adaptive decay: α(L) = 0.95^(96/L) — keeps τ/L ≈ 0.21.
+      - Relative-norm write gate (OR over branches):
+          fire iff ‖k_s − vp_s‖ ≥ thresh·‖k_s‖  OR
+                   ‖k_e − vp_e‖ ≥ thresh·‖k_e‖
+      - Production gate threshold: thresh=0.70 (exp_48_1, Phase 12).
+      - Soft retrieval: r = concat(r_sem, r_epi) — no learned read gate
+        (exp_38_3 ruled out learned read-gate combination).
+      - Null retrieval gate: learned scalar g = σ(linear(q)) applied to r
+        before the output projection, suppressing irrelevant retrievals.
+
+    Forward contract:
+        x : (B, L, d_model)  — full context with query token at position L-1.
+        returns : (B, d_model)  — memory retrieval for the query at position L-1.
+
+    Hard constraints (non-negotiable per research):
+        - gate_thresh must not be set below 0.40 (exp_43_1).
+        - Do not replace the fixed threshold with a randomly-initialised learnable
+          parameter — this triggers the low-accuracy equilibrium (exp_43_1).
+        - Use α(L) formula, never fixed α=0.95 alone (EMA bootstrap at L≤32).
+        - Validate write rate ∈ [0.10, 0.85] after any write-mechanism change.
+    """
+
+    def __init__(self, d_model: int, gate_thresh: float = 0.70) -> None:
+        super().__init__()
+        if d_model % 2 != 0:
+            raise ValueError(f"d_model must be even for episodic/semantic split, got {d_model}")
+        self.d_model = d_model
+        self.gate_thresh = gate_thresh
+        d_half = d_model // 2
+        self._d_half = d_half
+
+        # Separate key projections for each branch (no bias — scale-invariance)
+        self.sem_proj = nn.Linear(d_model, d_half, bias=False)
+        self.epi_proj = nn.Linear(d_model, d_half, bias=False)
+
+        # Null retrieval gate: learned scalar σ(w·q) suppresses empty-memory reads
+        self.null_gate = nn.Linear(d_model, 1)
+
+        # Output projection: concat(r_sem, r_epi) [d_model] → d_model
+        self.out_proj = nn.Linear(d_model, d_model)
+
+        # Write-rate from the most recent forward pass (float, updated in forward)
+        self._last_write_rate: float = 0.0
+
+    @staticmethod
+    def alpha(L: int) -> float:
+        """Length-adaptive EMA coefficient: α(L) = 0.95^(96/L)."""
+        return _ALPHA_REF ** (_L_REF / L)
+
+    def last_write_rate(self) -> float:
+        """Write rate recorded during the most recent forward pass.
+
+        Returns the fraction of (batch × step) positions where the OR gate
+        fired.  Use to verify the rate stays in [WRITE_RATE_LO, WRITE_RATE_HI].
+        """
+        return self._last_write_rate
+
+    def assert_write_rate_valid(self) -> None:
+        """Raise AssertionError if the last write rate is outside [0.10, 0.85]."""
+        wr = self._last_write_rate
+        assert WRITE_RATE_LO <= wr <= WRITE_RATE_HI, (
+            f"Write rate {wr:.3f} outside valid range "
+            f"[{WRITE_RATE_LO}, {WRITE_RATE_HI}]. "
+            "Check gate_thresh or sequence-length configuration."
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Process the full context x and return the memory retrieval for the
+        query token at position L-1.
+
+        Args:
+            x: (B, L, d_model) — token representations.  Position L-1 is
+               the query; positions 0..L-2 are written into memory.
+
+        Returns:
+            (B, d_model) — memory retrieval after the null gate and output
+            projection.
+        """
+        B, L, _ = x.shape
+        a = self.alpha(L)
+        d_half = self._d_half
+        device = x.device
+
+        # Zero-initialise associative matrices for this sequence
+        M_sem = torch.zeros(B, d_half, d_half, device=device)
+        M_epi = torch.zeros(B, d_half, d_half, device=device)
+
+        wr_count = 0
+        wr_total = 0
+
+        for t in range(L - 1):
+            h_t = x[:, t, :]                                  # (B, d_model)
+            ks = self.sem_proj(h_t)                           # (B, d_half)
+            ke = self.epi_proj(h_t)                           # (B, d_half)
+            kns = F.normalize(ks, dim=-1)                     # unit key — semantic
+            kne = F.normalize(ke, dim=-1)                     # unit key — episodic
+
+            # Retrieve memory prediction for both branches
+            vps = torch.bmm(M_sem, kns.unsqueeze(-1)).squeeze(-1)   # (B, d_half)
+            vpe = torch.bmm(M_epi, kne.unsqueeze(-1)).squeeze(-1)   # (B, d_half)
+
+            # Relative-norm write gate (OR: fire if either branch exceeds thresh)
+            err_s = (ks - vps).norm(dim=-1)                   # (B,)
+            err_e = (ke - vpe).norm(dim=-1)
+            ref_s = self.gate_thresh * ks.norm(dim=-1)
+            ref_e = self.gate_thresh * ke.norm(dim=-1)
+            fire = ((err_s >= ref_s) | (err_e >= ref_e)).float()  # (B,)
+
+            wr_count += fire.sum().item()
+            wr_total += B
+
+            # Outer-product delta-rule updates
+            Delta_s = torch.bmm((ks - vps).unsqueeze(-1), kns.unsqueeze(1))   # (B, d_half, d_half)
+            Delta_e = torch.bmm((ke - vpe).unsqueeze(-1), kne.unsqueeze(1))
+
+            # EMA write with gate; episodic branch also carries recency weight
+            w_t = (t + 1) / L                                 # recency weight ∈ (0, 1]
+            g3 = fire[:, None, None]                          # (B, 1, 1) broadcast
+            M_sem = M_sem + (1.0 - a) * g3 * Delta_s
+            M_epi = M_epi + (1.0 - a) * w_t * g3 * Delta_e
+
+        self._last_write_rate = wr_count / max(wr_total, 1)
+
+        # Read at query position (last token in the sequence)
+        q = x[:, -1, :]                                       # (B, d_model)
+        qns = F.normalize(self.sem_proj(q), dim=-1)           # (B, d_half)
+        qne = F.normalize(self.epi_proj(q), dim=-1)
+        r_sem = torch.bmm(M_sem, qns.unsqueeze(-1)).squeeze(-1)   # (B, d_half)
+        r_epi = torch.bmm(M_epi, qne.unsqueeze(-1)).squeeze(-1)
+        r = torch.cat([r_sem, r_epi], dim=-1)                 # (B, d_model)
+
+        # Null retrieval gate: suppress readout when memory is irrelevant
+        g_null = torch.sigmoid(self.null_gate(q))             # (B, 1)
+        r = g_null * r
+
+        return self.out_proj(r)                               # (B, d_model)
