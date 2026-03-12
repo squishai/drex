@@ -505,3 +505,42 @@ class TestMemoryModule:
         g = torch.sigmoid(mem.null_gate(q))
         # Allow a small range since weight is trunc_normal when wired via transformer
         assert 0.0 < g.item() < 1.0
+
+    # ------------------------------------------------------------------
+    # forward — numerical stability
+    # ------------------------------------------------------------------
+
+    def test_no_nan_with_zero_projection_input(self, device):
+        """F.normalize eps guard: zero-magnitude projections must not produce NaN."""
+        dev = torch.device(device)
+        mem = MemoryModule(d_model=32).to(dev)
+        # Force all linear weights and biases to zero so every projection outputs a
+        # zero vector — the hardest case for F.normalize stability.
+        with torch.no_grad():
+            for m in mem.modules():
+                if isinstance(m, torch.nn.Linear):
+                    m.weight.zero_()
+                    if m.bias is not None:
+                        m.bias.zero_()
+        x = torch.randn(2, 16, 32, device=dev)
+        out = mem(x)
+        assert not torch.isnan(out).any(), "NaN in output with zero-projection weights"
+        assert not torch.isinf(out).any(), "Inf in output with zero-projection weights"
+
+    def test_write_rate_deterministic_across_forward_calls(self, device):
+        """Vectorised write loop produces identical write rate on repeated identical inputs."""
+        dev = torch.device(device)
+        torch.manual_seed(42)
+        mem = MemoryModule(d_model=32, gate_thresh=0.5).to(dev)
+        x = torch.randn(3, 32, 32, device=dev)
+
+        mem(x)
+        wr_first = mem.last_write_rate()
+
+        mem(x)
+        wr_second = mem.last_write_rate()
+
+        assert abs(wr_first - wr_second) < 1e-6, (
+            f"Write rate is not deterministic: {wr_first} vs {wr_second}"
+        )
+        assert 0.0 <= wr_first <= 1.0

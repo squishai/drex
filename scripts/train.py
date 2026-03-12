@@ -31,7 +31,13 @@ from torch.utils.data import DataLoader
 # Allow running from repo root without installing
 sys.path.insert(0, str(Path(__file__).parent.parent / "python"))
 
-from drex.models.memory import MemoryModule, WRITE_RATE_LO, WRITE_RATE_HI
+from drex.models.memory import (
+    LayerState,
+    MemoryModule,
+    MemoryState,
+    WRITE_RATE_LO,
+    WRITE_RATE_HI,
+)
 from drex.models.transformer import DrexConfig, DrexTransformer
 from drex.training.data import SegmentDataset, collate_fn, tokenize_chars
 from drex.training.optimizer import build_optimizer, cosine_schedule_with_warmup
@@ -41,6 +47,10 @@ from drex.utils.config import load_checkpoint, save_checkpoint
 # ---------------------------------------------------------------------------
 # Data helpers
 # ---------------------------------------------------------------------------
+
+# ord('\n') in the char-level vocabulary used by tokenize_chars.
+# Story boundaries in TinyStories are represented as this token.
+_NEWLINE_TOKEN: int = 10
 
 
 def _load_tinystories(split: str = "train", max_chars: int | None = None) -> str:
@@ -107,6 +117,34 @@ def _validate(
             n_batches += 1
     model.train()
     return total_loss / max(n_batches, 1)
+
+
+def _reset_boundary_states(
+    states: list,
+    tgt: torch.Tensor,
+    model: DrexTransformer,
+    device: torch.device,
+) -> list:
+    """
+    Zero LayerState for batch elements whose target segment contains a story
+    boundary (token _NEWLINE_TOKEN = ord('\\n') = 10).
+
+    Prevents L2 Infini-Attention memory from threading across unrelated
+    TinyStories documents when --reset-on-boundary is enabled.
+    """
+    has_bnd = (tgt == _NEWLINE_TOKEN).any(dim=1)   # (B,) bool
+    if not has_bnd.any():
+        return states
+    fresh = model.init_states(tgt.size(0), device)
+    new_states: list = []
+    for s, f in zip(states, fresh):
+        # Zero out M and z only for batch elements that crossed a boundary.
+        M_new = torch.where(has_bnd[:, None, None, None], f.memory.M, s.memory.M)
+        z_new = torch.where(has_bnd[:, None, None], f.memory.z, s.memory.z)
+        new_states.append(
+            LayerState(memory=MemoryState(M=M_new, z=z_new), step=s.step)
+        )
+    return new_states
 
 
 # ---------------------------------------------------------------------------
@@ -248,6 +286,8 @@ def train(args: argparse.Namespace) -> None:
         optimizer.zero_grad()
         logits, states = model(src, states)
         states = [s.detach() for s in states]   # TBPTT boundary
+        if args.reset_on_boundary:
+            states = _reset_boundary_states(states, tgt, model, device)
 
         # Collect per-step write rates (no-op when use_episodic_memory=False)
         if _mem_modules:
@@ -262,6 +302,17 @@ def train(args: argparse.Namespace) -> None:
             logits.reshape(-1, config.vocab_size),
             tgt.reshape(-1),
         )
+        if not loss.isfinite():
+            print(
+                f"  [skip] step {global_step}  non-finite loss={loss.item():.4g}"
+                " — zeroing grads and resetting states",
+                flush=True,
+            )
+            optimizer.zero_grad()
+            global_step += 1
+            # Reset TBPTT state to prevent NaN from propagating through future steps.
+            states = model.init_states(args.batch_size, device)
+            continue
         loss.backward()
 
         if args.grad_clip > 0.0:
@@ -403,6 +454,16 @@ def _parser() -> argparse.ArgumentParser:
         type=int,
         default=500_000,
         help="Maximum characters to load from TinyStories validation split",
+    )
+    p.add_argument(
+        "--reset-on-boundary",
+        action="store_true",
+        default=False,
+        help=(
+            "Zero LayerState for batch elements whose segment crosses a story "
+            "boundary (token 10 = '\\n'). Prevents L2 memory contamination "
+            "across TinyStories documents."
+        ),
     )
 
     return p

@@ -1,6 +1,6 @@
 # PLAN.md — Drex Implementation Roadmap
 
-*Created: 2026-03-11 | Updated: 2026-03-12 | Reflects research state after Phase 12 (48 categories, 247+ experiments)*
+*Created: 2026-03-11 | Updated: 2026-03-12 | Reflects research state after Phase 15 (stability, vectorization, training quality)*
 
 ---
 
@@ -204,25 +204,57 @@ Production training integration. All scripts updated to expose the Phase 13 arch
 | BABILong eval CLI | `scripts/eval_babilong.py` | Done — new script, full task/length sweep |
 | Write-rate density sweep | `scripts/eval_passkey.py` | Done — `--density`, `--density-trials` |
 
-### Known limitations (carry forward to Phase 15)
+### Known limitations (both resolved in Phase 15)
 
 1. **TBPTT document boundary**: `train.py` threads L2 `MemoryState` and L4 `MemoryModule`
    across shuffled TinyStories segment boundaries. The model may learn to carry state
    across unrelated documents. Validation uses fresh per-batch states and is unaffected.
    Fix: detect EOS boundaries within each batch and reset state selectively.
+   → **RESOLVED Phase 15: `--reset-on-boundary` flag added.**
 
 2. **Sequential write loop**: `MemoryModule.forward()` writes positions in a Python
    `for t in range(L-1)` loop. At `segment_len=512` this is 511 sequential PyTorch
    micro-operations per layer per forward pass. Throughput at production scale will be
    significantly below the attention / feed-forward sublayers until this is vectorized.
+   → **RESOLVED Phase 15: projections batched; single GPU sync replaces L-1 syncs.**
+
+3. **NaN training loss (unguarded)**: Smoke testing revealed `train.py` had no
+   `loss.isfinite()` guard. Once loss becomes NaN, `backward()` poisons all weights.
+   → **RESOLVED Phase 15: skip-step guard added.**
+
+4. **`F.normalize` amplification on near-zero projections**: Default `eps=1e-12` could
+   amplify near-zero projection vectors by `1/eps = 1e12` on MPS or under weight decay.
+   → **RESOLVED Phase 15: `eps=1e-6` on all four `F.normalize` calls.**
 
 ---
 
-## Phase 15 — Candidates
+## Phase 15 (COMPLETE — 2026-03-12)
+
+Stability, vectorization, and training quality. All four blockers from Phase 14 resolved.
+
+### What was delivered
+
+| Component | File | Status |
+|---|---|---|
+| NaN skip-step guard | `scripts/train.py` | Done — `loss.isfinite()` check before `backward()`, state reset on skip |
+| TBPTT boundary reset | `scripts/train.py` | Done — `--reset-on-boundary` flag + `_reset_boundary_states()` helper |
+| `F.normalize` eps fix | `python/drex/models/memory.py` | Done — `eps=1e-6` on all 4 calls |
+| Vectorized write loop | `python/drex/models/memory.py` | Done — projections batched; L-1 GPU syncs → 1 |
+| New tests | `tests/python/test_memory.py` | Done — 2 new tests (total 199), 100% branch coverage |
+
+### Known limitations (carry forward to Phase 16)
+
+1. **Sequential matrix recurrence remains**: The `for t in range(L-1)` loop is still
+   present because each step reads `M_{t-1}`. Only the projection, normalization, and
+   reference-norm computation has been lifted out. Full elimination would require a
+   parallel scan approximation or a custom kernel.
+
+---
+
+## Phase 16 — Candidates
 
 | Item | Priority | Description |
 |---|---|---|
-| Vectorize MemoryModule write loop | High | Replace sequential Python loop with batched outer-product scan. O(L) Python → O(1) kernel launch at fixed L. Required before production training at segment_len≥512. |
-| TBPTT document-boundary reset | Medium | Detect EOS/story boundaries in the batch and zero-reset MemoryModule state selectively. Prevents cross-document memory contamination. |
-| Multi-dataset training | Medium | Extend train.py to support source mixing (TinyStories + Wikipedia tokenized) and a weighted sampler. |
+| Multi-dataset training | Medium | Extend train.py to support source mixing (TinyStories + Wikipedia tokenized) with a weighted sampler. |
 | BABILong distractor density parameter | Low | Add `--distractor-density` to eval_babilong.py to control filler fraction, enabling isolation of memory capacity vs. retrieval precision. |
+| Full matrix-recurrence parallelization | Low | Replace the remaining sequential `for t` loop with a parallel scan; requires approximation or custom kernel. |

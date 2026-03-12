@@ -399,46 +399,61 @@ class MemoryModule(nn.Module):
         M_sem = torch.zeros(B, d_half, d_half, device=device)
         M_epi = torch.zeros(B, d_half, d_half, device=device)
 
-        wr_count = 0
-        wr_total = 0
+        if L > 1:
+            # ── Vectorised pre-computation ─────────────────────────────────
+            # Batch all key projections and normalizations in two kernel launches
+            # instead of 4*(L-1) individual calls.  Shapes: (B, L-1, d_half)
+            ks_all  = self.sem_proj(x[:, :-1, :])
+            ke_all  = self.epi_proj(x[:, :-1, :])
+            kns_all = F.normalize(ks_all, dim=-1, eps=1e-6)   # unit semantic keys
+            kne_all = F.normalize(ke_all, dim=-1, eps=1e-6)   # unit episodic keys
 
-        for t in range(L - 1):
-            h_t = x[:, t, :]                                  # (B, d_model)
-            ks = self.sem_proj(h_t)                           # (B, d_half)
-            ke = self.epi_proj(h_t)                           # (B, d_half)
-            kns = F.normalize(ks, dim=-1)                     # unit key — semantic
-            kne = F.normalize(ke, dim=-1)                     # unit key — episodic
+            # Gate reference norms pre-computed once: (B, L-1)
+            ref_s_all = self.gate_thresh * ks_all.norm(dim=-1)
+            ref_e_all = self.gate_thresh * ke_all.norm(dim=-1)
 
-            # Retrieve memory prediction for both branches
-            vps = torch.bmm(M_sem, kns.unsqueeze(-1)).squeeze(-1)   # (B, d_half)
-            vpe = torch.bmm(M_epi, kne.unsqueeze(-1)).squeeze(-1)   # (B, d_half)
+            fires: list[torch.Tensor] = []   # (B,) tensors; stacked for single GPU sync
 
-            # Relative-norm write gate (OR: fire if either branch exceeds thresh)
-            err_s = (ks - vps).norm(dim=-1)                   # (B,)
-            err_e = (ke - vpe).norm(dim=-1)
-            ref_s = self.gate_thresh * ks.norm(dim=-1)
-            ref_e = self.gate_thresh * ke.norm(dim=-1)
-            fire = ((err_s >= ref_s) | (err_e >= ref_e)).float()  # (B,)
+            # ── Sequential recurrence (cross-step M dependency) ────────────
+            # Each step reads M_{t-1} to compute vps/vpe, so the loop cannot be
+            # eliminated.  All other work has been moved above.
+            for t in range(L - 1):
+                kns_t = kns_all[:, t]   # (B, d_half)
+                kne_t = kne_all[:, t]
+                ks_t  = ks_all[:, t]
+                ke_t  = ke_all[:, t]
 
-            wr_count += fire.sum().item()
-            wr_total += B
+                # Read from previous-step matrices
+                vps = torch.bmm(M_sem, kns_t.unsqueeze(-1)).squeeze(-1)   # (B, d_half)
+                vpe = torch.bmm(M_epi, kne_t.unsqueeze(-1)).squeeze(-1)
 
-            # Outer-product delta-rule updates
-            Delta_s = torch.bmm((ks - vps).unsqueeze(-1), kns.unsqueeze(1))   # (B, d_half, d_half)
-            Delta_e = torch.bmm((ke - vpe).unsqueeze(-1), kne.unsqueeze(1))
+                # OR-gate: fire if either branch error exceeds its reference
+                err_s = (ks_t - vps).norm(dim=-1)   # (B,)
+                err_e = (ke_t - vpe).norm(dim=-1)
+                fire = (
+                    (err_s >= ref_s_all[:, t]) | (err_e >= ref_e_all[:, t])
+                ).float()
+                fires.append(fire)
 
-            # EMA write with gate; episodic branch also carries recency weight
-            w_t = (t + 1) / L                                 # recency weight ∈ (0, 1]
-            g3 = fire[:, None, None]                          # (B, 1, 1) broadcast
-            M_sem = M_sem + (1.0 - a) * g3 * Delta_s
-            M_epi = M_epi + (1.0 - a) * w_t * g3 * Delta_e
+                # Outer-product delta-rule update
+                g3 = fire[:, None, None]   # (B, 1, 1)
+                Delta_s = torch.bmm((ks_t - vps).unsqueeze(-1), kns_t.unsqueeze(1))
+                Delta_e = torch.bmm((ke_t - vpe).unsqueeze(-1), kne_t.unsqueeze(1))
 
-        self._last_write_rate = wr_count / max(wr_total, 1)
+                w_t = (t + 1) / L   # recency weight ∈ (0, 1]
+                M_sem = M_sem + (1.0 - a) * g3 * Delta_s
+                M_epi = M_epi + (1.0 - a) * w_t * g3 * Delta_e
+
+            # Single GPU sync replaces L-1 syncs from the original loop
+            fires_t = torch.stack(fires, dim=1)   # (B, L-1)
+            self._last_write_rate = fires_t.sum().item() / max(B * (L - 1), 1)
+        else:
+            self._last_write_rate = 0.0
 
         # Read at query position (last token in the sequence)
         q = x[:, -1, :]                                       # (B, d_model)
-        qns = F.normalize(self.sem_proj(q), dim=-1)           # (B, d_half)
-        qne = F.normalize(self.epi_proj(q), dim=-1)
+        qns = F.normalize(self.sem_proj(q), dim=-1, eps=1e-6)  # (B, d_half)
+        qne = F.normalize(self.epi_proj(q), dim=-1, eps=1e-6)
         r_sem = torch.bmm(M_sem, qns.unsqueeze(-1)).squeeze(-1)   # (B, d_half)
         r_epi = torch.bmm(M_epi, qne.unsqueeze(-1)).squeeze(-1)
         r = torch.cat([r_sem, r_epi], dim=-1)                 # (B, d_model)
