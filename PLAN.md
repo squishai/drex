@@ -273,10 +273,22 @@ reproducibility gaps before first arXiv submission.
 - [x] Create `results/TRAINING_RUNS.md` with full Exp A/B commands, results template,
   interpretation guide, and Phase 16 ablation roadmap
 
-### Step 2 — End-to-end benchmark (IN PROGRESS)
+### Step 2 — End-to-end benchmark (BLOCKED)
 
-- [ ] Run Experiment A: DrexTransformer baseline (no MemoryModule), 256d/4L, 50k steps
-- [ ] Run Experiment B: DrexTransformer + MemoryModule (thresh=0.70), same config
+**Blocker:** Exp B write loop is 20× slower than baseline at `segment_len=512` (measured:
+543 tok/s vs 11,700 for Exp A). Projected Exp B runtime: ~4.5 h for 2k steps, ~112 h for
+50k steps. Additionally, wr=0.969 at step 200 is outside [0.10, 0.85]. Exp B was killed
+via SIGKILL (exit 137) at step 200. See §11.4 in ARCHITECTURE_FINDINGS.md.
+
+**Required first:** CPU-backend fix for the write loop (Phase 16 Architecture Candidate,
+now HIGH priority). After fix, re-run the 2000-step probe to confirm throughput and that
+wr converges to [0.10, 0.85] by ~step 1000. Then proceed with 50k runs.
+
+- [x] Run Experiment A: 2000-step convergence probe complete (val_ppl 4.21, ~11,700 tok/s)
+- [ ] **[BLOCKER]** Fix write loop throughput (CPU backend for sequential bmm section)
+- [ ] Validate wr convergence at L=512 with 1000-step diagnostic run after fix
+- [ ] Run Experiment A full 50k steps
+- [ ] Run Experiment B full 50k steps
 - [ ] Evaluate both on passkey recall: 512/1k/2k/4k/8k/16k context lengths
 - [ ] Evaluate both on BABILong: Tasks 1–5, 2k/4k/8k context lengths
 - [ ] Fill in results/TRAINING_RUNS.md tables
@@ -296,7 +308,7 @@ reproducibility gaps before first arXiv submission.
 
 | Item | Priority | Description |
 |---|---|---|
+| **Write loop CPU backend** | **HIGH — blocks Exp B** | Move `M_sem`/`M_epi` to CPU for the sequential write loop; move results back to GPU for the read. Avoids MPS per-kernel-launch overhead. Measured: 20× slowdown at seg_len=512 (543 vs 11,700 tok/s). |
 | Multi-dataset training | Medium | Extend train.py to support source mixing (TinyStories + Wikipedia tokenized) with a weighted sampler. |
 | BABILong distractor density parameter | Low | Add `--distractor-density` to eval_babilong.py to control filler fraction, enabling isolation of memory capacity vs. retrieval precision. |
 | Full matrix-recurrence parallelization | Low | Replace the remaining sequential `for t` loop with a parallel scan; requires approximation or custom kernel. |
-

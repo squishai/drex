@@ -358,7 +358,7 @@ elements before the next forward pass.
 **Validation is unaffected:** `_validate()` calls `model(src)` with `states=None`,
 which triggers `model.init_states()` — fully independent per-batch evaluation.
 
-### §11.4 — Write loop performance (Phase 15)
+### §11.4 — Write loop performance (Phase 15/16)
 
 `MemoryModule.forward()` iterates `for t in range(L-1)` because step t reads
 `M_{t-1}` (sequential recurrence). Per-step Python overhead includes:
@@ -370,12 +370,37 @@ launches instead of 4×(L-1) small launches). Accumulate `fire` tensors inside t
 and compute the write-rate sum in a single `torch.stack(...).sum().item()` call after
 the loop (1 sync instead of L-1).
 
-**Remaining cost:** The `torch.bmm(M_sem, kns_t)` and `torch.bmm(M_epi, kne_t)` calls
-inside the loop cannot be eliminated without changing the semantics of the delta rule.
-At `segment_len=512`, this is 511 sequential `bmm` operations per layer per forward
-pass. This is the dominant throughput bottleneck before the attention sublayer at
-production scale. Full parallelisation requires a parallel scan approximation or a
-custom kernel (Phase 16 candidate).
+**Remaining cost — measured at Phase 16:** The 4 `torch.bmm` calls per iteration of the
+sequential loop *cannot* be eliminated without changing the delta-rule semantics. At
+`segment_len=512` with 4 transformer layers, this is **4 × 511 × 4 = 8,176 sequential
+GPU kernel launches per forward pass**. On MPS, the per-launch overhead dominates:
+
+| Config | tok/s | Ratio vs baseline |
+|---|---|---|
+| Exp A (no MemoryModule), seg_len=512 | ~11,700 | 1.0× |
+| Exp B (MemoryModule), seg_len=64 | ~1,200 | 0.10× (9.8× slower) |
+| Exp B (MemoryModule), seg_len=512 | **543** | **0.046× (20× slower, measured)** |
+
+At `segment_len=512`, Exp B was killed (SIGKILL, exit 137) after step 200 (~27 min wall
+clock). Throughput: **543 tok/s**. Projected: ~4.5 h for 2k steps, ~112 h for 50k steps.
+**Hard blocker for the full benchmark run.**
+
+**Write rate at seg_len=512 (step 200):** wr=0.969, range [0.645, 1.000] — outside
+[0.10, 0.85]. Root cause: α(L=512)=0.990 gives (1−α)=0.010; matrices start near-zero so
+prediction error almost always exceeds `thresh × ||ks||` when thresh=0.70. Convergence to
+valid wr is expected but unconfirmed at L=512 (validated only at L=32, L=96).
+
+**Fix options (Phase 16, HIGH priority — blocks Exp B):**
+
+1. **CPU backend for write loop** *(recommended first step)*: Move `M_sem`, `M_epi` to
+   CPU for the loop body; results moved back to GPU for the read phase. CPU avoids MPS
+   per-kernel-launch overhead for small sequential ops. Estimated ~5–10× speedup on M3.
+
+2. **Parallel scan approximation**: Replace the sequential recurrence with a linear
+   recurrence scan. Changes delta-rule semantics; requires new write-rate micro-experiment.
+
+3. **Custom Metal kernel**: Fuse the entire write loop into one kernel. Best ceiling
+   but significant implementation complexity.
 
 ---
 

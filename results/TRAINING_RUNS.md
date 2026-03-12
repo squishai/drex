@@ -12,11 +12,11 @@ first published training result for the Phase 13–15 validated architecture.
 
 | Field | Value |
 |---|---|
-| Machine | (fill in: e.g., "MacBook Pro M3 Max, 128GB") |
-| Compute | (fill in: e.g., "MPS / CUDA / CPU") |
-| PyTorch | (fill in: e.g., "2.5.1") |
-| Python | (fill in: e.g., "3.12.8") |
-| Date | (fill in) |
+| Machine | MacBook Air, Apple M3, 16 GB |
+| Compute | MPS |
+| PyTorch | 2.8.0 |
+| Python | 3.12.12 |
+| Date | 2026-03-12 |
 
 ### Data
 
@@ -96,17 +96,20 @@ PYTHONPATH=python python3.12 scripts/train.py \
   2>&1 | tee results/exp_a_train.log
 ```
 
-### Training log (fill in when run)
+### Training log
 
 | Metric | Value |
 |---|---|
-| Final train loss | — |
-| Final train ppl | — |
-| Final val loss | — |
-| Final val ppl | — |
-| Wallclock time | — |
-| Effective throughput | — tok/s |
-| NaN skips total | — |
+| Final train loss | 1.3312 |
+| Final train ppl | 3.79 |
+| Final val loss (step 2000) | 1.4369 |
+| Final val ppl | 4.21 |
+| Steady-state throughput | ~11,000–12,200 tok/s |
+| NaN skips total | 0 |
+| Parameters | 4,264,464 |
+
+> Note: This is a 2000-step convergence probe, not the full 50,000-step benchmark run.
+> The full run is pending (see Step 2 status below).
 
 ---
 
@@ -142,19 +145,47 @@ PYTHONPATH=python python3.12 scripts/train.py \
   2>&1 | tee results/exp_b_train.log
 ```
 
-### Training log (fill in when run)
+### Training log
 
 | Metric | Value |
 |---|---|
-| Final train loss | — |
-| Final train ppl | — |
-| Final val loss | — |
-| Final val ppl | — |
-| Wallclock time | — |
-| Effective throughput | — tok/s |
-| NaN skips total | — |
-| Mean write rate (final 1000 steps) | — |
-| Write rate range (final 1000 steps) | — |
+| Final train loss | BLOCKED — run terminated at step 200 (SIGKILL) |
+| Final train ppl | BLOCKED |
+| Final val loss | BLOCKED |
+| Final val ppl | BLOCKED |
+| Throughput at step 200, seg_len=512 | **543 tok/s** (vs Exp A ~11,700 → **20× slower**) |
+| Write rate at step 200 | **0.969** — OUTSIDE [0.10, 0.85] (see α note below) |
+| Write rate range (per batch element) | [0.645, 1.000] |
+| Throughput at seg_len=64 (short probe) | ~1,200 tok/s (9.8× slower than baseline) |
+| Write rate at seg_len=64 | 0.456–0.491 ✓ |
+| Parameters | 4,792,852 |
+
+> **Throughput blocker (Phase 16 — HIGH priority):** `MemoryModule.forward()` contains a
+> `for t in range(L-1)` loop with 4 sequential `torch.bmm` calls per iteration. At L=512
+> with 4 transformer layers that is **4 × 511 × 4 = 8,176 sequential GPU kernel launches
+> per forward pass**. On MPS each small-tensor bmm has significant per-launch overhead;
+> the measured rate is 543 tok/s vs 11,700 for the baseline — **20× slowdown**. The
+> 2000-step probe run was killed via SIGKILL (exit 137) after step 200, estimated ~27
+> minutes per 200-step interval. Projected full runtime:
+>
+> | Run | Steps | Estimated wall-clock |
+> |---|---|---|
+> | 2000-step probe | 2,000 | ~4.5 hours |
+> | 50k benchmark | 50,000 | ~112 hours |
+>
+> **α calibration note (write rate at L=512):** The `α(L)` formula (`α = 0.95^(96/L)`)
+> gives α≈0.990 at L=512. With `(1−α)=0.010`, each delta-rule update is only 1% of its
+> full magnitude. Early in training the matrices are near-zero, so `vps ≈ 0` and the
+> prediction error `||ks − vps|| = ||ks||` almost always exceeds `thresh × ||ks||` when
+> thresh=0.70 < 1. This forces wr≈1.0 until the matrices populate enough to match keys.
+> At step 200 (only 1,600 tokens seen per matrix layer), wr=0.969 is expected.
+> Whether wr converges into [0.10, 0.85] by step ~5000 is untested. The α formula was
+> validated at L=32 (wr=0.581) and L=96 (wr=0.421); extrapolation to L=512 is unconfirmed.
+>
+> **Fix required before full Exp B run:**
+> Primary fix: move the sequential write loop to CPU backend to avoid MPS kernel-launch
+> overhead. Secondary: validate that wr converges into [0.10, 0.85] by step ~5000 at
+> L=512 once throughput is resolved (could use a short 1000-step diagnostic run).
 
 ---
 
@@ -216,14 +247,21 @@ PYTHONPATH=python python3.12 scripts/eval_babilong.py \
 
 ---
 
-## Results Table (fill in when run)
+## Results Table
+
+**Status: BLOCKED.** Passkey and BABILong evaluations require trained Exp B checkpoint.
+Exp B full training is blocked by the MPS sequential-bmm throughput issue documented above.
+See the throughput note in the Exp B training log section.
+
+Once the sequential write loop is moved to CPU or a parallel scan is implemented, re-run
+the eval commands above and fill in the tables below.
 
 ### Passkey Recall Accuracy
 
 | Model | 512 ctx | 1k ctx | 2k ctx | 4k ctx | 8k ctx | 16k ctx |
 |---|---|---|---|---|---|---|
 | Exp A (baseline) | — | — | — | — | — | — |
-| Exp B (episodic) | — | — | — | — | — | — |
+| Exp B (episodic) | BLOCKED | BLOCKED | BLOCKED | BLOCKED | BLOCKED | BLOCKED |
 | Δ (B − A) | — | — | — | — | — | — |
 
 ### BABILong Accuracy at 8k context
@@ -231,17 +269,18 @@ PYTHONPATH=python python3.12 scripts/eval_babilong.py \
 | Model | Task 1 | Task 2 | Task 3 | Task 4 | Task 5 | Mean |
 |---|---|---|---|---|---|---|
 | Exp A (baseline) | — | — | — | — | — | — |
-| Exp B (episodic) | — | — | — | — | — | — |
+| Exp B (episodic) | BLOCKED | BLOCKED | BLOCKED | BLOCKED | BLOCKED | BLOCKED |
 
-### Write Rate Validation (Exp B, post-training)
+### Write Rate Validation (Exp B, seg_len=64 throughput probe)
 
-| Context Length | mean_wr | min_wr | max_wr | In range? |
+| Segment Length | mean_wr | min_wr (per batch) | max_wr (per batch) | In range? |
 |---|---|---|---|---|
-| 2048 | — | — | — | — |
-| 4096 | — | — | — | — |
-| 8192 | — | — | — | — |
+| 64 | 0.456–0.491 | 0.000 | 1.000 | ✓ (overall mean; per-element extremes expected at short L) |
 
-*Target write rate range: [0.10, 0.85] per Hard Constraint #5 in ARCHITECTURE_FINDINGS.md.*
+*min_wr=0.000 and max_wr=1.000 per batch element are expected at L=64: some elements
+produce all-novel keys (every write fires) and some produce all-familiar keys (no write
+fires). The gate is operating correctly. The mean across all batch elements stays within
+[0.10, 0.85] from step 20 onward.*
 
 ---
 
