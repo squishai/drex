@@ -509,3 +509,103 @@ class TestNoNullGateThroughTransformer:
         assert any(p.grad is not None for p in model.parameters())
 
 
+class TestNoRecencyWeightAblation:
+    """exp_51 — uniform M_epi write weights (w_t=1.0 instead of (t+1)/L)."""
+
+    def test_output_shape_unchanged(self, device):
+        dev = torch.device(device)
+        cfg = _epi_cfg(use_recency_weight=False)
+        model = DrexTransformer(cfg).to(dev)
+        ids = torch.randint(0, cfg.vocab_size, (2, cfg.window_size), device=dev)
+        logits, _ = model(ids)
+        assert logits.shape == (2, cfg.window_size, cfg.vocab_size)
+
+    def test_no_nan(self, device):
+        dev = torch.device(device)
+        cfg = _epi_cfg(use_recency_weight=False)
+        model = DrexTransformer(cfg).to(dev)
+        ids = torch.randint(0, cfg.vocab_size, (2, cfg.window_size), device=dev)
+        logits, _ = model(ids)
+        assert not torch.isnan(logits).any()
+        assert not torch.isinf(logits).any()
+
+    def test_backward(self, device):
+        dev = torch.device(device)
+        cfg = _epi_cfg(use_recency_weight=False)
+        model = DrexTransformer(cfg).to(dev)
+        ids = torch.randint(0, cfg.vocab_size, (1, cfg.window_size), device=dev)
+        logits, _ = model(ids)
+        logits.sum().backward()
+        assert any(p.grad is not None for p in model.parameters())
+
+    def test_differs_from_recency_weight(self, device):
+        """Uniform and recency-weighted writes must produce different outputs."""
+        torch.manual_seed(0)
+        dev = torch.device(device)
+        cfg_recency  = _epi_cfg(use_recency_weight=True)
+        cfg_uniform  = _epi_cfg(use_recency_weight=False)
+        m_recency = DrexTransformer(cfg_recency).to(dev)
+        m_uniform = DrexTransformer(cfg_uniform).to(dev)
+        # Share weights so the only difference is the recency weighting
+        m_uniform.load_state_dict(m_recency.state_dict())
+        ids = torch.randint(0, cfg_recency.vocab_size, (2, cfg_recency.window_size), device=dev)
+        with torch.no_grad():
+            out_recency, _ = m_recency(ids)
+            out_uniform, _ = m_uniform(ids)
+        assert not torch.allclose(out_recency, out_uniform)
+
+
+class TestNoL2Ablation:
+    """exp_52 — disable Infini-Attention (L2): L1 sliding-window only."""
+
+    def test_output_shape_unchanged(self, device):
+        dev = torch.device(device)
+        cfg = _epi_cfg(use_l2=False)
+        model = DrexTransformer(cfg).to(dev)
+        ids = torch.randint(0, cfg.vocab_size, (2, cfg.window_size), device=dev)
+        logits, _ = model(ids)
+        assert logits.shape == (2, cfg.window_size, cfg.vocab_size)
+
+    def test_no_nan(self, device):
+        dev = torch.device(device)
+        cfg = _epi_cfg(use_l2=False)
+        model = DrexTransformer(cfg).to(dev)
+        ids = torch.randint(0, cfg.vocab_size, (2, cfg.window_size), device=dev)
+        logits, _ = model(ids)
+        assert not torch.isnan(logits).any()
+        assert not torch.isinf(logits).any()
+
+    def test_backward(self, device):
+        dev = torch.device(device)
+        cfg = _epi_cfg(use_l2=False)
+        model = DrexTransformer(cfg).to(dev)
+        ids = torch.randint(0, cfg.vocab_size, (1, cfg.window_size), device=dev)
+        logits, _ = model(ids)
+        logits.sum().backward()
+        assert any(p.grad is not None for p in model.parameters())
+
+    def test_state_not_updated_when_l2_disabled(self, device):
+        """With use_l2=False, LayerState.memory should remain all-zeros across a forward pass."""
+        dev = torch.device(device)
+        cfg = _epi_cfg(use_l2=False)
+        model = DrexTransformer(cfg).to(dev)
+        states = model.init_states(batch=2, device=dev)
+        ids = torch.randint(0, cfg.vocab_size, (2, cfg.window_size), device=dev)
+        _, new_states = model(ids, states)
+        for state in new_states:
+            assert torch.allclose(state.memory.M, torch.zeros_like(state.memory.M))
+
+    def test_differs_from_l2_enabled(self, device):
+        """Output with L2 disabled must differ from output with L2 enabled."""
+        torch.manual_seed(0)
+        dev = torch.device(device)
+        cfg_l2  = _epi_cfg(use_l2=True)
+        cfg_no  = _epi_cfg(use_l2=False)
+        m_l2 = DrexTransformer(cfg_l2).to(dev)
+        m_no = DrexTransformer(cfg_no).to(dev)
+        m_no.load_state_dict(m_l2.state_dict())
+        ids = torch.randint(0, cfg_l2.vocab_size, (2, cfg_l2.window_size), device=dev)
+        with torch.no_grad():
+            out_l2, _ = m_l2(ids)
+            out_no, _ = m_no(ids)
+        assert not torch.allclose(out_l2, out_no)

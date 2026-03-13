@@ -338,6 +338,7 @@ class MemoryModule(nn.Module):
         d_model: int,
         gate_thresh: float = 0.70,
         use_null_gate: bool = True,
+        use_recency_weight: bool = True,
     ) -> None:
         super().__init__()
         if d_model % 2 != 0:
@@ -345,6 +346,7 @@ class MemoryModule(nn.Module):
         self.d_model = d_model
         self.gate_thresh = gate_thresh
         self.use_null_gate = use_null_gate
+        self.use_recency_weight = use_recency_weight
         d_half = d_model // 2
         self._d_half = d_half
 
@@ -479,7 +481,7 @@ class MemoryModule(nn.Module):
                     Delta_s = torch.bmm((ks_t - vps).unsqueeze(-1), kns_t.unsqueeze(1))
                     Delta_e = torch.bmm((ke_t - vpe).unsqueeze(-1), kne_t.unsqueeze(1))
 
-                    w_t = (t + 1) / L   # recency weight ∈ (0, 1]
+                    w_t = (t + 1) / L if self.use_recency_weight else 1.0
                     M_sem = M_sem + (1.0 - a) * g3 * Delta_s
                     M_epi = M_epi + (1.0 - a) * w_t * g3 * Delta_e
 

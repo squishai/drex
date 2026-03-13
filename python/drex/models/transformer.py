@@ -46,6 +46,9 @@ class DrexConfig:
     use_null_gate: bool = True          # null retrieval gate in MemoryModule
     full_seq_residual: bool = False     # apply memory residual to all positions (default: last only)
     memory_last_layer_only: bool = False  # restrict MemoryModule to the final layer only
+    # Ablation flags (Phase 19 — §12.2 un-ablated medium-confidence components)
+    use_recency_weight: bool = True     # w_t=(t+1)/L on M_epi writes; False = uniform w_t=1.0
+    use_l2: bool = True                 # enable Infini-Attention L2 cross-segment memory
 
 
 class FeedForward(nn.Module):
@@ -79,6 +82,7 @@ class DrexLayer(nn.Module):
             d_model=config.d_model,
             n_heads=config.n_heads,
             window_size=config.window_size,
+            use_l2=config.use_l2,
         )
         self.ff = FeedForward(config.d_model, config.ff_mult, config.dropout)
         self.norm1 = nn.LayerNorm(config.d_model)
@@ -100,6 +104,7 @@ class DrexLayer(nn.Module):
                 config.d_model,
                 gate_thresh=config.episodic_gate_thresh,
                 use_null_gate=config.use_null_gate,
+                use_recency_weight=config.use_recency_weight,
             )
             if _this_layer_has_mem
             else None

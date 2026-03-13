@@ -306,6 +306,8 @@ def train(args: argparse.Namespace) -> None:
         use_null_gate=not args.no_null_gate,
         full_seq_residual=args.full_seq_residual,
         memory_last_layer_only=args.memory_last_layer_only,
+        use_recency_weight=not args.no_recency_weight,
+        use_l2=not args.no_l2,
     )
     model = DrexTransformer(config).to(device)
     n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -318,6 +320,10 @@ def train(args: argparse.Namespace) -> None:
             flags.append("full-seq-residual")
         if config.memory_last_layer_only:
             flags.append("last-layer-only")
+        if not config.use_recency_weight:
+            flags.append("no-recency-weight")
+        if not config.use_l2:
+            flags.append("no-l2")
         flag_str = "  [" + ", ".join(flags) + "]" if flags else ""
         print(
             f"Episodic memory: enabled  gate_thresh={config.episodic_gate_thresh}{flag_str}",
@@ -596,6 +602,16 @@ def _parser() -> argparse.ArgumentParser:
         "--memory-last-layer-only",
         action="store_true",
         help="Ablation: attach MemoryModule only to the final transformer layer",
+    )
+    p.add_argument(
+        "--no-recency-weight",
+        action="store_true",
+        help="Ablation (exp_51): set w_t=1.0 (uniform) instead of (t+1)/L for M_epi writes",
+    )
+    p.add_argument(
+        "--no-l2",
+        action="store_true",
+        help="Ablation (exp_52): disable Infini-Attention L2 cross-segment memory",
     )
 
     # Infrastructure

@@ -793,3 +793,40 @@ class TestMemoryModuleNormOut:
         # The outputs must differ
         assert not torch.allclose(out_default, out_scaled)
 
+
+class TestMemoryModuleRecencyWeight:
+    """exp_51 — ablation for use_recency_weight=False (uniform M_epi write weights)."""
+
+    def test_default_is_recency_weighted(self, device):
+        """Default constructor has use_recency_weight=True."""
+        mem = MemoryModule(d_model=32)
+        assert mem.use_recency_weight is True
+
+    def test_uniform_flag_stored(self, device):
+        """use_recency_weight=False is stored correctly."""
+        mem = MemoryModule(d_model=32, use_recency_weight=False)
+        assert mem.use_recency_weight is False
+
+    def test_uniform_weight_produces_different_output(self, device):
+        """With uniform weights, M_epi accumulates differently — output must differ."""
+        torch.manual_seed(0)
+        dev = torch.device(device)
+        mem_r = MemoryModule(d_model=32, use_recency_weight=True).to(dev)
+        mem_u = MemoryModule(d_model=32, use_recency_weight=False).to(dev)
+        mem_u.load_state_dict(mem_r.state_dict())  # same weights, different update rule
+        x = torch.randn(2, 32, 32, device=dev)     # L=32 so w_t varies meaningfully
+        with torch.no_grad():
+            out_r = mem_r(x)
+            out_u = mem_u(x)
+        assert not torch.allclose(out_r, out_u)
+
+    def test_uniform_weight_write_rate_tracked(self, device):
+        """last_write_rate() is populated even with uniform weights."""
+        dev = torch.device(device)
+        mem = MemoryModule(d_model=32, use_recency_weight=False).to(dev)
+        x = torch.randn(2, 16, 32, device=dev)
+        with torch.no_grad():
+            mem(x)
+        wr = mem.last_write_rate()
+        assert 0.0 <= wr <= 1.0
+

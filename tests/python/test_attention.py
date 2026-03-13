@@ -161,3 +161,29 @@ class TestHybridAttention:
         x = torch.randn(batch, seq, d_model, device=dev)
         _, new_state = attn(x, state)
         assert not torch.allclose(new_state.M, state.M)
+
+    def test_no_l2_state_passes_through_unchanged(self, batch, seq, d_model, n_heads, device):
+        """With use_l2=False the L2 delta-rule is skipped; state must be identical."""
+        dev = torch.device(device)
+        attn = HybridAttention(d_model, n_heads, use_l2=False).to(dev)
+        d_k = d_model // n_heads
+        state = self._make_state(batch, n_heads, d_k, device)
+        x = torch.randn(batch, seq, d_model, device=dev)
+        _, new_state = attn(x, state)
+        assert torch.allclose(new_state.M, state.M)
+        assert torch.allclose(new_state.z, state.z)
+
+    def test_no_l2_output_differs_from_l2(self, batch, seq, d_model, n_heads, device):
+        """L1-only output should differ from the full L1+L2 output."""
+        dev = torch.device(device)
+        torch.manual_seed(0)
+        attn_l2  = HybridAttention(d_model, n_heads, use_l2=True).to(dev)
+        attn_no  = HybridAttention(d_model, n_heads, use_l2=False).to(dev)
+        # Copy weights so the only difference is the L2 path
+        attn_no.load_state_dict(attn_l2.state_dict())
+        d_k = d_model // n_heads
+        state = self._make_state(batch, n_heads, d_k, device)
+        x = torch.randn(batch, seq, d_model, device=dev)
+        out_l2, _ = attn_l2(x, state)
+        out_no, _ = attn_no(x, state)
+        assert not torch.allclose(out_l2, out_no)

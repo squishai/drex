@@ -142,12 +142,13 @@ class HybridAttention(nn.Module):
     The InfiniAttention gate β determines the L1/L2 split.
     """
 
-    def __init__(self, d_model: int, n_heads: int, window_size: int = 2048) -> None:
+    def __init__(self, d_model: int, n_heads: int, window_size: int = 2048, use_l2: bool = True) -> None:
         super().__init__()
         assert d_model % n_heads == 0
         self.n_heads = n_heads
         self.d_k = d_model // n_heads
         self.window_size = window_size
+        self._use_l2 = use_l2
 
         # Shared projections
         self.qkv_proj = nn.Linear(d_model, 3 * d_model, bias=False)
@@ -177,18 +178,23 @@ class HybridAttention(nn.Module):
         # L1: sliding window causal attention over the current segment
         A_local = F.scaled_dot_product_attention(Q, K, V, is_causal=True)
 
-        # L2: read from memory
-        phi_Q = _elu1(Q)
-        A_mem = torch.matmul(phi_Q, state.M)
-        denom = (phi_Q * state.z.unsqueeze(-2)).sum(dim=-1, keepdim=True).clamp(min=1e-6)
-        A_mem = A_mem / denom
+        if self._use_l2:
+            # L2: read from memory
+            phi_Q = _elu1(Q)
+            A_mem = torch.matmul(phi_Q, state.M)
+            denom = (phi_Q * state.z.unsqueeze(-2)).sum(dim=-1, keepdim=True).clamp(min=1e-6)
+            A_mem = A_mem / denom
 
-        # L2: write to memory (delta rule)
-        new_state = self._delta_update(K, V, state)
+            # L2: write to memory (delta rule)
+            new_state = self._delta_update(K, V, state)
 
-        # Gate and combine
-        gate = torch.sigmoid(self.beta).view(1, H, 1, 1)
-        A_combined = gate * A_mem + (1.0 - gate) * A_local
+            # Gate and combine
+            gate = torch.sigmoid(self.beta).view(1, H, 1, 1)
+            A_combined = gate * A_mem + (1.0 - gate) * A_local
+        else:
+            # L2 disabled: use only L1 sliding-window attention; pass state unchanged
+            A_combined = A_local
+            new_state = state
 
         out = A_combined.transpose(1, 2).contiguous().view(B, S, D)
         return self.out_proj(out), new_state
