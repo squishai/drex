@@ -339,8 +339,30 @@ def train(args: argparse.Namespace) -> None:
     # ── resume ──────────────────────────────────────────────────────────────
     global_step = 0
     if args.resume:
-        global_step = load_checkpoint(model, args.resume)
-        print(f"Resumed from step {global_step}", flush=True)
+        global_step = load_checkpoint(
+            model, args.resume, optimizer=optimizer, scheduler=scheduler
+        )
+        # Check whether a companion optimizer-state file was present.
+        # Old checkpoints (saved before optimizer-state support) lack this file;
+        # fast-forward the LR scheduler to match global_step so the LR is
+        # correct from the first resumed step.  LambdaLR.step() is O(1) per
+        # call; N=15000 calls ≈ 15 ms — negligible relative to training cost.
+        opt_companion = Path(args.resume).with_name(
+            Path(args.resume).stem + "_opt.pt"
+        )
+        if not opt_companion.exists():
+            for _ in range(global_step):
+                scheduler.step()
+            print(
+                f"Resumed from step {global_step} "
+                f"(no optimizer state — scheduler fast-forwarded to step {global_step})",
+                flush=True,
+            )
+        else:
+            print(
+                f"Resumed from step {global_step} (optimizer + scheduler state restored)",
+                flush=True,
+            )
 
     # ── checkpoint dir ──────────────────────────────────────────────────────
     ckpt_dir = Path(args.ckpt_dir)
@@ -455,7 +477,10 @@ def train(args: argparse.Namespace) -> None:
         # ── checkpointing ────────────────────────────────────────────────
         if args.save_every > 0 and global_step % args.save_every == 0:
             ckpt_path = ckpt_dir / f"step_{global_step:07d}.safetensors"
-            save_checkpoint(model, ckpt_path, step=global_step)
+            save_checkpoint(
+                model, ckpt_path, step=global_step,
+                optimizer=optimizer, scheduler=scheduler,
+            )
             print(f"  Checkpoint saved → {ckpt_path}", flush=True)
 
         # ── validation ───────────────────────────────────────────────────
@@ -470,7 +495,10 @@ def train(args: argparse.Namespace) -> None:
 
     # Final checkpoint
     final_path = ckpt_dir / f"step_{global_step:07d}_final.safetensors"
-    save_checkpoint(model, final_path, step=global_step)
+    save_checkpoint(
+        model, final_path, step=global_step,
+        optimizer=optimizer, scheduler=scheduler,
+    )
     print(f"\nTraining complete. Final checkpoint → {final_path}", flush=True)
 
 
