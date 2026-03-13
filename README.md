@@ -2,7 +2,7 @@
 
 Drex is an experimental transformer architecture with a four-tier memory hierarchy,
 implementing a validated episodic/semantic split associative memory module. The
-architecture was developed through 15 phases of hypothesis-driven research across 247+
+architecture was developed through 16 phases of hypothesis-driven research across 247+
 experiments, with each architectural decision grounded in controlled ablation studies
 (SUPPORTED / INCONCLUSIVE / REFUTED verdicts, ≥2/3 seed confirmation).
 
@@ -12,9 +12,12 @@ a validated fix (`α(L) = 0.95^(96/L)`) that keeps memory time constants calibra
 across L=16–128. The full research log is in `research/experiments/` (cat1–cat48, 247+
 experiment result files).
 
-> **Current state (Phase 15):** The architecture is fully implemented and training-ready.
-> Evaluation scripts are live. No published checkpoint or end-to-end baseline comparison
-> exists yet — that is the next milestone. See [Current Results](#current-results).
+> **Current state (Phase 16 complete / Phase 17 in progress):** The architecture is
+> fully implemented, hardened, and training-ready. A 9-page arXiv preprint has been
+> drafted (`paper/main.tex`). Exp A (baseline) is running (step ~16k/50k); Exp B
+> (episodic memory) will auto-start on Exp A completion. Evaluation results (passkey
+> recall, BABILong) are pending final checkpoints — that is the current milestone.
+> See [Current Results](#current-results).
 
 ## Architecture
 
@@ -180,7 +183,7 @@ PYTHONPATH=python pytest tests/python/
 PYTHONPATH=python pytest tests/python/test_memory.py::TestMemoryModule -v
 ```
 
-199 tests, 100% branch coverage (enforced by `pytest --cov` configuration).
+241 tests, 100% branch coverage (enforced by `pytest --cov` configuration).
 
 ## Project Structure
 
@@ -205,17 +208,17 @@ drex/
 │   ├── train.py               # TinyStories training (write-rate monitoring, NaN guard)
 │   ├── eval_passkey.py        # Passkey recall CLI (+ density sweep)
 │   └── eval_babilong.py       # BABILong 5-task evaluation CLI
-├── tests/python/              # 199 tests, 100% branch coverage
+├── tests/python/              # 241 tests, 100% branch coverage
 ├── research/experiments/      # 247+ research experiments (cat1–cat48)
 ├── results/                   # Training run results and comparisons
-├── PLAN.md                    # Implementation roadmap (Phases 1–15, Phase 16 candidates)
+├── PLAN.md                    # Implementation roadmap (Phases 1–16; Phases 17–21 planned)
 ├── ARCHITECTURE_FINDINGS.md   # Full spec + dead ends + confidence classifications
 └── CLAUDE.md                  # Project conventions for AI collaboration
 ```
 
 ## Research Summary
 
-15 phases of hypothesis-driven experimentation established the architecture:
+16 phases of hypothesis-driven experimentation established the architecture:
 
 - **Phases 1–4**: Established delta-rule update, ELU+1 feature map, L2/L3 baseline
 - **Phases 5–6**: Ruled out offline consolidation, hierarchical routing
@@ -231,6 +234,11 @@ drex/
   BABILong CLI, passkey density sweep
 - **Phase 15**: Stability hardening — NaN guard, TBPTT boundary reset, vectorized write
   loop, `F.normalize` eps fix; 199 tests total, 100% branch coverage
+- **Phase 16**: Pre-publication hardening — write loop CPU backend + detach (543→2,310
+  tok/s at L=512), output `norm_out` LayerNorm, multi-seed ablations (full-seq-residual
+  INCONCLUSIVE; last-layer-only same quality at 2.7× speedup; null-gate +0.30 ppl),
+  checkpoint resume optimizer/scheduler fix, arXiv paper draft (`paper/main.tex`);
+  241 tests, 100% branch coverage
 
 All architectural decisions have evidence trails in `research/experiments/`. Dead ends
 are documented in [ARCHITECTURE_FINDINGS.md §9](ARCHITECTURE_FINDINGS.md).
