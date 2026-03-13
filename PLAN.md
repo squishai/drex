@@ -1,6 +1,6 @@
 # PLAN.md — Drex Implementation Roadmap
 
-*Created: 2026-03-11 | Updated: 2026-03-13 | Reflects research state after Phase 16 Step 3 (paper draft written)*
+*Created: 2026-03-11 | Updated: 2026-03-13 | Reflects state after Phase 16 complete; Phases 17–21 planned*
 
 ---
 
@@ -333,3 +333,115 @@ reproducibility gaps before first arXiv submission.
 | Multi-dataset training | Medium | Extend train.py to support source mixing (TinyStories + Wikipedia tokenized) with a weighted sampler. |
 | BABILong distractor density parameter | Low | Add `--distractor-density` to eval_babilong.py to control filler fraction, enabling isolation of memory capacity vs. retrieval precision. |
 | Full matrix-recurrence parallelization | Low | Replace the remaining sequential `for t` loop with a parallel scan; requires approximation or custom kernel. |
+
+---
+
+## Phase 17 — Results Integration & arXiv Submission (PENDING)
+
+*Trigger: Exp A/B 50k-step final checkpoints.*
+
+### Open questions driving this phase
+
+1. Does wr at L=512 converge to [0.10, 0.85] by step 50k?
+2. What are the passkey recall and BABILong deltas (Exp B vs Exp A)?
+
+### Steps
+
+- [ ] Exp A training complete (50k steps)
+- [ ] Exp B training complete (50k steps, auto-starts via run_exp_b.sh)
+- [ ] Extract val_ppl + wr trajectory from both logs; update `results/TRAINING_RUNS.md`
+- [ ] Run `scripts/eval_passkey.py` for both checkpoints → `results/exp_a_passkey.log`, `results/exp_b_passkey.log`
+- [ ] Run `scripts/eval_babilong.py` for both checkpoints → `results/exp_a_babilong.log`, `results/exp_b_babilong.log`
+- [ ] Fill all `\todo{pending}` entries in `paper/main.tex` (Tables 3–5, Abstract, Discussion)
+- [ ] Add training-curve paragraph to paper §5 and wr-convergence verdict to §7
+- [ ] Update `README.md` "Current Results" table
+- [ ] Recompile paper (pdflatex × 3 + bibtex); verify zero `\todo{}` remaining
+- [ ] Commit and submit to arXiv (cs.LG + cs.CL)
+
+---
+
+## Phase 18 — Write-Rate Convergence Investigation (PENDING)
+
+*Trigger: Exp B 50k log available.*
+
+Read wr from `results/exp_b_train.log` at steps 5k, 10k, 20k, 30k, 50k.
+
+| Outcome | Criterion | Action |
+|---|---|---|
+| Converges | wr ∈ [0.10, 0.85] by step 30k | Document; mark §12.3 resolved |
+| Slow convergence | wr ∈ [0.10, 0.85] only near step 50k | Log time-to-convergence; revisit α formula for L>256 |
+| Does not converge | wr > 0.85 at step 50k | Run exp_49 — α training warmup schedule |
+
+**exp_49 (conditional):** 3 seeds × 10k steps × {no warmup, linear α warmup, step α warmup}.
+If SUPPORTED: add `alpha_warmup_steps` to `MemoryModule`, `--alpha-warmup-steps` to `train.py`.
+
+- [ ] Read wr trajectory from Exp B log
+- [ ] Record verdict in ARCHITECTURE_FINDINGS.md §12.3
+- [ ] If wr does not converge: design and run exp_49
+
+---
+
+## Phase 19 — Ablation Completeness (PENDING)
+
+*Trigger: Phase 17 complete. Scale: d_model=256, seg_len=512, 10k steps, 3 seeds.*
+
+### exp_50 — Full-sequence residual at 10k steps (resolve INCONCLUSIVE)
+
+Current evidence: 2k-step, std=0.49 — inconclusive. Need 10k steps to reduce variance.
+Success criterion: ≥0.05 val_ppl benefit (3/3 seeds) to change default.
+
+- [ ] Run 3 seeds × 10k steps × {baseline, full-seq-residual}
+- [ ] Record verdict; update ARCHITECTURE_FINDINGS.md §12.2
+
+### exp_51 — Recency weight ablation (first controlled test)
+
+Test whether `w_t = (t+1)/L` in episodic branch provides any benefit.
+If REFUTED: merge M_epi into M_sem (single H×H matrix, simpler architecture).
+
+- [ ] Run 3 seeds × 10k steps × {w_t=(t+1)/L, w_t=1.0}
+- [ ] Record verdict; update ARCHITECTURE_FINDINGS.md §12
+
+### exp_52 — L2 vs L4 interaction (are they complementary or redundant?)
+
+Test L2-only, L4-only, L2+L4 to confirm the tiers are complementary.
+
+- [ ] Run 3 seeds × 10k steps × {L2+L4, L4-only, L2-only}
+- [ ] Record verdict; update ARCHITECTURE_FINDINGS.md §1
+
+---
+
+## Phase 20 — Throughput Optimization (PENDING)
+
+*Trigger: Phases 17–19 complete (architecture final before optimizing).*
+
+Current gap: Exp A ~11,700 tok/s vs Exp B ~2,310 tok/s at seg_len=512 (5× slower).
+Root cause: 511 sequential Python loop iterations × 4 layers = ~30,660 Python calls/step.
+
+### Option B — Chunked recurrence (implement first)
+
+Add `chunk_size` parameter to `MemoryModule.__init__`. At chunk_size=32, L=512:
+15 iterations instead of 511 → ~34× fewer Python calls, ~5× throughput gain.
+Fully equivalent to sequential version (no approximation error).
+
+- [ ] Implement `chunk_size` in `python/drex/models/memory.py`
+- [ ] Add `--memory-chunk-size` to `scripts/train.py`
+- [ ] Add numeric equivalence tests + throughput benchmark to `tests/python/test_memory.py`
+- [ ] Verify write rate unchanged after chunking
+
+### Option A — Parallel scan (follow-on if Option B insufficient)
+
+Implement EMA recurrence as a parallel prefix scan (Heinsen 2023, arXiv:2311.06281).
+New file: `python/drex/models/memory_scan.py`. Use `use_parallel_scan=True` flag.
+
+---
+
+## Phase 21 — Scale & Broader Evaluation (PENDING)
+
+*Trigger: Phase 20 complete.*
+
+| Item | Description |
+|---|---|
+| Exp C — 512d/8L model | Confirm architecture scales; ~18M vs ~20M parameters |
+| Multi-dataset training | `--data-mix` flag; `python/drex/training/data_mix.py`; TinyStories + Wikipedia |
+| BABILong distractor density | `--distractor-density` to `eval_babilong.py`; isolate capacity vs precision |
+| Context length scaling | Passkey sweep to 32k; extend `--lengths` beyond current 16k |
