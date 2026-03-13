@@ -300,8 +300,10 @@ reproducibility gaps before first arXiv submission.
 - [x] Fix checkpoint resume LR bug — optimizer+scheduler state now saved to `_opt.pt` companion
       file; fallback fast-forwards scheduler on old checkpoints. (`python/drex/utils/config.py`,
       `scripts/train.py`, `tests/python/test_config.py` — 241 tests, 100% coverage)
-- [ ] Run Experiment A full 50k steps (IN PROGRESS — step 16,800/50,000 as of 2026-03-13)
-- [ ] Run Experiment B full 50k steps (waiting on run_exp_b.sh; starts when Exp A final ckpt appears)
+- [x] Fix `run_exp_b.sh` absolute Python path — bare `python3.12` not in PATH when shell exits;
+      replaced with full framework path + absolute PYTHONPATH (commit 2bc9889)
+- [ ] Run Experiment A full 50k steps (IN PROGRESS — resumed from step 20,000; PID 76679)
+- [ ] Run Experiment B full 50k steps (watcher PID 77406; starts when Exp A final ckpt appears)
 - [ ] Evaluate both on passkey recall: 512/1k/2k/4k/8k/16k context lengths
 - [ ] Evaluate both on BABILong: Tasks 1–5, 2k/4k/8k context lengths
 - [ ] Fill in results/TRAINING_RUNS.md tables
