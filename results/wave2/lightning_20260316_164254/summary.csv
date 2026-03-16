@@ -1,0 +1,2 @@
+exp_id,step,train_loss,val_loss,val_ppl,grad_norm,dead_rate,max_mem_gb,tau,elapsed_sec,checkpoint,gate_ppl_pass,gate_dead_pass
+1D_noprop_hestia,1200,0.48059173425038654,11.686143035888671,118912.47959152011,0.05178510807131426,6.357828776041666e-07,2.9434151649475098,0.6474,450.5,/teamspace/studios/this_studio/drex_parallel_results/lightning_20260316_164254/checkpoints/1D_noprop_hestia_step_0001200.pt,False,True
