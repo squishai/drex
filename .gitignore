@@ -30,6 +30,11 @@ drex_l3/
 *.meta
 journal.ndjson
 
+# Model checkpoints (large binaries — store externally)
+*.pt
+*.safetensors
+results/wave*/checkpoints/
+
 # IDE
 .idea/
 .vscode/
