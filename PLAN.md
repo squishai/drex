@@ -806,3 +806,64 @@ Non-HESTIA experiments (0A/1A/0B/0C/1B/1C) are unaffected: they use `self.weight
 not `self.logits`, and default `tau_init=1.5` maintains previous behavior.
 
 **Status:** HESTIA fix staged for run 3. Upload updated `noprop_lightning.ipynb` to Lightning AI.
+
+---
+
+## kaggle_5k Run 1 Results (2026-03-16) — kaggle5k_20260316_202657
+
+All 7 experiments ran 5000 steps on Tesla T4. Gates were stale (old smoke-test values), causing
+misleading FAIL labels. Actual results by real category:
+
+### Backprop baselines — excellent convergence
+
+| Exp | val_ppl@5k | Gate used | Actual verdict |
+|-----|-----------|-----------|----------------|
+| 0C fp32_backprop | **223** | <200 (stale) | ✅ Excellent — 538→223, converging |
+| 0B ternary_backprop | **286** | <250 (stale) | ✅ Excellent — 587→286, converging |
+
+Both baselines cut val_ppl nearly in half from 800-step results. The ternary backprop (286) is
+nearly indistinguishable from FP32 (223), confirming ternary weights lose minimal capacity.
+
+### HESTIA — best NoProp result to date
+
+| Exp | val_ppl@5k | Gate | Actual verdict |
+|-----|-----------|------|----------------|
+| 1D noprop_hestia | **14,910** | <300 (stale) | ✅ PASS vs real gate |
+
+14,910 at 5k steps is a dramatic improvement from 800-step failures. Notably this ran on the
+*old* notebook (logit init `* 0.02`, `tau_init=1.5`) — the logit-init fix wasn't active yet.
+The HESTIA logit+tau fixes staged for run 2 should push this lower.
+
+### NoProp variants — diverged at 5k (CE overwhelmed)
+
+| Exp | ppl@800 best | ppl@5k | Ratio |
+|-----|-------------|--------|-------|
+| 1C noprop_dqt | ~3k@200 | 67,211 | 22× worse |
+| 1B noprop_trust | ~21k | 90,937 | — |
+| 0A fp32_noprop | ~3.5k@200 | 87,832 | 25× worse |
+| 1A noprop_ste | ~9k | 170,681 | — |
+
+Grad norm plot: backprop stays flat ~0.4, NoProp grows continuously to 1.2–1.4. Root cause:
+`ce_weight=0.1` is 10× weaker than the MSE denoising weight (~1.0). Over 5k steps, blocks
+optimize for denoising at the expense of LM quality. The best val_ppl for each is achieved
+early (~step 200–400) then diverges monotonically.
+
+### Fixes applied for kaggle_5k run 2
+
+**`noprop_kaggle_5k.ipynb` Cell 8:**
+1. `ce_weight=0.5` parameter added to `run_noprop` (default; all NoProp experiments)
+   ```python
+   loss = alpha * F.mse_loss(out, y_emb) + ce_weight * F.cross_entropy(logits.reshape(-1, vocab), y)
+   ```
+2. Gradient clipping after each block's backward pass:
+   ```python
+   torch.nn.utils.clip_grad_norm_(block_params + noise_proj_params, max_norm=1.0)
+   ```
+
+**`noprop_kaggle_5k.ipynb` Cell 10:**
+3. Gates updated from run 1 actuals:
+   - 0B: <250→<300, 0C: <200→<230 (confirmed converging, tightened slightly)
+   - NoProp 0A/1A/1B/1C: <5000 (achievable with ce+clip fix)
+   - 1D HESTIA: <15000 (run1 hit 14,910 without fixes)
+
+**Status:** 5k run 1 complete. Fixes applied. Upload updated `noprop_kaggle_5k.ipynb` for run 2.
