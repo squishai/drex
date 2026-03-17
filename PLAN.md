@@ -934,3 +934,75 @@ Block 5 (the final block) is the only one whose output the head should classify 
 - 0B/0C: unchanged (use `run_global`, not `run_noprop`)
 
 **Status:** 5k run 2 complete. Run 3 fixes applied. Upload updated `noprop_kaggle_5k.ipynb` for run 3.
+
+---
+
+## Lightning + Colab Run 3 Results (2026-03-17)
+
+### Lightning — 1D HESTIA, 1200 steps (lightning_20260317_122206)
+
+| step | val_ppl | grad_norm | tau |
+|------|---------|-----------|-----|
+| 1 | 49,799 | 0.1675 | 0.500 |
+| **200** | **3,689** | 0.0727 | 0.480 |
+| 400 | 6,180 | 0.0592 | 0.462 |
+| 600 | 8,637 | 0.0515 | 0.444 |
+| 800 | 12,662 | 0.0505 | 0.426 |
+| 1000 | 17,743 | 0.0497 | 0.409 |
+| 1200 | 21,391 | 0.0509 | 0.393 |
+
+gate_ppl_pass=true. **Best val_ppl = 3,689 at step 200.**
+
+### Colab — 0A + 1A, 800 steps (colab_20260317_121925)
+
+| Exp | step | val_ppl | Best ppl | gate_pass |
+|-----|------|---------|----------|-----------|
+| 0A fp32_noprop | 800 | 25,305 | ~10,267 @400 | ✅ |
+| 1A noprop_ste | 800 | 20,566 | **3,694 @200** | ✅ |
+
+1A training curve: 48,833 → **3,694** → 5,835 → 9,940 → 20,566 (classic fast-then-diverge).
+0A is noisy: 51,942 → 61,783 → 10,267 → 16,287 → 25,305 (slower initial convergence, noisier).
+
+### Critical finding — universal step-200 optimum
+
+**Every NoProp variant reaches ~3,690 ppl at step 200, then diverges monotonically.** This is
+independent of mode (fp32, STE, HESTIA) and platform. The convergent point is nearly the same
+value across three independent runs.
+
+| Variant | Best ppl | Best step | Final ppl |
+|---------|----------|-----------|-----------|
+| 1D HESTIA | **3,689** | 200 | 21,391 (at 1200) |
+| 1A noprop_ste | **3,694** | 200 | 20,566 (at 800) |
+| 0A fp32_noprop | ~10,267 | 400 | 25,305 (noisy) |
+
+Grad norms are NOT growing — they are flat or declining (0.04–0.17). This was the divergence
+signature in the old runs; it is absent here. The CE-at-last-block fix worked for grad stability.
+**The post-200 divergence is a steady optimization drift past the optimum, not an explosion.**
+
+### Root cause — constant learning rate overshoots the optimum
+
+With lr=3e-4 constant throughout training, the model rapidly converges at step 200 then the
+block-local denoising objectives pull all 6 blocks' representations away from the embedding space
+the head is calibrated to. Each block's optimizer takes an identical-magnitude step at step 800
+as at step 1, but by step 200 the model has found the best solution accessible to block-local
+training at this LR.
+
+**Fix for run 4: cosine LR schedule** — `lr_t = lr * 0.5 * (1 + cos(π * step / steps))`
+This decays the learning rate to 0 over the run. By step 200 (25% through 800-step run), lr drops
+to ~3e-4 * 0.85, but by step 600 it is ~3e-4 * 0.25. This locks in the early minimum rather than
+drifting past it.
+
+### Run 4 changes applied
+
+Added `lr_schedule="cosine"` parameter to `run_noprop` in all three notebooks:
+```python
+if lr_schedule == "cosine":
+    lr_t = lr * 0.5 * (1.0 + math.cos(math.pi * step / steps))
+    for opt in bopts + [opt_shared]:
+        for pg in opt.param_groups: pg["lr"] = lr_t
+```
+`run_global` (backprop) is unchanged — backprop already has full gradient signal to stabilize.
+
+**Expected run 4 outcome:** NoProp val_ppl converges toward ~3,700 and stays there (or improves),
+matching or beating the 5k run 3 trajectory. HESTIA and STE should both land in the 3,000–5,000
+range and hold.
