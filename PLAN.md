@@ -1,13 +1,20 @@
 # PLAN.md — Drex Implementation Roadmap
 
-*Created: 2026-03-11 | Updated: 2026-03-13 | Reflects state after Phase 16 complete; Phases 17–21 planned*
+*Created: 2026-03-11 | Updated: 2026-03-24 | Reflects state after Phase 22 in progress; architecture evolution documented*
+
+**See DREX_UNIFIED_PLAN.md for the forward architecture roadmap (Phases 23–30).**
+This file covers Phases 1–22. New phases use the new file.
 
 ---
 
 ## Current State
 
-Twelve phases of hypothesis-driven research are complete. The validated minimal architecture
-stack is:
+Phase 16 complete. 247+ experiments across 48 categories. Phase 22 (NoProp x Ternary)
+in progress (Wave 0+1 validated, Wave 2-3 smoke tests running).
+Exp A training: step ~22,400 / 50,000 (val_ppl ~1.23 at step 22k).
+Exp B: waiting on Exp A final checkpoint (watcher PID 77406).
+
+The validated minimal architecture stack is:
 
 > **Delta-rule associative matrix + EMA smoothing α(L)=0.95^(96/L) + episodic/semantic
 > split (two H/2 matrices) + relative-vector-norm write gate at thresh\*=0.70
