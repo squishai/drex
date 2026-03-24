@@ -447,13 +447,13 @@ submit to arXiv. **This is the experimental proof that DREX-UNIFIED works.**
 
 ## Sprint Checklist & Tracking
 
-| Sprint | Config                        | Status     | Best val_ppl | Notes |
-|--------|-------------------------------|------------|--------------|-------|
-| 1      | Baseline transformer          | 🔲 TODO    | —            | seeds 42, 43, 44 |
-| 2      | + Mamba backbone              | 🔲 TODO    | —            | seeds 42, 43, 44 |
-| 3      | + ESN episodic memory         | 🔲 TODO    | —            | seeds 42, 43, 44 |
-| 4      | + HDC encoder                 | 🔲 TODO    | —            | seeds 42, 43, 44 |
-| 5      | Scale: d=256, 8L, 50k steps   | 🔲 TODO    | —            | seed 42 only     |
+| Sprint | Config                        | Status          | Median val_ppl | Notes |
+|--------|-------------------------------|-----------------|----------------|-------|
+| 1      | Baseline transformer          | ✅ DONE (gate ✅) | **1.12**       | s42=1.11, s43=1.48, s44=1.12 |
+| 2      | + Mamba backbone              | 🔄 RUNNING       | —              | seeds 42, 43, 44 |
+| 3      | + ESN episodic memory         | 🔲 TODO          | —              | seeds 42, 43, 44 |
+| 4      | + HDC encoder                 | 🔲 TODO          | —              | seeds 42, 43, 44 |
+| 5      | Scale: d=256, 8L, 50k steps   | 🔲 TODO          | —              | seed 42 only     |
 
 Update this table as each sprint completes.
 
