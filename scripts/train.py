@@ -313,6 +313,10 @@ def train(args: argparse.Namespace) -> None:
         esn_spectral_radius=args.esn_spectral_radius,
         esn_connectivity=args.esn_connectivity,
         esn_reservoir_seed=args.esn_reservoir_seed,
+        use_hdc_encoder=args.use_hdc_encoder,
+        hdc_dim=args.hdc_dim,
+        hdc_normalize=not args.no_hdc_normalize,
+        hdc_seed=args.hdc_seed,
     )
     model = DrexTransformer(config).to(device)
     n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -340,6 +344,14 @@ def train(args: argparse.Namespace) -> None:
         )
         print(
             f"Episodic memory: enabled  gate_thresh={config.episodic_gate_thresh}{flag_str}{esn_str}",
+            flush=True,
+        )
+    if config.use_hdc_encoder:
+        print(
+            f"HDC encoder: enabled  hdc_dim={config.hdc_dim}"
+            f"  normalize={config.hdc_normalize}"
+            f"  seed={config.hdc_seed}"
+            f"  [zero trainable params]",
             flush=True,
         )
 
@@ -657,6 +669,32 @@ def _parser() -> argparse.ArgumentParser:
         type=int,
         default=42,
         help="Base seed for reproducible reservoir construction; layer i uses seed+i (default: 42)",
+    )
+
+    # Phase 24 (DREX-UNIFIED) — HDC encoder (fixed random projection, zero training cost)
+    p.add_argument(
+        "--use-hdc-encoder",
+        action="store_true",
+        default=False,
+        help="Prepend fixed HDC encoder to token embeddings (Phase 24; zero trainable params)",
+    )
+    p.add_argument(
+        "--hdc-dim",
+        type=int,
+        default=4096,
+        help="Hypervector dimension for the HDC encoder (must be ≥ d_model, default: 4096)",
+    )
+    p.add_argument(
+        "--no-hdc-normalize",
+        action="store_true",
+        default=False,
+        help="Disable L2 normalisation of hypervectors before readdown (default: normalise)",
+    )
+    p.add_argument(
+        "--hdc-seed",
+        type=int,
+        default=0,
+        help="Seed for reproducible HDC projection weights (default: 0)",
     )
 
     # Infrastructure

@@ -42,6 +42,7 @@ features = ["extension-module"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests/python"]
+pythonpath = ["python"]
 asyncio_mode = "auto"
 addopts = "--cov=drex --cov-branch --cov-report=term-missing --cov-fail-under=100"
 

@@ -20,6 +20,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from drex.models.attention import HybridAttention
+from drex.models.hdc_encoder import HDCEncoder
 from drex.models.memory import LayerState, MemoryModule
 from drex.models.memory_esn import EchoStateMemory
 
@@ -56,6 +57,11 @@ class DrexConfig:
     esn_spectral_radius: float = 0.95   # ESN spectral radius (must be < 1)
     esn_connectivity: float = 0.01      # fraction of non-zero reservoir weights (~1%)
     esn_reservoir_seed: int = 42        # seed for reproducible reservoir construction
+    # Phase 24 (DREX-UNIFIED) — HDC encoder (fixed random projection, zero training cost)
+    use_hdc_encoder: bool = False       # prepend fixed HDC lift/readdown to token embeddings
+    hdc_dim: int = 4096                 # hypervector dimension (must be ≥ d_model)
+    hdc_normalize: bool = True          # L2-normalise hypervectors before readdown
+    hdc_seed: int = 0                   # seed for reproducible projection weights
 
 
 class FeedForward(nn.Module):
@@ -201,6 +207,19 @@ class DrexTransformer(nn.Module):
         self.pos_emb = nn.Embedding(config.max_seq_len, config.d_model)
         self.drop = nn.Dropout(config.dropout)
 
+        # Phase 24: optional fixed HDC encoder after embedding sum.
+        # All projection weights are frozen — contributes 0 trainable params.
+        self.hdc_encoder: Optional[HDCEncoder] = (
+            HDCEncoder(
+                d_model=config.d_model,
+                hdc_dim=config.hdc_dim,
+                normalize=config.hdc_normalize,
+                seed=config.hdc_seed,
+            )
+            if config.use_hdc_encoder
+            else None
+        )
+
         # L3: create TitanMemory + bridge before layers (bridge passed into each layer)
         if config.use_l3:
             from drex.models.memory import L3MemoryBridge, TitanMemory
@@ -283,6 +302,10 @@ class DrexTransformer(nn.Module):
         pos = torch.arange(S, device=device).unsqueeze(0)  # (1, S)
 
         x = self.drop(self.token_emb(input_ids) + self.pos_emb(pos))
+
+        # Phase 24: HDC enrichment (zero training cost — all weights frozen).
+        if self.hdc_encoder is not None:
+            x = self.hdc_encoder(x)
 
         use_ckpt = self.config.gradient_checkpointing and self.training
         new_states: list[LayerState] = []

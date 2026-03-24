@@ -346,24 +346,34 @@ Experiments:
 
 ---
 
-### Phase 24 — HDC Encoder Integration (NEW — parallel to Phase 23)
+### Phase 24 — HDC Encoder Integration (COMPLETE — 2026-03-24)
 
 Goal: Add a fixed HDC projection layer before the main model.
 Input representation switches from raw byte embeddings to HDC hypervectors.
 
-Design:
-  - HDC dimension: 2048 or 4096 (ablation)
-  - Binding/bundling implemented as fixed operations (no training)
-  - Project HDC vectors down to d_model via fixed random projection before passing
-    to the main backbone
+Implementation (DONE):
+  - python/drex/models/hdc_encoder.py: HDCEncoder class + hdc_bind/bundle/permute prims
+    - Fixed random projection lift (d_model → hdc_dim) + readdown (hdc_dim → d_model)
+    - All projection weights frozen as buffers — zero trainable parameters (only LayerNorm)
+    - Training mode: tanh thresholding (differentiable). Eval mode: sign (hard bipolar)
+    - Residual merge + LayerNorm output: preserves original embedding + HDC structure
+    - hdc_dim must be strictly > d_model (enforced in constructor)
+  - transformer.py: DrexConfig.use_hdc_encoder, hdc_dim, hdc_normalize, hdc_seed fields
+    - DrexTransformer.hdc_encoder created when use_hdc_encoder=True (None otherwise)
+    - Applied in forward() after embedding sum, before transformer layers
+  - scripts/train.py: --use-hdc-encoder, --hdc-dim, --no-hdc-normalize, --hdc-seed flags
+  - tests/python/test_hdc_encoder.py: 44 tests, 100% coverage of hdc_encoder.py
+  - pyproject.toml: added pythonpath=["python"] to pytest config
 
-Experiments:
+Experiments (PENDING — ready to run):
   exp_55: Byte embedding baseline vs HDC encoder
     Success criterion: val_ppl maintained (within ±0.05) or improved
     Focus: does compositional structure of HDC encoding benefit downstream memory?
 
   exp_56: HDC controller representation
     If the DREX Controller uses HDC features directly, does routing quality improve?
+
+Status: CODE DONE. Experiments exp_55/56 pending (trigger: Exp A/B baselines available).
 
 ---
 
