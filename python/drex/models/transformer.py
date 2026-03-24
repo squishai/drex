@@ -21,6 +21,7 @@ import torch.nn.functional as F
 
 from drex.models.attention import HybridAttention
 from drex.models.memory import LayerState, MemoryModule
+from drex.models.memory_esn import EchoStateMemory
 
 if TYPE_CHECKING:
     from drex.models.memory import L3MemoryBridge
@@ -49,6 +50,12 @@ class DrexConfig:
     # Ablation flags (Phase 19 — §12.2 un-ablated medium-confidence components)
     use_recency_weight: bool = True     # w_t=(t+1)/L on M_epi writes; False = uniform w_t=1.0
     use_l2: bool = True                 # enable Infini-Attention L2 cross-segment memory
+    # Phase 23 (DREX-UNIFIED) — ESN reservoir memory
+    use_esn_memory: bool = False        # replace MemoryModule with EchoStateMemory (Phase 23)
+    esn_reservoir_mult: int = 4         # reservoir size N = esn_reservoir_mult × d_model
+    esn_spectral_radius: float = 0.95   # ESN spectral radius (must be < 1)
+    esn_connectivity: float = 0.01      # fraction of non-zero reservoir weights (~1%)
+    esn_reservoir_seed: int = 42        # seed for reproducible reservoir construction
 
 
 class FeedForward(nn.Module):
@@ -99,16 +106,30 @@ class DrexLayer(nn.Module):
             )
         )
         self._full_seq_residual: bool = config.full_seq_residual
-        self.episodic_mem: Optional[MemoryModule] = (
-            MemoryModule(
-                config.d_model,
-                gate_thresh=config.episodic_gate_thresh,
-                use_null_gate=config.use_null_gate,
-                use_recency_weight=config.use_recency_weight,
-            )
-            if _this_layer_has_mem
-            else None
-        )
+        # Phase 23: optionally use EchoStateMemory (ESN reservoir) instead of
+        # the trained delta-rule MemoryModule.  Both share the same forward
+        # interface (B, L, d_model) → (B, d_model).
+        if _this_layer_has_mem:
+            if config.use_esn_memory:
+                self.episodic_mem: Optional[nn.Module] = EchoStateMemory(
+                    d_model=config.d_model,
+                    reservoir_mult=config.esn_reservoir_mult,
+                    spectral_radius=config.esn_spectral_radius,
+                    connectivity=config.esn_connectivity,
+                    gate_thresh=config.episodic_gate_thresh,
+                    use_null_gate=config.use_null_gate,
+                    use_recency_weight=config.use_recency_weight,
+                    reservoir_seed=config.esn_reservoir_seed + layer_idx,
+                )
+            else:
+                self.episodic_mem = MemoryModule(
+                    config.d_model,
+                    gate_thresh=config.episodic_gate_thresh,
+                    use_null_gate=config.use_null_gate,
+                    use_recency_weight=config.use_recency_weight,
+                )
+        else:
+            self.episodic_mem = None
         self.norm_mem: Optional[nn.LayerNorm] = (
             nn.LayerNorm(config.d_model)
             if _this_layer_has_mem

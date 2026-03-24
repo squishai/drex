@@ -308,6 +308,11 @@ def train(args: argparse.Namespace) -> None:
         memory_last_layer_only=args.memory_last_layer_only,
         use_recency_weight=not args.no_recency_weight,
         use_l2=not args.no_l2,
+        use_esn_memory=args.use_esn_memory,
+        esn_reservoir_mult=args.esn_reservoir_mult,
+        esn_spectral_radius=args.esn_spectral_radius,
+        esn_connectivity=args.esn_connectivity,
+        esn_reservoir_seed=args.esn_reservoir_seed,
     )
     model = DrexTransformer(config).to(device)
     n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -325,8 +330,16 @@ def train(args: argparse.Namespace) -> None:
         if not config.use_l2:
             flags.append("no-l2")
         flag_str = "  [" + ", ".join(flags) + "]" if flags else ""
+        esn_str = (
+            f"  [ESN reservoir  mult={config.esn_reservoir_mult}"
+            f"  sr={config.esn_spectral_radius}"
+            f"  c={config.esn_connectivity}"
+            f"  seed={config.esn_reservoir_seed}]"
+            if config.use_esn_memory
+            else "  [delta-rule]"
+        )
         print(
-            f"Episodic memory: enabled  gate_thresh={config.episodic_gate_thresh}{flag_str}",
+            f"Episodic memory: enabled  gate_thresh={config.episodic_gate_thresh}{flag_str}{esn_str}",
             flush=True,
         )
 
@@ -612,6 +625,38 @@ def _parser() -> argparse.ArgumentParser:
         "--no-l2",
         action="store_true",
         help="Ablation (exp_52): disable Infini-Attention L2 cross-segment memory",
+    )
+
+    # Phase 23 (DREX-UNIFIED) — ESN reservoir memory
+    p.add_argument(
+        "--use-esn-memory",
+        action="store_true",
+        default=False,
+        help="Replace MemoryModule with EchoStateMemory (ESN reservoir, Phase 23)",
+    )
+    p.add_argument(
+        "--esn-reservoir-mult",
+        type=int,
+        default=4,
+        help="Reservoir size N = esn_reservoir_mult × (d_model // 2) (default: 4)",
+    )
+    p.add_argument(
+        "--esn-spectral-radius",
+        type=float,
+        default=0.95,
+        help="ESN spectral radius, must be < 1.0 for echo state property (default: 0.95)",
+    )
+    p.add_argument(
+        "--esn-connectivity",
+        type=float,
+        default=0.01,
+        help="Fraction of non-zero reservoir weights, e.g. 0.01 = 1%% sparse (default: 0.01)",
+    )
+    p.add_argument(
+        "--esn-reservoir-seed",
+        type=int,
+        default=42,
+        help="Base seed for reproducible reservoir construction; layer i uses seed+i (default: 42)",
     )
 
     # Infrastructure
