@@ -336,6 +336,54 @@ selective scan must be learning, not just passing state unchanged (D-skip over-d
 
 **If fails:** reduce mamba_d_state to 8, increase mamba_expand to 4, retry.
 
+**Platform note:** Mamba on Apple Silicon MPS has no hardware-accelerated scan kernel →
+~200 tok/s (150× slower than baseline). Run Sprint 2 on Colab or Kaggle (T4/P100)
+using `notebooks/platforms/colab_drex_poc.ipynb` with `SPRINT = 2`.
+
+---
+
+### Sprint 2b — Transformer + ESN Episodic Memory (exp_poc_2b) — MPS-NATIVE
+
+**Goal:** Isolate the ESN episodic memory contribution on top of the baseline
+transformer *without* Mamba. Runs at full MPS speed (~15k–30k tok/s) on Apple Silicon.
+
+**Why this sprint exists:** Sprint 2 is stalled locally due to Mamba/MPS incompatibility.
+Sprint 2b provides a clean ablation (ESN vs. baseline) that runs in ~1h locally and
+produces useful evidence regardless of whether Mamba is added later.
+
+**What it measures:** Transformer L1 (SWA) + L2 (InfiniAttention) + ESN reservoir
+episodic memory. The ESN reservoir itself has zero trainable parameters — only the
+linear readout and write gate train. Net parameter increase is small.
+
+**Hypothesis:** ESN working memory reduces perplexity vs. the bare transformer by
+storing and retrieving recent context patterns that SWA window cannot reach.
+
+```bash
+bash scripts/run_poc_sprint2b.sh
+```
+
+Or manually:
+
+```bash
+python scripts/train.py \
+  --d-model 128 --n-heads 4 --n-layers 4 --segment-len 128 \
+  --use-episodic-memory --use-esn-memory \
+  --esn-reservoir-mult 4 --esn-spectral-radius 0.95 \
+  --steps 10000 --batch-size 8 --val-every 500 \
+  --log-every 100 --save-every 5000 \
+  --ckpt-dir checkpoints/poc_2b_s42 --seed 42
+# (repeat for seeds 43, 44)
+```
+
+**Success criterion:** median val_ppl(Sprint 2b) ≤ 1.32 (Sprint 1 + 0.20)
+  Bonus: median val_ppl(Sprint 2b) < 1.12 (strictly beats baseline)
+
+**Diagnostic:** monitor `wr` (write rate) at each log step — must be in [0.10, 0.85].
+  If wr > 0.85: decrease `--episodic-gate-thresh` from 0.70 to 0.50.
+  If wr < 0.10: decrease to 0.40.
+
+**Record:** `results/poc/sprint2b_esn.md`
+
 ---
 
 ### Sprint 3 — Mamba + ESN Episodic Memory (exp_poc_c = exp_58)
@@ -447,13 +495,14 @@ submit to arXiv. **This is the experimental proof that DREX-UNIFIED works.**
 
 ## Sprint Checklist & Tracking
 
-| Sprint | Config                        | Status          | Median val_ppl | Notes |
-|--------|-------------------------------|-----------------|----------------|-------|
-| 1      | Baseline transformer          | ✅ DONE (gate ✅) | **1.12**       | s42=1.11, s43=1.48, s44=1.12 |
-| 2      | + Mamba backbone              | 🔄 RUNNING       | —              | seeds 42, 43, 44 |
-| 3      | + ESN episodic memory         | 🔲 TODO          | —              | seeds 42, 43, 44 |
-| 4      | + HDC encoder                 | 🔲 TODO          | —              | seeds 42, 43, 44 |
-| 5      | Scale: d=256, 8L, 50k steps   | 🔲 TODO          | —              | seed 42 only     |
+| Sprint | Config                              | Status               | Median val_ppl | Notes |
+|--------|-------------------------------------|----------------------|----------------|-------|
+| 1      | Baseline transformer                | ✅ DONE (gate ✅)    | **1.12**       | s42=1.11, s43=1.48, s44=1.12 |
+| 2      | + Mamba backbone                    | ⏸️ PAUSED (cloud)   | —              | MPS: ~200 tok/s (150× slower). Run on Colab/Kaggle T4. |
+| 2b     | Transformer + ESN memory (no Mamba) | 🔄 RUNNING (local)   | —              | MPS-native sprint. Gate: median ≤ 1.32. 3 seeds. |
+| 3      | Mamba + ESN episodic memory         | 🔲 TODO (cloud)      | —              | seeds 42, 43, 44 |
+| 4      | Mamba + ESN + HDC encoder           | 🔲 TODO (cloud)      | —              | seeds 42, 43, 44 |
+| 5      | Scale: d=256, 8L, 50k steps         | 🔲 TODO (cloud)      | —              | seed 42 only     |
 
 Update this table as each sprint completes.
 
