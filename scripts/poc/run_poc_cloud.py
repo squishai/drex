@@ -65,6 +65,11 @@ _DEFAULT_SEEDS = {
     5: [42],  # Sprint 5 is single-seed — it's a 50k-step scale run
 }
 
+# Sprint 5 uses segment-len=512 with Mamba, which creates (B,S,d_inner,d_state)
+# tensors per SSM layer. On a 14-16 GB T4/P100, batch_size=32 overflows VRAM.
+# Cap batch_size to 8 for Sprint 5 regardless of the --batch-size flag.
+_SPRINT5_MAX_BATCH = 8
+
 # Base architecture flags (override per sprint where needed)
 _BASE_FLAGS_S1_4 = [
     "--d-model", "128",
@@ -177,6 +182,15 @@ def run_sprint(
     log_dir.mkdir(parents=True, exist_ok=True)
     ckpt_base.mkdir(parents=True, exist_ok=True)
 
+    effective_batch = batch_size
+    if sprint == 5 and batch_size > _SPRINT5_MAX_BATCH:
+        print(
+            f"Sprint 5: capping batch_size {batch_size} → {_SPRINT5_MAX_BATCH} "
+            f"(Mamba segment-len=512 on T4/P100 overflows VRAM at larger sizes)",
+            flush=True,
+        )
+        effective_batch = _SPRINT5_MAX_BATCH
+
     for seed in seeds:
         seed_name = f"{name}_s{seed}"
         ckpt_dir = ckpt_base / seed_name
@@ -188,7 +202,7 @@ def run_sprint(
             str(repo_root / "scripts" / "train.py"),
             *_base_flags(sprint),
             *_SPRINT_EXTRA_FLAGS[sprint],
-            "--batch-size", str(batch_size),
+            "--batch-size", str(effective_batch),
             "--device", device,
             "--seed", str(seed),
             "--ckpt-dir", str(ckpt_dir),
@@ -196,6 +210,12 @@ def run_sprint(
 
         print(f"[seed {seed}] Starting: {' '.join(cmd)}", flush=True)
         print(f"[seed {seed}] Log: {log_file}\n", flush=True)
+
+        import os
+        env = os.environ.copy()
+        if sprint == 5 and device == "cuda":
+            # Reduce CUDA memory fragmentation — helps with many small Mamba SSM allocs
+            env.setdefault("PYTORCH_ALLOC_CONF", "expandable_segments:True")
 
         start_ts = time.time()
         last_val_ppl: float | None = None
@@ -208,6 +228,7 @@ def run_sprint(
                 stderr=subprocess.STDOUT,
                 text=True,
                 bufsize=1,
+                env=env,
             )
             assert proc.stdout is not None
             for line in proc.stdout:
@@ -215,14 +236,17 @@ def run_sprint(
                 print(line, end="", flush=True)
                 log_fh.write(line)
                 log_fh.flush()
-                # Parse val_ppl from log lines: "val_ppl=X.XX" or "val_ppl: X.XX"
-                for prefix in ("val_ppl=", "val_ppl: "):
+                # Parse val_ppl from log lines.
+                # train.py emits: "val_ppl  4.01" (space-padded, not colon or equals)
+                # Also accept legacy: "val_ppl=X.XX" or "val_ppl: X.XX"
+                for prefix in ("val_ppl ", "val_ppl=", "val_ppl: "):
                     if prefix in line:
                         try:
                             val_str = line.split(prefix, 1)[1].strip().split()[0].rstrip(",")
                             last_val_ppl = float(val_str)
                         except (ValueError, IndexError):
                             pass
+                        break
 
             proc.wait()
 

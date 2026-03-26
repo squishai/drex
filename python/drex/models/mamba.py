@@ -197,24 +197,26 @@ class MambaSSM(nn.Module):
         # A_neg: stable negative eigenvalues  (d_inner, d_state)
         A_neg = -torch.exp(self.log_A)
 
-        # ── 4. Discretise (approximate ZOH) ─────────────────────────────────
-        # Ā[b,s,i,n] = exp(Δ[b,s,i] · A_neg[i,n])
-        # B̄[b,s,i,n] = Δ[b,s,i] · B_ss[b,s,n]
-        delta_e = delta.unsqueeze(-1)                  # (B, S, d_inner, 1)
-        # A_neg broadcast: (1, 1, d_inner, d_state)
-        A_bar = torch.exp(delta_e * A_neg[None, None])  # (B, S, d_inner, d_state)
-        B_bar = delta_e * B_ss.unsqueeze(-2)            # (B, S, d_inner, d_state)
-
-        # ── 5. Sequential selective scan ─────────────────────────────────────
-        # h: (B, d_inner, d_state) — SSM latent state, init to zero each segment
+        # ── 4+5. Discretise on-the-fly and selective scan ────────────────────
+        # Computing Ā and B̄ per timestep avoids pre-allocating
+        # (B, S, d_inner, d_state) tensors — at Sprint-5 scale (B=32, S=512,
+        # d_inner=512, d_state=16) that would be 2×536 MB per layer × 8 layers
+        # = >8 GB, overflowing a 14-16 GB T4/P100.  Instead we compute each
+        # (B, d_inner, d_state) slice (~1 MB) inside the loop.
+        #
+        #   Ā_t = exp(Δ_t · A_neg)       (B, d_inner, d_state)
+        #   B̄_t = Δ_t · B_t             (B, d_inner, d_state)   [broadcast]
+        #   h_t = Ā_t ⊙ h_{t-1} + B̄_t ⊙ u_t
+        #   y_t = ⟨C_t, h_t⟩            (B, d_inner)
         h = x.new_zeros(B, d_inner, d_state)
         ys: list[torch.Tensor] = []
         for t in range(S):
-            # h_t = Ā_t ⊙ h + B̄_t ⊙ u_t  (elementwise; u_t unsqueezed for d_state)
-            h = A_bar[:, t] * h + B_bar[:, t] * x_branch[:, t].unsqueeze(-1)
-            # y_t = ⟨C_t, h_t⟩  (sum over d_state dim)
-            ys.append((h * C_ss[:, t].unsqueeze(1)).sum(-1))  # (B, d_inner)
-        y = torch.stack(ys, dim=1)                    # (B, S, d_inner)
+            d_t = delta[:, t].unsqueeze(-1)                         # (B, d_inner, 1)
+            a_bar_t = torch.exp(d_t * A_neg)                        # (B, d_inner, d_state)
+            b_bar_t = d_t * B_ss[:, t].unsqueeze(1)                 # (B, d_inner, d_state)
+            h = a_bar_t * h + b_bar_t * x_branch[:, t].unsqueeze(-1)
+            ys.append((h * C_ss[:, t].unsqueeze(1)).sum(-1))        # (B, d_inner)
+        y = torch.stack(ys, dim=1)                                  # (B, S, d_inner)
 
         # ── 6. D skip + output gate ──────────────────────────────────────────
         y = y + self.D * x_branch                     # learnable skip connection
