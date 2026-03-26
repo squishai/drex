@@ -112,10 +112,12 @@ class InfiniAttention(nn.Module):
         # ----- L2 memory read -----
         phi_Q = _elu1(Q)  # (B, H, S, d_k)
         # A_mem = φ(Q) M / (φ(Q) z + ε)
+        # state.M/z are float32 (DREX dtype contract: episodic state is float32).
+        # Cast to phi_Q.dtype for mixed-precision compatibility when Mamba is bfloat16.
         # (B, H, S, d_k) @ (B, H, d_k, d_v) → (B, H, S, d_v)
-        A_mem = torch.matmul(phi_Q, state.M)
+        A_mem = torch.matmul(phi_Q, state.M.to(phi_Q.dtype))
         # denom: (B, H, S, 1) — prevent divide by zero
-        denom = (phi_Q * state.z.unsqueeze(-2)).sum(dim=-1, keepdim=True).clamp(min=1e-6)
+        denom = (phi_Q * state.z.to(phi_Q.dtype).unsqueeze(-2)).sum(dim=-1, keepdim=True).clamp(min=1e-6)
         A_mem = A_mem / denom
 
         # ----- L2 memory write (delta rule) -----

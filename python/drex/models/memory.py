@@ -104,16 +104,21 @@ class DeltaRuleUpdate(nn.Module):
     ) -> MemoryState:
         phi_K = _elu1(K)      # (B, H, S, d_k)
 
+        # state.M/z are float32 (DREX dtype contract: episodic state is float32).
+        # Cast to computation dtype for mixed-precision compatibility (e.g. bfloat16 Mamba).
+        M_work = state.M.to(K.dtype)
+
         # V_existing = φ(K) M — what memory currently "says" for these keys
         # (B, H, S, d_k) @ (B, H, d_k, d_v) → (B, H, S, d_v)
-        V_existing = torch.matmul(phi_K, state.M)
+        V_existing = torch.matmul(phi_K, M_work)
 
         # Associative delta update: ΔM = φ(K)ᵀ @ (V - V_existing)
         # (B, H, d_k, S) @ (B, H, S, d_v) → (B, H, d_k, d_v)
         delta_M = torch.matmul(phi_K.transpose(-2, -1), V - V_existing)
 
-        new_M = state.M + delta_M
-        new_z = state.z + phi_K.sum(dim=-2)  # (B, H, d_k)
+        # Accumulate in float32 to preserve state precision.
+        new_M = state.M + delta_M.to(state.M.dtype)
+        new_z = state.z + phi_K.sum(dim=-2).to(state.z.dtype)
 
         return MemoryState(M=new_M, z=new_z)
 
