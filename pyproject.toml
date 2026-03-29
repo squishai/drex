@@ -33,36 +33,25 @@ dev = [
 ]
 
 [tool.maturin]
-# Python source tree — maturin includes this as part of the built wheel
-python-source = "python"
-# The Rust _sys lib becomes importable as drex._sys.
-# Cargo.toml [lib] name = "_sys" must match the part after the last dot here.
+# Rust extension module — built separately from the Python components.
+# Python source packages live in src/ (hdc/, backbone/, controller/, etc.).
+# The Rust _sys lib becomes importable as drex._sys from Python.
+python-source = "src"
 module-name = "drex._sys"
 features = ["extension-module"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests/python"]
-pythonpath = ["python"]
-asyncio_mode = "auto"
-addopts = "--cov=drex --cov-branch --cov-report=term-missing --cov-fail-under=100"
-
-[tool.coverage.run]
-source = ["drex"]
-branch = true
-omit = ["*/drex/_sys*"]
-
-[tool.coverage.report]
-exclude_lines = [
-    "pragma: no cover",
-    "if TYPE_CHECKING:",
-    "raise NotImplementedError",
-    "\\.\\.\\.",
-]
-show_missing = true
+# "src" on the path makes `from hdc.encoder import X` work without install.
+pythonpath = ["src"]
+# Coverage is enforced per-wave as components are implemented.
+# Wave 0: no src/ code yet — coverage not required.
+# When promoting a component to src/, add --cov=<pkg> and raise --cov-fail-under.
+addopts = "-v"
 
 [tool.ruff]
 line-length = 100
-target-version = "py311"
+target-version = "py312"
 
 [tool.mypy]
 python_version = "3.11"

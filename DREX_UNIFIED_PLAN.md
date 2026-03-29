@@ -1,31 +1,228 @@
 # DREX-UNIFIED PLAN
-# Architecture Evolution & Forward Research Roadmap
+# Architecture Evolution & Implementation Roadmap — v0.2 Fresh Start
 
-*Created: 2026-03-24 | Updated: 2026-03-24 (Phase 25 complete, POC sprints planned) | Status: Active*
-*Synthesizes: Phases 1–22 findings + architectural research from March 2026 sessions*
+*Created: 2026-03-24 | Updated: 2026-03-XX (v0.2 reset) | Status: Active*
+*Master spec: DREX_UNIFIED_SPEC.md v0.2 supersedes all prior planning documents*
 
-**See DREX_UNIFIED_SPEC.md for the full per-component interface spec, tensor shapes,
+**See DREX_UNIFIED_SPEC.md for the per-component interface spec, tensor shapes,
 validation criteria, and phase gates.**
 
 ---
 
-## Implementation Status (as of 2026-03-24)
+## v0.2 Reset Notice
 
-| Phase | Component                | File                            | Status              |
-|-------|--------------------------|---------------------------------|---------------------|
-| 13–16 | MemoryModule (L2+L4)     | models/memory.py                | ✅ DONE              |
-| 23    | EchoStateMemory (L1 ESN) | models/memory_esn.py            | ✅ DONE 170ff80      |
-| 24    | HDCEncoder               | models/hdc_encoder.py           | ✅ DONE 999d067      |
-| 25    | Mamba SSM Backbone       | models/mamba.py                 | ✅ DONE 0f16216      |
-| 26    | DREX Controller + Reward | models/controller.py + reward.py| 🔲 After Phase 25    |
-| 27    | NoProp Semantic (L3)     | models/semantic.py              | 🔲 After Phase 22 ✓  |
-| 28    | KAN Readout              | models/kan_readout.py           | 🔲 After Phase 25    |
-| 29    | Sparse Router            | models/router.py                | 🔲 After Phase 26    |
-| 30    | Full Integration         | models/drex_unified.py          | 🔲 After Phases 25–29|
+All prior implementation code has been archived to `research/legacy/`. This was
+a deliberate clean-slate decision: the legacy code (Phases 1–25) is valuable
+research and remains accessible, but v0.2 defines a different file layout (`src/`),
+stricter CI requirements, and updated exit criteria that the legacy code was not
+built against.
+
+The migration script is at `scripts/migrate_to_v0_2.sh`. Run it once from the
+repo root to move `python/` and `tests/` to `research/legacy/` and scaffold the
+new `src/` and `tests/` layout.
+
+Key changes in v0.2 vs legacy:
+- `src/` is the real filesystem source root (not `python/drex/models/`)
+- HDC encoder must be token-ID encoder (int32 → float32), not embedding-lifting
+- Phase 1 requires CI infrastructure (gradient leak, dtype, shape assertions) FIRST
+- ESN feedback extension test is a Phase 1 EXIT BLOCKER (was never validated in legacy)
+- NoProp exit criterion is accuracy parity on CIFAR-100 (not VRAM-only)
+- Controller routing collapse test is a Phase 1 EXIT BLOCKER
 
 ---
 
-## Part 1 — Where We Are (State of the Repo)
+## Implementation Status (v0.2 — fresh start)
+
+| Wave | Component                | File                            | Status              |
+|------|--------------------------|---------------------------------|---------------------|
+| 0    | CI Infrastructure        | .github/workflows/ci.yml        | ✅ complete (44 tests green) |
+| 1    | HDC Token Encoder        | src/hdc/encoder.py              | 🔲 not started       |
+| 2    | ESN Reservoir + feedback | src/memory/reservoir.py         | 🔲 not started       |
+| 2    | Episodic Memory          | src/memory/episodic.py          | 🔲 not started       |
+| 3    | Mamba PCN Backbone       | src/backbone/mamba.py           | 🔲 not started       |
+| 4    | NoProp Semantic Memory   | src/memory/semantic.py          | 🔲 not started       |
+| 5    | RL Controller            | src/controller/policy.py        | 🔲 not started       |
+| 6    | KAN Readout              | src/readout/kan.py              | 🔲 not started       |
+| 7    | Phase 1 Documentation    | (report + gate closure)         | 🔲 not started       |
+
+---
+
+## Phase 1 — Seven-Wave Implementation Plan
+
+### Wave 0: CI Infrastructure (EXIT BLOCKER — must be green before any component code)
+
+Goal: automated gradient leak, dtype boundary, and shape contract assertions running
+on every commit via GitHub Actions.
+
+Deliverables:
+- `.github/workflows/ci.yml` — full pytest suite + three CI-specific assertion tests
+- `tests/python/test_gradient_leak_ci.py` — asserts no cross-layer gradients in PCN,
+  no cross-block gradients in NoProp, zero gradients on ESN reservoir weights
+- `tests/python/test_dtype_contracts_ci.py` — asserts all component boundary dtypes
+  match the DTYPE BOUNDARY CONTRACT section in DREX_UNIFIED_SPEC.md
+- `tests/python/test_shape_contracts_ci.py` — asserts all intermediate tensor shapes
+
+Exit criterion: CI green on main. All three assertion test files pass with synthetic
+inputs (no real model weights required at Wave 0).
+
+Wave 0 completes before Wave 1-6 begin.
+
+---
+
+### Wave 1: HDC Token Encoder (Objective 0)
+
+Depends on: Wave 0 CI green.
+Can run in parallel with: Wave 2.
+
+File: `src/hdc/encoder.py`
+Test: `tests/python/test_hdc_encoder.py`
+
+What to build:
+- Token-ID encoder: (B,S) int32 → (B,S,D_hdc) float32
+- item_memory: fixed random (vocab_size, D_hdc), never trained
+- position_permutations: cyclic roll offsets per position
+- encode_sequence: bundle permuted item vectors
+- D_hdc default: start at 4096, scale to 10000 if orthogonality tests pass
+
+Exit criterion (all six in spec must pass):
+- similarity > 0.999, orthogonality mean < 0.05, associativity, sequence order,
+  shape (B,S,D_hdc), dtype float32
+
+Key note: this is NOT the legacy embedding-lifting HDC from research/legacy/.
+Build fresh from the spec.
+
+---
+
+### Wave 2: ESN Reservoir + Spectral Radius Sweep (Objective 2a & 2b)
+
+Depends on: Wave 0 CI green.
+Can run in parallel with: Wave 1.
+
+Files: `src/memory/reservoir.py`, `src/memory/episodic.py`
+Tests: `tests/python/test_reservoir.py`, `tests/python/test_episodic.py`
+
+What to build:
+- Reservoir (L1): fixed W_res (spectral_radius < 1.0), W_in, W_fb; ridge readout
+- Episodic (L2): EMA delta writes (alpha=0.90 default), hard overwrite mode
+
+Exit criterion Wave 2a (reservoir): echo state property, convergence, feedback
+extension test (EXIT BLOCKER — confirm feedback=True improves memory beyond N steps).
+Spectral radius sweep: run 0.90, 0.95, 0.99 on POS tagging task. Document winner.
+
+Exit criterion Wave 2b (episodic): EMA stability, delta write, alpha sweep result.
+
+---
+
+### Wave 3: Mamba PCN Backbone (Objective 1)
+
+Depends on: Wave 1 (HDC encoder interface locked).
+Can run in parallel with: waves 4, 5, 6.
+
+File: `src/backbone/mamba.py`
+Test: `tests/python/test_mamba.py`
+
+What to build:
+- Mamba SSM block with Predictive Coding training wrapper
+- Each layer trains on local MSE target, stop_gradient between layers
+- CI gradient leak assertion automatically validates no cross-layer gradient on commit
+
+Exit criterion: PC convergence test (all layer losses decrease simultaneously),
+perplexity within 10% of same-size backprop Mamba on WikiText-2.
+
+---
+
+### Wave 4: NoProp Semantic Memory (Objective 2c)
+
+Depends on: Wave 0 CI green.
+Can run in parallel with: waves 1, 2, 3, 5, 6.
+
+File: `src/memory/semantic.py`
+Test: `tests/python/test_semantic.py`
+
+What to build:
+- NoProp blocks with local denoising loss
+- Block optimizer isolation (Phase 22 fix applies: block optimizers own only their params)
+- CI block independence assertion auto-validates on every commit
+
+Exit criterion: accuracy parity test MUST PASS (within 5% of backprop on CIFAR-100).
+Block independence assertion must pass on CI. VRAM efficiency secondary.
+
+noise_std sweep: run 0.05, 0.10, 0.20 and document best value.
+
+---
+
+### Wave 5: RL Controller + Routing Collapse Evaluation (Objective 3)
+
+Depends on: Wave 0 CI green. HDC encoder interface helps but not strictly required.
+Can run in parallel with: waves 1, 2, 4, 6.
+
+Files: `src/controller/policy.py`, `src/controller/reward.py`
+Tests: `tests/python/test_controller.py`, `tests/python/test_reward.py`
+
+What to build:
+- REINFORCE policy (2-layer MLP, ~50K params, CPU-trainable)
+- Synthetic routing task: high-surprise vectors → L3, low-surprise → L1
+- Reward feedback loop with NaN guard (>10 consecutive NaN = halt + raise)
+
+Exit criterion: better-than-random routing within 1000 episodes. Routing collapse
+test MUST PASS over 5000-step evaluation (EXIT BLOCKER: no single tier > 95%
+over any 100-step window).
+
+---
+
+### Wave 6: KAN Readout Validation (Objective 5)
+
+Depends on: Wave 0 CI green.
+Can run in parallel with: waves 1, 2, 4, 5.
+
+File: `src/readout/kan.py`
+Test: `tests/python/test_kan.py`
+
+What to build:
+- BSplineKANLayer: B-spline basis functions, closed-form coefficient fitting
+- KANReadout: 2-layer KAN, D_model → vocab_size
+
+Exit criterion: approximation within 2% of MLP readout. Spline visualizations
+non-trivial (saved to experiments/runs/<timestamp>/kan_splines/). Regression
+snapshot committed.
+
+---
+
+### Wave 7: Phase 1 Gate Documentation & Spec Sync
+
+Depends on: all Waves 1–6 exit criteria met.
+
+Deliverables:
+- Internal validation report: exact numbers for every component test, hardware,
+  timing (markdown in `docs/phase1_validation_report.md`)
+- Spectral radius sweep table
+- noise_std sweep table for NoProp
+- Ablation log format verified in all experiment run outputs
+- `DREX_UNIFIED_SPEC.md` Phase 1 gate checkboxes updated to [x]
+- `DREX_UNIFIED_PLAN.md` (this file) updated with final numbers
+- `CHANGELOG.md` entry written
+
+---
+
+## Wave Dependency Graph
+
+    Wave 0: CI Infrastructure         ← MUST complete first (EXIT BLOCKER)
+    Wave 1: HDCTokenEncoder (Obj 0)   ← after Wave 0 green
+    Wave 2: ESN + Episodic (Obj 2a/b) ← parallel with Wave 1
+    Wave 3: Mamba PCN (Obj 1)         ← after Wave 1 (interface dependency)
+    Wave 4: NoProp Semantic (Obj 2c)  ← parallel with Waves 1-3
+    Wave 5: Controller (Obj 3)        ← parallel with Waves 1-3
+    Wave 6: KAN Readout (Obj 5)       ← parallel with Waves 1-3
+    Wave 7: Documentation & gate      ← after all Waves 1-6 pass
+
+---
+
+## Part 2 — Research Archive (Phases 1–25)
+
+The following summarizes the validated findings from the legacy research.
+This work informs v0.2 implementation decisions even though the legacy code
+is archived. See `research/legacy/` for runnable code and `research/` for
+full experiment reports.
 
 ### Research Complete (Phases 1–16)
 

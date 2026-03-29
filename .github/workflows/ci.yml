@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  test:
+    name: pytest (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: ["3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
+          restore-keys: pip-${{ matrix.python-version }}-
+
+      - name: Install test dependencies
+        run: |
+          pip install --upgrade pip
+          # Install PyTorch CPU-only for CI (Wave 0–3 tests need torch, not MLX).
+          # MLX requires Apple Silicon — mac-specific waves tested locally.
+          pip install torch==2.8.0 --index-url https://download.pytorch.org/whl/cpu
+          pip install numpy pytest pytest-asyncio
+
+      - name: Run Wave 0 CI assertion tests
+        run: |
+          PYTHONPATH=src pytest tests/python/test_gradient_leak_ci.py \
+                                   tests/python/test_dtype_contracts_ci.py \
+                                   tests/python/test_shape_contracts_ci.py \
+                                   -v --tb=short
+
+      - name: Run full test suite
+        run: |
+          PYTHONPATH=src pytest tests/python/ -v --tb=short \
+            --ignore=tests/python/test_gradient_leak_ci.py \
+            --ignore=tests/python/test_dtype_contracts_ci.py \
+            --ignore=tests/python/test_shape_contracts_ci.py
+        # Wave 0: all other test files are placeholders — empty collections OK.
+        # Once components land (Waves 1–6) they run here too.
+        continue-on-error: false
