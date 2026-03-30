@@ -39,11 +39,11 @@ Key changes in v0.2 vs legacy:
 | 1    | HDC Token Encoder        | src/hdc/encoder.py              | ✅ complete (62 tests green, D_hdc_min=1024) |
 | 2    | ESN Reservoir + feedback | src/memory/reservoir.py         | ✅ complete (96 tests green, spectral_radius sweep 0.90/0.95/0.99, feedback EXIT BLOCKER) |
 | 2    | Episodic Memory          | src/memory/episodic.py          | ✅ complete (alpha sweep 0.70–0.99, force_overwrite, noise attenuation verified) |
-| 3    | Mamba PCN Backbone       | src/backbone/mamba.py           | 🔲 not started       |
-| 4    | NoProp Semantic Memory   | src/memory/semantic.py          | 🔲 not started       |
-| 5    | RL Controller            | src/controller/policy.py        | 🔲 not started       |
-| 6    | KAN Readout              | src/readout/kan.py              | 🔲 not started       |
-| 7    | Phase 1 Documentation    | (report + gate closure)         | 🔲 not started       |
+| 3    | Mamba PCN Backbone       | src/backbone/mamba.py           | ✅ complete (108 tests green, PC convergence all layers, causality + recurrence verified) |
+| 4    | NoProp Semantic Memory   | src/memory/semantic.py          | ✅ complete (121 tests green, block independence CI passes, block optimizer isolation verified) |
+| 5    | RL Controller            | src/controller/policy.py        | ✅ complete (131 tests green, REINFORCE beats random synthetic task, routing collapse detection passes) |
+| 6    | KAN Readout              | src/readout/kan.py              | ✅ complete (136 tests green, B-spline 8.86x overhead bounded by 2*(n_basis+1)=18x, regression snapshot committed 82fa74c) |
+| 7    | Phase 1 Documentation    | docs/phase1_validation_report.md | ✅ complete (validation report, spec sync, CHANGELOG — 2026-03-30) |
 
 ---
 
