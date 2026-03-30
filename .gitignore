@@ -39,3 +39,10 @@ results/wave*/checkpoints/
 .idea/
 .vscode/
 *.swp
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# LaTeX
+texput.log
