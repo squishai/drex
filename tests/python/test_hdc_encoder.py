@@ -1,467 +1,333 @@
+"""Wave 1 validation tests — DREX-UNIFIED COMPONENT 2: HDC ENCODER.
+
+Tests required by DREX_UNIFIED_SPEC.md § COMPONENT 2 / PHASE 1 EXIT CRITERIA:
+  1. Similarity     : cosine_sim(encode(t), encode(t)) > 0.999  (100 random tokens)
+  2. Orthogonality  : mean cosine_sim(encode(A), encode(B)) < 0.05  (1000 pairs A≠B)
+  3. Associativity  : bind→unbind retrieval cosine_sim > 0.9
+  4. Sequence order : encode_sequence([A,B]) ≠ encode_sequence([B,A])
+  5. Shape contract : forward(token_ids).shape == (B, S, D_HDC) using conftest dims
+  6. Dtype contract : forward(token_ids).dtype == torch.float32
+
+Additional sweep:
+  7. D_hdc sweep    : orthogonality gate at D=1024, 2048, 4096 — documents minimum.
 """
-Tests for drex.models.hdc_encoder — HDCEncoder (Phase 24).
-
-Coverage targets:
-  - Module construction: valid params, hdc_dim < d_model raises
-  - Trainable parameter count: zero (all buffers, none in parameters())
-  - Buffer registration: W_lift and W_down present, correct shapes
-  - Reproducibility: same seed → identical weights; different seeds → different
-  - Layer norm: norm module exists and has trainable params (only learnable component)
-  - forward(): output shape matches input, no NaN, no Inf
-  - forward() residual: output differs from input (HDC enrichment is non-trivial)
-  - Training vs eval mode: outputs differ (tanh vs sign threshold)
-  - hypervector(): correct shape (B, S, hdc_dim)
-  - similarity(): cosine similarity, same vector → 1.0, opposite → -1.0 (approx)
-  - HDC primitive ops: hdc_bind, hdc_bundle, hdc_permute shapes and properties
-  - Integration: DrexConfig.use_hdc_encoder=True builds and runs without error
-  - Integration: HDCEncoder disabled → model unchanged
-  - Integration: trainable param count identical with and without HDC encoder
-  - Integration: no NaN after a full forward pass with HDC enabled
-  - Integration: works at L=1 (single-token sequences)
-  - Integration: works at L=512 (max expected segment length)
-"""
-
-from __future__ import annotations
-
-import math
-
 import pytest
 import torch
-import torch.nn as nn
+import torch.nn.functional as F
 
-from drex.models.hdc_encoder import HDCEncoder, hdc_bind, hdc_bundle, hdc_permute
-from drex.models.transformer import DrexConfig, DrexTransformer
+from hdc.encoder import HDCTokenEncoder
+
+# ---------------------------------------------------------------------------
+# Canonical dims (copied from conftest.py constants — accessed via pytest
+# fixtures below; constants inlined here to keep tests pure-unit)
+# ---------------------------------------------------------------------------
+B = 2
+S = 16
+D_HDC = 1024
+VOCAB_SIZE = 512
+SEED = 42
+
+# ---------------------------------------------------------------------------
+# Shared encoder fixtures
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture(scope="module")
+def encoder() -> HDCTokenEncoder:
+    enc = HDCTokenEncoder(d_hdc=D_HDC, vocab_size=VOCAB_SIZE, normalize=True, seed=SEED)
+    enc.eval()
+    return enc
+
+
+@pytest.fixture(scope="module")
+def raw_encoder() -> HDCTokenEncoder:
+    """normalize=False — needed for clean algebraic unbind/associativity tests."""
+    enc = HDCTokenEncoder(d_hdc=D_HDC, vocab_size=VOCAB_SIZE, normalize=False, seed=SEED)
+    enc.eval()
+    return enc
 
 
 # ---------------------------------------------------------------------------
-# Fixtures
+# TEST 1 — Similarity
+# SPEC: cosine_sim(encode(t), encode(t)) > 0.999 for 100 random tokens
 # ---------------------------------------------------------------------------
 
-@pytest.fixture
-def d_model() -> int:
-    return 64
 
+class TestSimilarity:
+    def test_self_similarity_100_tokens(self, raw_encoder: HDCTokenEncoder) -> None:
+        """encode(t) always returns the same vector — self-similarity must be > 0.999."""
+        rng = torch.Generator()
+        rng.manual_seed(SEED)
+        token_ids = torch.randint(0, VOCAB_SIZE, (100,), generator=rng, dtype=torch.int32)
 
-@pytest.fixture
-def hdc_dim() -> int:
-    return 256  # small for fast tests
+        failures = []
+        for tid in token_ids:
+            hv_a = raw_encoder.encode_token(tid)
+            hv_b = raw_encoder.encode_token(tid)
+            sim = F.cosine_similarity(hv_a.unsqueeze(0), hv_b.unsqueeze(0)).item()
+            if sim <= 0.999:
+                failures.append((tid.item(), sim))
 
-
-@pytest.fixture
-def enc(d_model: int, hdc_dim: int) -> HDCEncoder:
-    return HDCEncoder(d_model=d_model, hdc_dim=hdc_dim, normalize=True, seed=0)
-
-
-@pytest.fixture
-def batch() -> int:
-    return 2
-
-
-@pytest.fixture
-def seq_len() -> int:
-    return 16
+        assert not failures, (
+            f"Self-similarity failed for {len(failures)} tokens (expected > 0.999): {failures[:5]}"
+        )
 
 
 # ---------------------------------------------------------------------------
-# Construction
+# TEST 2 — Orthogonality
+# SPEC: mean(cosine_sim(encode(A), encode(B))) < 0.05 for 1000 distinct pairs
 # ---------------------------------------------------------------------------
 
-class TestConstruction:
-    def test_valid_construction(self, d_model: int, hdc_dim: int) -> None:
-        enc = HDCEncoder(d_model=d_model, hdc_dim=hdc_dim)
-        assert enc.d_model == d_model
-        assert enc.hdc_dim == hdc_dim
 
-    def test_hdc_dim_smaller_than_d_model_raises(self, d_model: int) -> None:
-        with pytest.raises(ValueError, match="hdc_dim"):
-            HDCEncoder(d_model=d_model, hdc_dim=d_model - 1)
+class TestOrthogonality:
+    def test_mean_cosine_below_threshold(self, raw_encoder: HDCTokenEncoder) -> None:
+        """Mean |cosine_sim| over 1000 distinct-token pairs must be < 0.05."""
+        rng = torch.Generator()
+        rng.manual_seed(SEED + 1)
 
-    def test_hdc_dim_equal_to_d_model_raises(self, d_model: int) -> None:
-        with pytest.raises(ValueError, match="hdc_dim"):
-            HDCEncoder(d_model=d_model, hdc_dim=d_model)
-
-    def test_hdc_dim_greater_than_d_model_ok(self, d_model: int) -> None:
-        enc = HDCEncoder(d_model=d_model, hdc_dim=d_model + 1)
-        assert enc.hdc_dim == d_model + 1
-
-    def test_normalize_flag_stored(self, d_model: int, hdc_dim: int) -> None:
-        enc = HDCEncoder(d_model=d_model, hdc_dim=hdc_dim, normalize=False)
-        assert enc.normalize is False
-
-
-# ---------------------------------------------------------------------------
-# Parameter / buffer split
-# ---------------------------------------------------------------------------
-
-class TestParametersAndBuffers:
-    def test_zero_trainable_parameters_from_projections(
-        self, enc: HDCEncoder, d_model: int, hdc_dim: int
-    ) -> None:
-        # Only norm has trainable params; projections contribute zero.
-        proj_param_names = {"W_lift", "W_down"}
-        for name, param in enc.named_parameters():
-            assert name not in proj_param_names, (
-                f"{name} should be a buffer (frozen), not a trainable parameter"
+        sims = []
+        attempts = 0
+        while len(sims) < 1000 and attempts < 5000:
+            ids = torch.randint(0, VOCAB_SIZE, (2,), generator=rng, dtype=torch.int32)
+            a_id, b_id = ids[0].item(), ids[1].item()
+            attempts += 1
+            if a_id == b_id:
+                continue
+            hv_a = raw_encoder.encode_token(ids[0])
+            hv_b = raw_encoder.encode_token(ids[1])
+            sims.append(
+                F.cosine_similarity(hv_a.unsqueeze(0), hv_b.unsqueeze(0)).abs().item()
             )
 
-    def test_w_lift_in_buffers(self, enc: HDCEncoder, d_model: int, hdc_dim: int) -> None:
-        buf_names = {name for name, _ in enc.named_buffers()}
-        assert "W_lift" in buf_names
-
-    def test_w_down_in_buffers(self, enc: HDCEncoder, d_model: int, hdc_dim: int) -> None:
-        buf_names = {name for name, _ in enc.named_buffers()}
-        assert "W_down" in buf_names
-
-    def test_w_lift_shape(self, enc: HDCEncoder, d_model: int, hdc_dim: int) -> None:
-        assert enc.W_lift.shape == (d_model, hdc_dim)
-
-    def test_w_down_shape(self, enc: HDCEncoder, d_model: int, hdc_dim: int) -> None:
-        assert enc.W_down.shape == (hdc_dim, d_model)
-
-    def test_only_norm_contributes_trainable_params(
-        self, enc: HDCEncoder, d_model: int
-    ) -> None:
-        total = sum(p.numel() for p in enc.parameters())
-        # LayerNorm(d_model) has weight + bias = 2 × d_model params
-        assert total == 2 * d_model, (
-            f"Expected 2×{d_model}={2*d_model} trainable params (LayerNorm only), "
-            f"got {total}"
+        assert len(sims) >= 1000, f"Only {len(sims)} distinct pairs generated"
+        mean_sim = sum(sims) / len(sims)
+        assert mean_sim < 0.05, (
+            f"Orthogonality contract FAILED: mean |cosine_sim| = {mean_sim:.4f} ≥ 0.05 "
+            f"(D_hdc={D_HDC}, vocab_size={VOCAB_SIZE})"
         )
 
-    def test_buffers_not_updated_by_optimizer(
-        self, enc: HDCEncoder, d_model: int, hdc_dim: int, batch: int, seq_len: int
-    ) -> None:
-        """A gradient step must not change W_lift or W_down."""
-        W_lift_before = enc.W_lift.clone()
-        W_down_before = enc.W_down.clone()
+    def test_high_similarity_fraction(self, raw_encoder: HDCTokenEncoder) -> None:
+        """Fraction of pairs with |cosine_sim| > 0.3 must be < 1%."""
+        rng = torch.Generator()
+        rng.manual_seed(SEED + 2)
 
-        optimizer = torch.optim.Adam(enc.parameters(), lr=1e-3)
-        enc.train()
-        x = torch.randn(batch, seq_len, d_model)
-        loss = enc(x).sum()
-        loss.backward()
-        optimizer.step()
+        high = 0
+        checked = 0
+        attempts = 0
+        while checked < 500 and attempts < 2000:
+            ids = torch.randint(0, VOCAB_SIZE, (2,), generator=rng, dtype=torch.int32)
+            attempts += 1
+            if ids[0].item() == ids[1].item():
+                continue
+            hv_a = raw_encoder.encode_token(ids[0])
+            hv_b = raw_encoder.encode_token(ids[1])
+            sim = F.cosine_similarity(hv_a.unsqueeze(0), hv_b.unsqueeze(0)).abs().item()
+            if sim > 0.3:
+                high += 1
+            checked += 1
 
-        assert torch.equal(enc.W_lift, W_lift_before), "W_lift was mutated by optimizer"
-        assert torch.equal(enc.W_down, W_down_before), "W_down was mutated by optimizer"
-
-
-# ---------------------------------------------------------------------------
-# Reproducibility
-# ---------------------------------------------------------------------------
-
-class TestReproducibility:
-    def test_same_seed_same_weights(self, d_model: int, hdc_dim: int) -> None:
-        enc_a = HDCEncoder(d_model=d_model, hdc_dim=hdc_dim, seed=7)
-        enc_b = HDCEncoder(d_model=d_model, hdc_dim=hdc_dim, seed=7)
-        assert torch.equal(enc_a.W_lift, enc_b.W_lift)
-        assert torch.equal(enc_a.W_down, enc_b.W_down)
-
-    def test_different_seeds_different_weights(self, d_model: int, hdc_dim: int) -> None:
-        enc_a = HDCEncoder(d_model=d_model, hdc_dim=hdc_dim, seed=0)
-        enc_b = HDCEncoder(d_model=d_model, hdc_dim=hdc_dim, seed=99)
-        assert not torch.equal(enc_a.W_lift, enc_b.W_lift)
-
-
-# ---------------------------------------------------------------------------
-# Forward pass — shape, numerical health
-# ---------------------------------------------------------------------------
-
-class TestForward:
-    def test_output_shape_matches_input(
-        self, enc: HDCEncoder, batch: int, seq_len: int, d_model: int
-    ) -> None:
-        x = torch.randn(batch, seq_len, d_model)
-        out = enc(x)
-        assert out.shape == (batch, seq_len, d_model)
-
-    def test_no_nan_in_output(
-        self, enc: HDCEncoder, batch: int, seq_len: int, d_model: int
-    ) -> None:
-        enc.eval()
-        x = torch.randn(batch, seq_len, d_model)
-        out = enc(x)
-        assert not torch.isnan(out).any(), "NaN detected in HDCEncoder output"
-
-    def test_no_inf_in_output(
-        self, enc: HDCEncoder, batch: int, seq_len: int, d_model: int
-    ) -> None:
-        enc.eval()
-        x = torch.randn(batch, seq_len, d_model)
-        out = enc(x)
-        assert not torch.isinf(out).any(), "Inf detected in HDCEncoder output"
-
-    def test_residual_enriches_embedding(
-        self, enc: HDCEncoder, batch: int, seq_len: int, d_model: int
-    ) -> None:
-        """Output must differ from input — HDC adds structure."""
-        enc.eval()
-        x = torch.randn(batch, seq_len, d_model)
-        out = enc(x)
-        assert not torch.allclose(out, x, atol=1e-4), (
-            "HDCEncoder output is identical to input; residual enrichment is absent"
+        fraction = high / max(checked, 1)
+        assert fraction < 0.01, (
+            f"{high}/{checked} pairs had |cosine_sim| > 0.3 ({fraction:.2%}). "
+            "D_hdc may be too small."
         )
 
-    def test_L1_edge_case(self, enc: HDCEncoder, d_model: int) -> None:
-        enc.eval()
-        x = torch.randn(1, 1, d_model)
-        out = enc(x)
-        assert out.shape == (1, 1, d_model)
-        assert not torch.isnan(out).any()
 
-    def test_L512_edge_case(self, enc: HDCEncoder, d_model: int) -> None:
-        enc.eval()
-        x = torch.randn(1, 512, d_model)
-        out = enc(x)
-        assert out.shape == (1, 512, d_model)
-        assert not torch.isnan(out).any()
+# ---------------------------------------------------------------------------
+# TEST 3 — Associativity (bind/unbind)
+# SPEC: bind(encode(A), encode(B)) — unbind with encode(A) → cosine_sim > 0.9
+# For bipolar {-1,+1}: a*(a*b) = (a*a)*b = 1*b = b (exact for bipolar)
+# ---------------------------------------------------------------------------
 
-    def test_training_eval_outputs_differ(
-        self, enc: HDCEncoder, d_model: int, seq_len: int
-    ) -> None:
-        """Training mode uses tanh; eval mode uses sign — outputs must differ."""
-        x = torch.randn(1, seq_len, d_model)
-        enc.train()
-        out_train = enc(x).detach()
-        enc.eval()
-        out_eval = enc(x)
-        assert not torch.allclose(out_train, out_eval, atol=1e-4), (
-            "Training and eval outputs are identical; tanh/sign branching may be broken"
+
+class TestAssociativity:
+    def test_bind_unbind_retrieval(self, raw_encoder: HDCTokenEncoder) -> None:
+        """Unbinding with one argument exactly recovers the other (bipolar property)."""
+        rng = torch.Generator()
+        rng.manual_seed(SEED + 3)
+
+        failures = []
+        for _ in range(50):
+            ids = torch.randint(0, VOCAB_SIZE, (2,), generator=rng, dtype=torch.int32)
+            a_id, b_id = ids[0], ids[1]
+            if a_id.item() == b_id.item():
+                continue
+
+            hv_a = raw_encoder.encode_token(a_id)
+            hv_b = raw_encoder.encode_token(b_id)
+
+            bound = HDCTokenEncoder.bind(hv_a, hv_b)   # bind(a, b)
+            retrieved = HDCTokenEncoder.bind(hv_a, bound)  # unbind: a*(a*b) = b
+
+            sim = F.cosine_similarity(retrieved.unsqueeze(0), hv_b.unsqueeze(0)).item()
+            if sim <= 0.9:
+                failures.append((a_id.item(), b_id.item(), sim))
+
+        assert not failures, (
+            f"Bind/unbind retrieval cosine_sim ≤ 0.9 for {len(failures)} pairs: {failures[:5]}"
         )
-
-    def test_gradient_flows_through_norm(
-        self, enc: HDCEncoder, batch: int, seq_len: int, d_model: int
-    ) -> None:
-        enc.train()
-        x = torch.randn(batch, seq_len, d_model, requires_grad=True)
-        out = enc(x)
-        loss = out.sum()
-        loss.backward()
-        assert x.grad is not None, "No gradient flowed through HDCEncoder to input"
-        assert not torch.isnan(x.grad).any(), "NaN in gradient"
-
-    def test_normalize_false_no_nan(
-        self, d_model: int, hdc_dim: int, batch: int, seq_len: int
-    ) -> None:
-        enc = HDCEncoder(d_model=d_model, hdc_dim=hdc_dim, normalize=False, seed=0)
-        enc.eval()
-        x = torch.randn(batch, seq_len, d_model)
-        out = enc(x)
-        assert not torch.isnan(out).any()
-        assert out.shape == (batch, seq_len, d_model)
 
 
 # ---------------------------------------------------------------------------
-# hypervector() / similarity()
+# TEST 4 — Sequence order
+# SPEC: encode_sequence([A,B]) ≠ encode_sequence([B,A])
 # ---------------------------------------------------------------------------
 
-class TestHypervectorHelpers:
-    def test_hypervector_shape(
-        self, enc: HDCEncoder, batch: int, seq_len: int, d_model: int, hdc_dim: int
-    ) -> None:
-        enc.eval()
-        x = torch.randn(batch, seq_len, d_model)
-        h = enc.hypervector(x)
-        assert h.shape == (batch, seq_len, hdc_dim)
 
-    def test_hypervector_no_nan(
-        self, enc: HDCEncoder, batch: int, seq_len: int, d_model: int
-    ) -> None:
-        enc.eval()
-        x = torch.randn(batch, seq_len, d_model)
-        h = enc.hypervector(x)
-        assert not torch.isnan(h).any()
+class TestSequenceOrder:
+    def test_order_sensitive(self, raw_encoder: HDCTokenEncoder) -> None:
+        """[A,B] and [B,A] must produce different hypervectors."""
+        rng = torch.Generator()
+        rng.manual_seed(SEED + 4)
 
-    def test_similarity_identical_vectors_approx_one(
-        self, enc: HDCEncoder, d_model: int, hdc_dim: int
-    ) -> None:
-        enc.eval()
-        x = torch.randn(1, 4, d_model)
-        h = enc.hypervector(x)
-        sim = enc.similarity(h, h)
-        assert (sim > 0.99).all(), f"Self-similarity should be ≈1.0; got {sim}"
+        failures = []
+        for _ in range(50):
+            ids = torch.randint(0, VOCAB_SIZE, (2,), generator=rng, dtype=torch.int32)
+            a_id, b_id = ids[0], ids[1]
+            if a_id.item() == b_id.item():
+                continue
 
-    def test_similarity_shape(
-        self, enc: HDCEncoder, batch: int, seq_len: int, d_model: int
-    ) -> None:
-        enc.eval()
-        x = torch.randn(batch, seq_len, d_model)
-        h = enc.hypervector(x)
-        sim = enc.similarity(h, h)
-        assert sim.shape == (batch, seq_len)
+            seq_ab = raw_encoder.encode_sequence(torch.stack([a_id, b_id]))
+            seq_ba = raw_encoder.encode_sequence(torch.stack([b_id, a_id]))
 
+            if torch.allclose(seq_ab, seq_ba, atol=1e-6):
+                failures.append((a_id.item(), b_id.item()))
 
-# ---------------------------------------------------------------------------
-# HDC primitive operations
-# ---------------------------------------------------------------------------
-
-class TestHDCPrimitives:
-    def test_bind_shape(self) -> None:
-        a = torch.randn(2, 8, 256)
-        b = torch.randn(2, 8, 256)
-        assert hdc_bind(a, b).shape == (2, 8, 256)
-
-    def test_bind_is_element_wise_multiply(self) -> None:
-        a = torch.tensor([1.0, -1.0, 2.0])
-        b = torch.tensor([2.0, 3.0, -1.0])
-        result = hdc_bind(a, b)
-        expected = torch.tensor([2.0, -3.0, -2.0])
-        assert torch.allclose(result, expected)
-
-    def test_bundle_shape(self) -> None:
-        a = torch.randn(2, 8, 256)
-        b = torch.randn(2, 8, 256)
-        assert hdc_bundle(a, b).shape == (2, 8, 256)
-
-    def test_bundle_is_normalised(self) -> None:
-        a = torch.randn(4, 256)
-        b = torch.randn(4, 256)
-        result = hdc_bundle(a, b)
-        norms = result.norm(dim=-1)
-        assert torch.allclose(norms, torch.ones(4), atol=1e-5), (
-            f"bundle result should be unit-norm; got norms {norms}"
+        assert not failures, (
+            f"encode_sequence gave identical result for [A,B] and [B,A] "
+            f"in {len(failures)} cases: {failures[:5]}"
         )
 
-    def test_permute_shape(self) -> None:
-        x = torch.randn(2, 8, 256)
-        assert hdc_permute(x).shape == (2, 8, 256)
+    def test_order_cosine_not_one(self, raw_encoder: HDCTokenEncoder) -> None:
+        """Cosine sim between [A,B] and [B,A] must be < 0.98 (not effectively identical)."""
+        rng = torch.Generator()
+        rng.manual_seed(SEED + 5)
 
-    def test_permute_is_circular_shift(self) -> None:
-        x = torch.tensor([1.0, 2.0, 3.0, 4.0])
-        shifted = hdc_permute(x, shifts=1)
-        expected = torch.tensor([4.0, 1.0, 2.0, 3.0])
-        assert torch.allclose(shifted, expected)
+        near_identical = 0
+        checked = 0
+        attempts = 0
+        while checked < 50 and attempts < 200:
+            ids = torch.randint(0, VOCAB_SIZE, (2,), generator=rng, dtype=torch.int32)
+            attempts += 1
+            if ids[0].item() == ids[1].item():
+                continue
 
-    def test_permute_shifts_arg(self) -> None:
-        x = torch.randn(1, 1, 16)
-        p1 = hdc_permute(x, shifts=1)
-        p2 = hdc_permute(x, shifts=2)
-        # Two different shifts should produce different vectors
-        assert not torch.allclose(p1, p2)
+            seq_ab = raw_encoder.encode_sequence(torch.stack([ids[0], ids[1]]))
+            seq_ba = raw_encoder.encode_sequence(torch.stack([ids[1], ids[0]]))
 
-    def test_permute_reversible(self) -> None:
-        """Permuting by +n then -n should recover the original."""
-        x = torch.randn(1, 1, 32)
-        out = hdc_permute(hdc_permute(x, shifts=5), shifts=-5)
-        assert torch.allclose(out, x, atol=1e-6)
+            sim = F.cosine_similarity(seq_ab.unsqueeze(0), seq_ba.unsqueeze(0)).abs().item()
+            if sim >= 0.98:
+                near_identical += 1
+            checked += 1
+
+        assert near_identical == 0, (
+            f"{near_identical}/{checked} reversed-order pair(s) had |cosine_sim| ≥ 0.98 — "
+            "positional permutation may not be working."
+        )
 
 
 # ---------------------------------------------------------------------------
-# Integration with DrexTransformer
+# TEST 5 — Shape contract
+# SPEC: forward(token_ids).shape == (B, S, D_hdc)
 # ---------------------------------------------------------------------------
 
-class TestTransformerIntegration:
-    """Verify that DrexConfig.use_hdc_encoder=True threads through correctly."""
 
-    def _config(self, use_hdc: bool, hdc_dim: int = 256) -> DrexConfig:
-        return DrexConfig(
-            d_model=64,
-            n_heads=2,
-            n_layers=1,
-            vocab_size=256,
-            window_size=16,
-            max_seq_len=128,
-            use_hdc_encoder=use_hdc,
-            hdc_dim=hdc_dim,
+class TestShapeContract:
+    def test_canonical_batch_shape(self, encoder: HDCTokenEncoder) -> None:
+        """forward((B, S) int32) → (B, S, D_HDC) with canonical conftest dims."""
+        x = torch.randint(0, VOCAB_SIZE, (B, S), dtype=torch.int32)
+        out = encoder(x)
+        assert out.shape == (B, S, D_HDC), f"Got {out.shape}, expected ({B}, {S}, {D_HDC})"
+
+    def test_batch_size_1(self, encoder: HDCTokenEncoder) -> None:
+        """Shape works for batch size 1."""
+        x = torch.randint(0, VOCAB_SIZE, (1, S), dtype=torch.int32)
+        out = encoder(x)
+        assert out.shape == (1, S, D_HDC)
+
+    def test_variable_seq_len(self, encoder: HDCTokenEncoder) -> None:
+        """Shape works for sequence length != canonical S."""
+        x = torch.randint(0, VOCAB_SIZE, (3, 32), dtype=torch.int32)
+        out = encoder(x)
+        assert out.shape == (3, 32, D_HDC)
+
+    def test_item_memory_shape(self, encoder: HDCTokenEncoder) -> None:
+        """item_memory must be (vocab_size, D_hdc) exactly."""
+        assert encoder.item_memory.shape == (VOCAB_SIZE, D_HDC), (
+            f"item_memory shape: {encoder.item_memory.shape}"
         )
 
-    def test_model_builds_with_hdc(self) -> None:
-        model = DrexTransformer(self._config(use_hdc=True))
-        assert model.hdc_encoder is not None
 
-    def test_model_builds_without_hdc(self) -> None:
-        model = DrexTransformer(self._config(use_hdc=False))
-        assert model.hdc_encoder is None
+# ---------------------------------------------------------------------------
+# TEST 6 — Dtype contract
+# SPEC: forward() output must be float32
+#       (bfloat16 cast belongs ONLY at the Mamba input projection boundary)
+# ---------------------------------------------------------------------------
 
-    def test_trainable_param_count_identical(self) -> None:
-        """HDCEncoder contributes ZERO trainable parameters."""
-        model_base = DrexTransformer(self._config(use_hdc=False))
-        model_hdc  = DrexTransformer(self._config(use_hdc=True))
 
-        # LayerNorm inside HDCEncoder has 2*d_model trainable params; everything
-        # else is frozen buffers.
-        base_params = sum(p.numel() for p in model_base.parameters() if p.requires_grad)
-        hdc_params  = sum(p.numel() for p in model_hdc.parameters()  if p.requires_grad)
-        diff = hdc_params - base_params
-        d_model = 64
-        # Only LayerNorm in HDCEncoder adds trainable params (weight + bias = 2*d_model)
-        assert diff == 2 * d_model, (
-            f"Expected exactly {2*d_model} extra trainable params from HDCEncoder "
-            f"LayerNorm, got {diff}"
+class TestDtypeContract:
+    def test_output_float32(self, encoder: HDCTokenEncoder) -> None:
+        """forward() must return float32."""
+        x = torch.randint(0, VOCAB_SIZE, (B, S), dtype=torch.int32)
+        out = encoder(x)
+        assert out.dtype == torch.float32, f"Got {out.dtype}, expected torch.float32"
+
+    def test_item_memory_float32(self, encoder: HDCTokenEncoder) -> None:
+        """item_memory buffer must be float32."""
+        assert encoder.item_memory.dtype == torch.float32, (
+            f"item_memory dtype: {encoder.item_memory.dtype}"
         )
 
-    def test_forward_no_nan_with_hdc(self) -> None:
-        model = DrexTransformer(self._config(use_hdc=True))
-        model.eval()
-        ids = torch.randint(0, 256, (1, 16))
-        logits, _ = model(ids)
-        assert not torch.isnan(logits).any(), "NaN in logits with HDC encoder enabled"
+    def test_float_input_raises(self, encoder: HDCTokenEncoder) -> None:
+        """Passing float32 input must raise AssertionError (expects int tokens)."""
+        x_bad = torch.zeros(B, S, dtype=torch.float32)
+        with pytest.raises(AssertionError):
+            encoder(x_bad)
 
-    def test_forward_no_nan_without_hdc(self) -> None:
-        model = DrexTransformer(self._config(use_hdc=False))
-        model.eval()
-        ids = torch.randint(0, 256, (1, 16))
-        logits, _ = model(ids)
-        assert not torch.isnan(logits).any()
+    def test_encode_token_float32(self, encoder: HDCTokenEncoder) -> None:
+        """encode_token() must return float32."""
+        hv = encoder.encode_token(torch.tensor(0, dtype=torch.int32))
+        assert hv.dtype == torch.float32
 
-    def test_L1_with_hdc(self) -> None:
-        model = DrexTransformer(self._config(use_hdc=True))
-        model.eval()
-        ids = torch.randint(0, 256, (1, 1))
-        logits, _ = model(ids)
-        assert logits.shape == (1, 1, 256)
-        assert not torch.isnan(logits).any()
+    def test_no_nan_inf(self, encoder: HDCTokenEncoder) -> None:
+        """No NaN or Inf values in forward() output."""
+        x = torch.randint(0, VOCAB_SIZE, (B, S), dtype=torch.int32)
+        out = encoder(x)
+        assert not torch.isnan(out).any(), "NaN in HDCTokenEncoder output"
+        assert not torch.isinf(out).any(), "Inf in HDCTokenEncoder output"
 
-    def test_L512_with_hdc(self) -> None:
-        config = DrexConfig(
-            d_model=64, n_heads=2, n_layers=1, vocab_size=256,
-            window_size=512, max_seq_len=4096,
-            use_hdc_encoder=True, hdc_dim=256,
-        )
-        model = DrexTransformer(config)
-        model.eval()
-        ids = torch.randint(0, 256, (1, 512))
-        logits, _ = model(ids)
-        assert logits.shape == (1, 512, 256)
-        assert not torch.isnan(logits).any()
 
-    def test_hdc_encoder_output_differs_from_no_hdc(self) -> None:
-        """The HDC layer must actually change activations."""
-        cfg_base = self._config(use_hdc=False)
-        cfg_hdc  = self._config(use_hdc=True)
+# ---------------------------------------------------------------------------
+# TEST 7 — D_hdc sweep
+# SPEC: document the minimum D_hdc that passes the orthogonality gate.
+# D=1024 is the conftest canonical; 2048 and 4096 are higher-fidelity options.
+# ---------------------------------------------------------------------------
 
-        torch.manual_seed(0)
-        model_base = DrexTransformer(cfg_base)
-        torch.manual_seed(0)
-        model_hdc  = DrexTransformer(cfg_hdc)
 
-        # Copy all shared weights so the only difference is the HDC encoder
-        model_hdc.load_state_dict(model_base.state_dict(), strict=False)
+@pytest.mark.parametrize("d_hdc", [1024, 2048, 4096])
+def test_d_hdc_sweep_orthogonality(d_hdc: int) -> None:
+    """Orthogonality gate: mean |cosine_sim| < 0.05 at each D_hdc value."""
+    enc = HDCTokenEncoder(d_hdc=d_hdc, vocab_size=VOCAB_SIZE, normalize=False, seed=SEED)
+    enc.eval()
 
-        model_base.eval()
-        model_hdc.eval()
-        ids = torch.randint(0, 256, (1, 8))
-        logits_base, _ = model_base(ids)
-        logits_hdc,  _ = model_hdc(ids)
+    rng = torch.Generator()
+    rng.manual_seed(99)
 
-        assert not torch.allclose(logits_base, logits_hdc, atol=1e-4), (
-            "HDC encoder made no difference to logits; it may not be wired correctly"
+    sims = []
+    attempts = 0
+    while len(sims) < 1000 and attempts < 5000:
+        ids = torch.randint(0, VOCAB_SIZE, (2,), generator=rng, dtype=torch.int32)
+        attempts += 1
+        if ids[0].item() == ids[1].item():
+            continue
+        hv_a = enc.encode_token(ids[0])
+        hv_b = enc.encode_token(ids[1])
+        sims.append(
+            F.cosine_similarity(hv_a.unsqueeze(0), hv_b.unsqueeze(0)).abs().item()
         )
 
-    def test_combined_esn_and_hdc(self) -> None:
-        """ESN memory and HDC encoder should work together without error."""
-        config = DrexConfig(
-            d_model=64, n_heads=2, n_layers=2, vocab_size=256,
-            window_size=16, max_seq_len=128,
-            use_episodic_memory=True,
-            use_esn_memory=True,
-            esn_reservoir_mult=2,
-            use_hdc_encoder=True,
-            hdc_dim=256,
-        )
-        model = DrexTransformer(config)
-        model.eval()
-        ids = torch.randint(0, 256, (1, 16))
-        logits, states = model(ids)
-        assert not torch.isnan(logits).any()
-        assert logits.shape == (1, 16, 256)
+    assert len(sims) >= 1000
+    mean_sim = sum(sims) / len(sims)
+    assert mean_sim < 0.05, (
+        f"[D_hdc={d_hdc}] Orthogonality FAILED: mean |cosine_sim| = {mean_sim:.4f} ≥ 0.05"
+    )

@@ -36,7 +36,7 @@ Key changes in v0.2 vs legacy:
 | Wave | Component                | File                            | Status              |
 |------|--------------------------|---------------------------------|---------------------|
 | 0    | CI Infrastructure        | .github/workflows/ci.yml        | ✅ complete (44 tests green) |
-| 1    | HDC Token Encoder        | src/hdc/encoder.py              | 🔲 not started       |
+| 1    | HDC Token Encoder        | src/hdc/encoder.py              | ✅ complete (62 tests green, D_hdc_min=1024) |
 | 2    | ESN Reservoir + feedback | src/memory/reservoir.py         | 🔲 not started       |
 | 2    | Episodic Memory          | src/memory/episodic.py          | 🔲 not started       |
 | 3    | Mamba PCN Backbone       | src/backbone/mamba.py           | 🔲 not started       |
