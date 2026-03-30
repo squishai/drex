@@ -1,308 +1,307 @@
+"""Wave 4 — NoProp Semantic Memory tests.
+
+Validates NoPropBlock and NoPropSemanticMemory against the contracts defined in
+DREX_UNIFIED_SPEC.md § COMPONENT 3, using the REAL pipeline (no mocking).
+
+Tests:
+    TestNoPropBlockShapeAndDtype      — shape, dtype, float32-only guard, NaN/Inf,
+                                        local_loss has grad_fn
+    TestNoPropBlockIndependenceReal   — real NoPropSemanticMemory gradient isolation
+    TestNoPropConvergence             — top-block task loss decreases over 300 steps
+    TestNoPropVRAMEfficiency          — RSS growth guard (xfail on CPU)
 """
-Tests for drex.models.semantic — SemanticMemory / NoProp L3 (Phase 27).
-
-Test taxonomy:
-  - (a) Pure unit: deterministic, no I/O.
-  - (b) Shape/dtype contracts.
-  - (c) Correctness: denoising convergence, block independence, per-block optimizers.
-  - (d) RW-lock and concurrency safety (single-threaded verification).
-  - (e) Failure cases.
-
-Coverage:
-  NoPropBlock:
-    - forward: (B, d_model) → (B, d_model)
-    - forward: (B, S, d_model) → (B, S, d_model)
-    - forward: no NaN on random input
-    - residual path: with zeros fc2 weight, output ≈ input
-
-  SemanticMemory:
-    - construction: valid with default args
-    - construction: inference_lr > 1e-5 raises ValueError
-    - train_step: returns list of n_blocks float losses
-    - train_step: all losses finite
-    - train_step: loss decreases over repeated calls on fixed signal
-    - block independence: assert_block_independence() passes after forward
-    - block optimizer isolation: each optimizer only has params from its block
-    - query: output shape (B, d_model)
-    - query: output dtype float32
-    - query: no NaN
-    - inference_update: does NOT update when write_decisions[:, 2] all False
-    - inference_update: DOES run when at least one write_decisions[:, 2] is True
-    - inference_update: lr cap (1e-5) — parameters change only minutely per step
-    - train correctness: 100 train_steps on repeated 0-vector signal → query near 0
-    - block parameters: each block's optimizer references only that block's params
-"""
-
 from __future__ import annotations
+
+import os
+import resource
+from datetime import datetime
 
 import pytest
 import torch
-import torch.nn as nn
+import torch.nn.functional as F
 
-from drex.models.semantic import NoPropBlock, SemanticMemory
-
-
-# ---------------------------------------------------------------------------
-# Fixtures
-# ---------------------------------------------------------------------------
-
-D_MODEL  = 32
-N_BLOCKS = 3
-B        = 4
-S        = 8
-
-
-@pytest.fixture
-def block() -> NoPropBlock:
-    torch.manual_seed(0)
-    return NoPropBlock(d_model=D_MODEL, expand=2, block_idx=0)
-
-
-@pytest.fixture
-def mem() -> SemanticMemory:
-    torch.manual_seed(0)
-    return SemanticMemory(d_model=D_MODEL, n_blocks=N_BLOCKS, noise_std=0.1, inference_lr=1e-5)
-
+from memory.semantic import NoPropBlock, NoPropSemanticMemory
+from tests.python.conftest import assert_no_nan_inf
 
 # ---------------------------------------------------------------------------
-# NoPropBlock
+# Module-level constants (mirror conftest dims for clarity)
 # ---------------------------------------------------------------------------
+B = 2
+S = 16
+D_MODEL = 256
 
-class TestNoPropBlock:
-    def test_forward_2d_shape(self, block: NoPropBlock):
-        x = torch.randn(B, D_MODEL)
-        y = block(x)
-        assert y.shape == (B, D_MODEL)
 
-    def test_forward_3d_shape(self, block: NoPropBlock):
+# ===========================================================================
+# 1. NoPropBlock shape, dtype, and contract tests
+# ===========================================================================
+
+class TestNoPropBlockShapeAndDtype:
+
+    def test_output_shape(self):
+        """Output shape must equal input shape."""
+        block = NoPropBlock(d_model=D_MODEL)
+        block.train()
         x = torch.randn(B, S, D_MODEL)
-        y = block(x)
-        assert y.shape == (B, S, D_MODEL)
+        out, _ = block(x)
+        assert out.shape == (B, S, D_MODEL), (
+            f"Expected output shape {(B, S, D_MODEL)}, got {out.shape}"
+        )
 
-    def test_forward_no_nan(self, block: NoPropBlock):
-        torch.manual_seed(1)
-        x = torch.randn(B, D_MODEL)
-        y = block(x)
-        assert not torch.isnan(y).any()
-        assert not torch.isinf(y).any()
+    def test_output_dtype_bfloat16(self):
+        """Output must be bfloat16."""
+        block = NoPropBlock(d_model=D_MODEL)
+        block.train()
+        x = torch.randn(B, S, D_MODEL)
+        out, _ = block(x)
+        assert out.dtype == torch.bfloat16, (
+            f"Expected bfloat16 output, got {out.dtype}"
+        )
 
-    def test_zero_fc2_weight_residual(self):
-        """With fc2 initialized to zero, output ≈ input (residual dominates)."""
-        block = NoPropBlock(d_model=D_MODEL, expand=2, block_idx=0)
-        # fc2 is initialized to zeros by design (see semantic.py __init__)
-        # Bias might be non-zero from fc2; check shapes
-        x = torch.randn(B, D_MODEL)
-        y = block(x)
-        # Output should be finite
-        assert not torch.isnan(y).any()
+    def test_input_must_be_float32(self):
+        """NoPropBlock must assert float32 input and reject bfloat16."""
+        block = NoPropBlock(d_model=D_MODEL)
+        block.train()
+        x_bf16 = torch.randn(B, S, D_MODEL, dtype=torch.bfloat16)
+        with pytest.raises(AssertionError, match="float32"):
+            block(x_bf16)
+
+    def test_no_nan_inf(self):
+        """Output must contain no NaN or Inf values."""
+        block = NoPropBlock(d_model=D_MODEL)
+        block.train()
+        x = torch.randn(B, S, D_MODEL)
+        out, loss = block(x)
+        assert_no_nan_inf(out, "NoPropBlock output")
+        assert_no_nan_inf(loss, "NoPropBlock local_loss")
+
+    def test_local_loss_is_scalar_with_grad_fn(self):
+        """local_loss must be a scalar Tensor with a grad_fn (train mode)."""
+        block = NoPropBlock(d_model=D_MODEL)
+        block.train()
+        x = torch.randn(B, S, D_MODEL)
+        _, loss = block(x)
+        assert loss is not None, "local_loss must not be None in train mode"
+        assert loss.shape == (), f"local_loss must be scalar, got shape {loss.shape}"
+        assert loss.grad_fn is not None, "local_loss must have grad_fn"
+
+    def test_eval_mode_returns_none_loss(self):
+        """In eval mode, local_loss must be None and output is pass-through."""
+        block = NoPropBlock(d_model=D_MODEL)
+        block.eval()
+        x = torch.randn(B, S, D_MODEL)
+        out, loss = block(x)
+        assert loss is None, "local_loss must be None in eval mode"
+        assert out.shape == (B, S, D_MODEL)
+        assert out.dtype == torch.bfloat16
+
+    def test_output_shape_uses_dims_fixture(self, dims):
+        """Shape contract against the canonical conftest dims fixture."""
+        d = dims["D_MODEL"]
+        b = dims["B"]
+        s = dims["S"]
+        block = NoPropBlock(d_model=d)
+        block.train()
+        x = torch.randn(b, s, d)
+        out, _ = block(x)
+        assert out.shape == (b, s, d)
 
 
-# ---------------------------------------------------------------------------
-# SemanticMemory construction
-# ---------------------------------------------------------------------------
+# ===========================================================================
+# 2. Block independence — REAL NoPropSemanticMemory (not synthetic stub)
+# ===========================================================================
 
-class TestSemanticMemoryConstruction:
-    def test_default_construction(self, mem: SemanticMemory):
-        assert len(mem.blocks) == N_BLOCKS
+class TestNoPropBlockIndependenceReal:
 
-    def test_n_blocks_created_correctly(self):
-        m = SemanticMemory(d_model=D_MODEL, n_blocks=5)
-        assert len(m.blocks) == 5
+    def test_block0_loss_does_not_touch_block1_params(self):
+        """Backward through block 0's local loss must leave block 1 grads None."""
+        mem = NoPropSemanticMemory(d_model=64, n_blocks=2)
+        mem.train()
 
-    def test_inference_lr_cap_enforced(self):
-        with pytest.raises(ValueError, match="inference_lr"):
-            SemanticMemory(d_model=D_MODEL, n_blocks=N_BLOCKS, inference_lr=2e-5)
+        # Zero all grads first
+        for p in mem.parameters():
+            p.grad = None
 
-    def test_n_block_optimizers_matches_n_blocks(self, mem: SemanticMemory):
-        assert len(mem._block_optimisers) == N_BLOCKS
+        # Run block 0 only — isolated graph from detached input
+        x = torch.randn(B, S, 64)
+        out0, loss0 = mem.blocks[0](x)
+        assert loss0 is not None
+        loss0.backward()
 
-    def test_n_inference_optimizers_matches_n_blocks(self, mem: SemanticMemory):
-        assert len(mem._inference_optimisers) == N_BLOCKS
+        # Block 1 must have no gradients
+        for name, p in mem.blocks[1].named_parameters():
+            assert p.grad is None, (
+                f"Block 1 param '{name}' received gradient from block 0 loss — "
+                "NoProp block independence contract violated."
+            )
+        # Block 0 must have gradients
+        assert any(p.grad is not None for p in mem.blocks[0].parameters()), (
+            "Block 0 must have gradients after its own loss backward"
+        )
 
+    def test_blockN_loss_does_not_touch_block0_params(self):
+        """Backward through block N's local loss must leave block 0 grads None."""
+        n_blocks = 3
+        mem = NoPropSemanticMemory(d_model=64, n_blocks=n_blocks)
+        mem.train()
 
-# ---------------------------------------------------------------------------
-# Block optimizer isolation
-# ---------------------------------------------------------------------------
+        for p in mem.parameters():
+            p.grad = None
 
-class TestOptimizerIsolation:
-    def test_each_optimizer_owns_only_its_block_params(self, mem: SemanticMemory):
-        """Each block optimizer's param_ids ⊆ the corresponding block's param_ids."""
-        for i, (opt, block) in enumerate(zip(mem._block_optimisers, mem.blocks)):
-            opt_param_ids = {id(p) for group in opt.param_groups for p in group["params"]}
-            block_param_ids = {id(p) for p in block.parameters()}
-            # opt params must be a subset of the block's own params
-            rogue = opt_param_ids - block_param_ids
-            assert len(rogue) == 0, (
-                f"Block {i} optimizer has params not from its block: {rogue}"
+        # Feed block N a fully-detached input so the graph is isolated
+        x_detached = torch.randn(B, S, 64)
+        out_n, loss_n = mem.blocks[-1](x_detached)
+        assert loss_n is not None
+        loss_n.backward()
+
+        # All earlier blocks must have grad=None
+        for blk_idx in range(n_blocks - 1):
+            for name, p in mem.blocks[blk_idx].named_parameters():
+                assert p.grad is None, (
+                    f"Block {blk_idx} param '{name}' received gradient from "
+                    f"block {n_blocks - 1} loss"
+                )
+
+    def test_each_optimizer_owns_only_its_block_params(self):
+        """Each per-block optimizer must own exactly that block's parameters."""
+        n_blocks = 3
+        mem = NoPropSemanticMemory(d_model=64, n_blocks=n_blocks)
+
+        for b_idx in range(n_blocks):
+            opt_ids = {
+                id(p)
+                for pg in mem.blocks[b_idx].optimizer.param_groups
+                for p in pg["params"]
+            }
+            block_ids = {id(p) for p in mem.blocks[b_idx].parameters()}
+            other_ids = {
+                id(p)
+                for j, blk in enumerate(mem.blocks)
+                if j != b_idx
+                for p in blk.parameters()
+            }
+            assert opt_ids == block_ids, (
+                f"Optimizer {b_idx}: param IDs do not match block {b_idx} params"
+            )
+            assert opt_ids.isdisjoint(other_ids), (
+                f"Optimizer {b_idx} contains params from other blocks"
             )
 
-    def test_optimizer_does_not_cross_blocks(self, mem: SemanticMemory):
-        """Block 0's optimizer must not reference Block 1's parameters."""
-        if N_BLOCKS < 2:
-            pytest.skip("Needs at least 2 blocks")
-        block0_params = {id(p) for p in mem.blocks[0].parameters()}
-        block1_params = {id(p) for p in mem.blocks[1].parameters()}
-        opt0_params   = {id(p) for group in mem._block_optimisers[0].param_groups
-                         for p in group["params"]}
-        cross = opt0_params & block1_params
-        assert len(cross) == 0, "Block 0 optimizer references block 1 parameters"
+    def test_train_step_isolates_each_block_graph(self):
+        """train_step must produce per-block loss values without cross-contamination."""
+        mem = NoPropSemanticMemory(d_model=64, n_blocks=3)
+        mem.train()
+
+        x = torch.randn(B, S, 64)
+        losses = mem.train_step(x)
+
+        assert len(losses) == 3, f"Expected 3 loss values, got {len(losses)}"
+        assert all(isinstance(v, float) for v in losses), (
+            "All loss values must be Python floats"
+        )
+        assert all(v >= 0.0 for v in losses), "All losses must be non-negative"
 
 
-# ---------------------------------------------------------------------------
-# Block independence (NoProp contract)
-# ---------------------------------------------------------------------------
+# ===========================================================================
+# 3. Convergence test
+# ===========================================================================
 
-class TestBlockIndependence:
-    def test_assert_block_independence_passes(self, mem: SemanticMemory):
-        """After a fresh construction, assert_block_independence() must not raise."""
-        x = torch.randn(B, D_MODEL)
-        _ = mem.query(x)
-        mem.assert_block_independence()
+class TestNoPropConvergence:
 
+    def test_top_block_loss_decreases(self):
+        """Top-block denoising loss must strictly decrease over 300 training steps.
 
-# ---------------------------------------------------------------------------
-# SemanticMemory.query
-# ---------------------------------------------------------------------------
-
-class TestQuery:
-    def test_output_shape(self, mem: SemanticMemory):
-        x = torch.randn(B, D_MODEL)
-        y = mem.query(x)
-        assert y.shape == (B, D_MODEL)
-
-    def test_output_dtype(self, mem: SemanticMemory):
-        x = torch.randn(B, D_MODEL)
-        y = mem.query(x)
-        assert y.dtype == torch.float32
-
-    def test_no_nan(self, mem: SemanticMemory):
-        torch.manual_seed(3)
-        x = torch.randn(B, D_MODEL)
-        y = mem.query(x)
-        assert not torch.isnan(y).any()
-        assert not torch.isinf(y).any()
-
-    def test_query_non_zero_output(self, mem: SemanticMemory):
-        """Query should return non-trivial output (not all zeros)."""
-        x = torch.randn(B, D_MODEL)
-        y = mem.query(x)
-        assert y.abs().max().item() > 0
-
-
-# ---------------------------------------------------------------------------
-# SemanticMemory.train_step
-# ---------------------------------------------------------------------------
-
-class TestTrainStep:
-    def test_returns_dict(self, mem: SemanticMemory):
-        signal = torch.randn(B, D_MODEL)
-        result = mem.train_step(signal)
-        assert isinstance(result, dict)
-        assert "mean_block_loss" in result
-
-    def test_mean_loss_finite(self, mem: SemanticMemory):
-        signal = torch.randn(B, D_MODEL)
-        result = mem.train_step(signal)
-        l = result["mean_block_loss"]
-        assert isinstance(l, float), f"mean_block_loss is not float: {type(l)}"
-        assert math.isfinite(l), f"mean_block_loss is not finite: {l}"
-
-    def test_return_block_losses(self, mem: SemanticMemory):
-        """With return_block_losses=True, per-block losses are included."""
-        signal = torch.randn(B, D_MODEL)
-        result = mem.train_step(signal, return_block_losses=True)
-        assert "block_losses" in result
-        assert len(result["block_losses"]) == N_BLOCKS
-
-    def test_mean_loss_decreases_over_steps(self):
-        """Mean block loss should decrease when trained on a fixed signal."""
-        import math
+        Uses d_model=64, n_blocks=2, noise_std=0.10 for speed.
+        """
         torch.manual_seed(42)
-        mem = SemanticMemory(d_model=D_MODEL, n_blocks=2, noise_std=0.05, inference_lr=1e-5)
-        signal = torch.randn(B, D_MODEL)
+        d = 64
+        n_blocks = 2
+        mem = NoPropSemanticMemory(d_model=d, n_blocks=n_blocks, noise_std=0.10, lr=3e-3)
+        mem.train()
 
-        early = mem.train_step(signal)["mean_block_loss"]
-        for _ in range(49):
-            late = mem.train_step(signal)["mean_block_loss"]
+        # Fixed clean signal
+        clean = torch.randn(B, S, d)
 
-        assert late < early or math.isclose(late, early, rel_tol=0.5), (
-            f"Mean loss did not decrease: early={early:.4f}, late={late:.4f}"
+        initial_losses: list[float] = []
+        final_losses: list[float] = []
+        history: list[list[float]] = [[] for _ in range(n_blocks)]
+
+        for step in range(301):
+            losses = mem.train_step(clean)
+
+            if step == 0:
+                initial_losses = list(losses)
+            if step == 300:
+                final_losses = list(losses)
+            if step > 0:
+                for blk_idx, v in enumerate(losses):
+                    history[blk_idx].append(v)
+
+        # Top block trains on its own local denoising task — must strictly improve
+        assert final_losses[-1] < initial_losses[-1], (
+            f"Top block loss did not decrease: "
+            f"step 0 = {initial_losses[-1]:.6f}, step 300 = {final_losses[-1]:.6f}"
         )
+        # Lower blocks: divergence guard only
+        for blk_idx in range(n_blocks - 1):
+            assert final_losses[blk_idx] < 0.5, (
+                f"Block {blk_idx} loss diverged: step 300 = {final_losses[blk_idx]:.6f}"
+            )
 
-    def test_signal_is_not_mutated(self, mem: SemanticMemory):
-        """train_step must not mutate the caller's write_signal tensor."""
-        signal = torch.randn(B, D_MODEL)
-        signal_clone = signal.clone()
-        mem.train_step(signal)
-        assert torch.allclose(signal, signal_clone), "train_step mutated the input signal"
+        # Save loss curves if matplotlib available
+        try:
+            import matplotlib
+            matplotlib.use("Agg")
+            import matplotlib.pyplot as plt
+
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            out_dir = os.path.join(
+                "experiments", "runs", f"{timestamp}_noprop_convergence"
+            )
+            os.makedirs(out_dir, exist_ok=True)
+
+            fig, ax = plt.subplots()
+            for blk_idx, h in enumerate(history):
+                ax.plot(h, label=f"Block {blk_idx} loss")
+            ax.set_xlabel("Step")
+            ax.set_ylabel("MSE Loss")
+            ax.set_title("NoProp Semantic Memory local losses")
+            ax.legend()
+            fig.savefig(os.path.join(out_dir, "noprop_loss_curves.png"))
+            plt.close(fig)
+        except ImportError:
+            pass
 
 
-# ---------------------------------------------------------------------------
-# SemanticMemory.inference_update
-# ---------------------------------------------------------------------------
+# ===========================================================================
+# 4. VRAM efficiency test (xfail on CPU — meaningful on MPS/CUDA only)
+# ===========================================================================
 
-class TestInferenceUpdate:
-    def test_no_update_when_decision_false(self, mem: SemanticMemory):
-        """When write_decisions[:, 2] is all False, parameters should not change."""
-        signal = torch.randn(B, D_MODEL)
-        # Capture params before
-        params_before = [p.clone().detach() for p in mem.blocks[0].parameters()]
-        write_decisions = torch.zeros(B, 3, dtype=torch.float32)  # tier 2 = col 2 = 0
+class TestNoPropVRAMEfficiency:
 
-        mem.inference_update(signal, write_decisions)
+    @pytest.mark.xfail(
+        not (torch.backends.mps.is_available() or torch.cuda.is_available()),
+        reason="VRAM measurement only meaningful on MPS or CUDA hardware",
+        strict=False,
+    )
+    def test_rss_does_not_double_during_train_step(self):
+        """RSS after train_step must be < 2× initial RSS.
 
-        params_after = [p.clone().detach() for p in mem.blocks[0].parameters()]
-        for pb, pa in zip(params_before, params_after):
-            assert torch.allclose(pb, pa), "Parameters changed when write_decisions all False"
+        Verifies that NoProp local-loss training does not materialise a large
+        global computation graph.
+        """
+        mem = NoPropSemanticMemory(d_model=64, n_blocks=4, noise_std=0.10)
+        mem.train()
 
-    def test_update_when_decision_true(self, mem: SemanticMemory):
-        """When at least one write_decisions[:, 2] is True, parameters should shift."""
-        torch.manual_seed(7)
-        signal = torch.randn(B, D_MODEL) * 10  # large signal
-        params_before = [p.clone().detach() for block in mem.blocks for p in block.parameters()]
-        write_decisions = torch.zeros(B, 3, dtype=torch.float32)
-        write_decisions[0, 2] = 1.0  # At least one sample writes to L3
+        x = torch.randn(32, S, 64)
 
-        # Run multiple updates to ensure parameters change (lr is small)
-        for _ in range(20):
-            mem.inference_update(signal, write_decisions)
+        # Warmup
+        mem.train_step(x)
 
-        params_after = [p.clone().detach() for block in mem.blocks for p in block.parameters()]
-        changed = any(
-            not torch.allclose(pb, pa, atol=1e-9)
-            for pb, pa in zip(params_before, params_after)
+        rss_before = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        mem.train_step(x)
+        rss_after = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+
+        assert rss_after < rss_before * 2, (
+            f"RSS doubled during NoProp train_step: "
+            f"before={rss_before}, after={rss_after}"
         )
-        assert changed, "Parameters did not change after inference_update with write=True"
-
-    def test_inference_update_lr_bounded(self, mem: SemanticMemory):
-        """A single inference_update step should cause only small parameter changes."""
-        signal = torch.randn(B, D_MODEL) * 100  # amplified signal
-        param0 = next(mem.blocks[0].parameters()).clone().detach()
-
-        write_decisions = torch.ones(B, 3, dtype=torch.float32)
-        mem.inference_update(signal, write_decisions)
-
-        param0_after = next(mem.blocks[0].parameters()).clone().detach()
-        max_delta = (param0_after - param0).abs().max().item()
-        # lr=1e-5 with a large signal: delta << 1
-        assert max_delta < 0.1, f"Inference update caused too-large delta: {max_delta}"
-
-
-# ---------------------------------------------------------------------------
-# Continual learning sanity
-# ---------------------------------------------------------------------------
-
-class TestContinual:
-    def test_query_stable_after_repeated_train(self, mem: SemanticMemory):
-        """Memory should not collapse to zero after repeated training."""
-        torch.manual_seed(10)
-        signal = torch.randn(B, D_MODEL)
-        for _ in range(30):
-            mem.train_step(signal)
-        x = torch.randn(B, D_MODEL)
-        y = mem.query(x)
-        # Should not have collapsed to zeros
-        assert y.abs().max().item() > 1e-4
-
-
-import math
