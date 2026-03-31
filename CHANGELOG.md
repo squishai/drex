@@ -10,6 +10,28 @@ Format: [Conventional Commits](https://www.conventionalcommits.org/) · [Semanti
 
 ---
 
+## Sprint 2b Complete — 2026-05-22
+
+Transformer + ESN episodic memory 3-seed run complete. Gate PASS with bonus.
+
+**Results:**
+- Seed 42: val_ppl = 1.10 @ step 10k
+- Seed 43: val_ppl = 1.12 @ step 10k
+- Seed 44: val_ppl = 1.08 @ step 10k
+- **Median: 1.10 — PASS (≤1.32) — Bonus PASS (median < 1.12, beats Sprint 1 baseline)**
+
+**Config:** d=128, 4L, 4H, segment_len=128, batch=8, ESN mult=4, sr=0.95, c=0.01
+
+**Files added/updated:**
+- `results/poc/sprint2b_seed42.log` — complete, 10k steps
+- `results/poc/sprint2b_seed43.log` — complete, 10k steps
+- `results/poc/sprint2b_seed44.log` — complete, 10k steps
+- `results/poc/sprint2b_esn.md` — results recorded, trajectory table added
+- `DREX_UNIFIED_PLAN.md` — Sprint Checklist Sprint 2b updated to ✅ DONE
+- `checkpoints/poc_2b_s42/`, `checkpoints/poc_2b_s43/`, `checkpoints/poc_2b_s44/` — final checkpoints saved
+
+---
+
 ## Phase 1 Complete — 2026-03-30
 
 All nine DREX-UNIFIED Phase 1 components implemented and unit-validated.

@@ -723,7 +723,7 @@ submit to arXiv. **This is the experimental proof that DREX-UNIFIED works.**
 |--------|-------------------------------------|----------------------|----------------|-------|
 | 1      | Baseline transformer                | ✅ DONE (gate ✅)    | **1.12**       | s42=1.11, s43=1.48, s44=1.12 |
 | 2      | + Mamba backbone                    | ⏸️ PAUSED (cloud)   | —              | MPS: ~200 tok/s (150× slower). Run on Colab/Kaggle T4. |
-| 2b     | Transformer + ESN memory (no Mamba) | 🔄 RUNNING (local)   | —              | MPS-native sprint. Gate: median ≤ 1.32. 3 seeds. |
+| 2b     | Transformer + ESN memory (no Mamba) | ✅ DONE (gate ✅)    | **1.10**       | s42=1.10, s43=1.12, s44=1.08. Bonus PASS (median < 1.12). |
 | 3      | Mamba + ESN episodic memory         | 🔲 TODO (cloud)      | —              | seeds 42, 43, 44 |
 | 4      | Mamba + ESN + HDC encoder           | 🔲 TODO (cloud)      | —              | seeds 42, 43, 44 |
 | 5      | Scale: d=256, 8L, 50k steps         | 🔲 TODO (cloud)      | —              | seed 42 only     |

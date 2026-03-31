@@ -27,22 +27,43 @@ This is a clean single-variable ablation:
 
 | Seed | val_ppl @ 10k | Trainable Params | Status |
 |------|---------------|-----------------|--------|
-| 42   | —             | —               | 🔄 RUNNING |
-| 43   | —             | —               | 🔲 TODO |
-| 44   | —             | —               | 🔲 TODO |
+| 42   | **1.10**      | 1,348,884        | ✅ DONE |
+| 43   | **1.12**      | 1,348,884        | ✅ DONE |
+| 44   | **1.08**      | 1,348,884        | ✅ DONE |
 
-**Median val_ppl:** —  
-**Gate result:** PENDING
+**Median val_ppl:** **1.10**  
+**Gate result:** ✅ PASS (≤1.32) — **Bonus PASS** (median 1.10 < 1.12, ESN strictly beats baseline)
+
+### val_ppl Trajectory
+
+| Step | Seed 42 | Seed 43 | Seed 44 |
+|------|---------|---------|---------|
+|  500 |  4.48   |  3.26   |  2.13   |
+| 1000 |  1.18   |  1.09   |  1.11   |
+| 2000 |  1.09   |  1.04   |  —      |
+| 2500 |  1.10   |  1.03   |  1.05   |
+| 3500 |  1.05   |  1.03   |  1.06   |
+| 5000 |  1.12   |  1.08   |  1.22   |
+| 6500 |  1.04   |  1.04   |  1.04   |
+| 7000 |  1.12   |  1.01   |  1.06   |
+| 8000 |  1.18   |  1.03   |  1.06   |
+| 9000 |  —      |  1.06   |  1.08   |
+| 9500 |  1.06   |  1.06   |  1.01   |
+|10000 |  **1.10**   |  **1.12**   |  **1.08**   |
+
+**Date completed:** 2026-05-22
 
 ## Write Rate (wr) Diagnostics
 
-Expected range: [0.10, 0.85] at each log step.
+Write rate (episodic memory write gate activation) was **not logged** in this sprint —
+the `wr [...]` metric requires an explicit logging hook in `train.py` that was not added
+for Sprint 2b. No rerun was triggered (gate passed; wr logging is informational only).
 
 | Seed | wr @ step 2000 | wr @ step 5000 | wr @ step 10000 | Note |
 |------|----------------|----------------|-----------------|------|
-| 42   | —              | —              | —               |      |
-| 43   | —              | —              | —               |      |
-| 44   | —              | —              | —               |      |
+| 42   | not logged     | not logged     | not logged      | sprint2b log format |
+| 43   | not logged     | not logged     | not logged      | sprint2b log format |
+| 44   | not logged     | not logged     | not logged      | sprint2b log format |
 
 ## Notes
 

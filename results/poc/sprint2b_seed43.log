@@ -1,0 +1,982 @@
+Device: mps
+Seed: 43
+Loading TinyStories [train] …
+  Loaded 50,000,306 chars (56,013 stories)
+Dataset: 390,627 segments of 128 tokens
+Loading TinyStories [validation] …
+  Loaded 500,948 chars (619 stories)
+  Validation: 3,913 segments of 128 tokens
+Model: 1,348,884 trainable parameters
+Episodic memory: enabled  gate_thresh=0.7  [ESN reservoir  mult=4  sr=0.95  c=0.01  seed=42]
+  [skip] step 11  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 23  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 35  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 47  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 59  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 71  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 83  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 95  non-finite loss=nan — zeroing grads and resetting states
+step    100  loss 5.3810  ppl  217.23  lr 5.52e-05  4,102 tok/s
+  [skip] step 107  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 119  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 131  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 143  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 155  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 167  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 179  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 191  non-finite loss=nan — zeroing grads and resetting states
+step    200  loss 4.7400  ppl  114.43  lr 1.10e-04  1,104 tok/s
+  [skip] step 203  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 215  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 227  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 239  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 251  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 263  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 275  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 287  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 299  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 311  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 323  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 335  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 347  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 359  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 371  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 383  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 395  non-finite loss=nan — zeroing grads and resetting states
+step    400  loss 4.9543  ppl  141.78  lr 2.20e-04  1,200 tok/s
+  [skip] step 407  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 419  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 431  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 443  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 455  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 467  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 479  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 491  non-finite loss=nan — zeroing grads and resetting states
+step    500  loss 4.6213  ppl  101.63  lr 2.75e-04  1,190 tok/s
+  [val] step    500  val_loss 1.1832  val_ppl    3.26
+  [skip] step 503  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 515  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 527  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 539  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 551  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 563  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 575  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 587  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 599  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 611  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 623  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 635  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 647  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 659  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 671  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 683  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 695  non-finite loss=nan — zeroing grads and resetting states
+step    700  loss 4.4033  ppl   81.72  lr 3.00e-04  438 tok/s
+  [skip] step 707  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 719  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 731  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 743  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 755  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 767  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 779  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 791  non-finite loss=nan — zeroing grads and resetting states
+step    800  loss 4.3112  ppl   74.53  lr 3.00e-04  1,185 tok/s
+  [skip] step 803  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 815  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 827  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 839  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 851  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 863  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 875  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 887  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 899  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 911  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 923  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 935  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 947  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 959  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 971  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 983  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 995  non-finite loss=nan — zeroing grads and resetting states
+step   1000  loss 3.7610  ppl   42.99  lr 2.99e-04  1,209 tok/s
+  Checkpoint saved → checkpoints/poc_2b_s43/step_0001000.safetensors
+  [val] step   1000  val_loss 0.0896  val_ppl    1.09
+  [skip] step 1007  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1019  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1031  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1042  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1054  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1065  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1077  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1088  non-finite loss=nan — zeroing grads and resetting states
+step   1100  loss 3.5076  ppl   33.37  lr 2.98e-04  273 tok/s
+  [skip] step 1100  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1112  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1123  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1134  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1145  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1156  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1167  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1178  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1189  non-finite loss=nan — zeroing grads and resetting states
+step   1200  loss 3.1308  ppl   22.89  lr 2.97e-04  1,167 tok/s
+  [skip] step 1200  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1211  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1222  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1233  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1244  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1255  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1266  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1277  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1288  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1299  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1310  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1321  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1332  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1343  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1354  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1365  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1376  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1387  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1398  non-finite loss=nan — zeroing grads and resetting states
+step   1400  loss 3.0390  ppl   20.88  lr 2.96e-04  1,188 tok/s
+  [skip] step 1409  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1420  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1431  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1442  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1453  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1464  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1475  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1486  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1497  non-finite loss=nan — zeroing grads and resetting states
+step   1500  loss 2.8184  ppl   16.75  lr 2.94e-04  1,189 tok/s
+  [val] step   1500  val_loss 0.0833  val_ppl    1.09
+  [skip] step 1508  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1519  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1530  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1541  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1552  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1563  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1574  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1585  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1596  non-finite loss=nan — zeroing grads and resetting states
+step   1600  loss 2.7389  ppl   15.47  lr 2.93e-04  268 tok/s
+  [skip] step 1607  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1618  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1629  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1640  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1651  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1662  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1673  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1684  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1695  non-finite loss=nan — zeroing grads and resetting states
+step   1700  loss 2.6252  ppl   13.81  lr 2.92e-04  1,243 tok/s
+  [skip] step 1706  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1717  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1728  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1739  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1750  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1761  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1772  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1783  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1794  non-finite loss=nan — zeroing grads and resetting states
+step   1800  loss 2.6595  ppl   14.29  lr 2.90e-04  1,214 tok/s
+  [skip] step 1805  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1816  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1827  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1838  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1849  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1860  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1871  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1882  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1893  non-finite loss=nan — zeroing grads and resetting states
+step   1900  loss 2.7130  ppl   15.07  lr 2.89e-04  1,241 tok/s
+  [skip] step 1904  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1915  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1926  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1937  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1948  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1959  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1970  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1981  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 1992  non-finite loss=nan — zeroing grads and resetting states
+step   2000  loss 2.4697  ppl   11.82  lr 2.87e-04  1,202 tok/s
+  Checkpoint saved → checkpoints/poc_2b_s43/step_0002000.safetensors
+  [val] step   2000  val_loss 0.0359  val_ppl    1.04
+  [skip] step 2003  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2014  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2025  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2036  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2047  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2058  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2069  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2080  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2091  non-finite loss=nan — zeroing grads and resetting states
+step   2100  loss 2.7092  ppl   15.02  lr 2.85e-04  279 tok/s
+  [skip] step 2102  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2113  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2124  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2135  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2146  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2157  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2168  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2179  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2190  non-finite loss=nan — zeroing grads and resetting states
+step   2200  loss 2.5474  ppl   12.77  lr 2.84e-04  5,914 tok/s
+  [skip] step 2201  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2212  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2223  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2234  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2245  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2256  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2267  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2278  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2289  non-finite loss=nan — zeroing grads and resetting states
+step   2300  loss 2.5336  ppl   12.60  lr 2.82e-04  6,204 tok/s
+  [skip] step 2300  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2311  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2322  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2333  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2344  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2355  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2366  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2377  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2388  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2399  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2410  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2421  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2432  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2443  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2454  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2465  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2476  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2487  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2498  non-finite loss=nan — zeroing grads and resetting states
+step   2500  loss 2.4759  ppl   11.89  lr 2.77e-04  6,229 tok/s
+  [val] step   2500  val_loss 0.0282  val_ppl    1.03
+  [skip] step 2509  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2521  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2533  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2544  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2555  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2566  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2577  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2588  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2599  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2610  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2621  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2632  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2643  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2655  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2666  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2677  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2689  non-finite loss=nan — zeroing grads and resetting states
+step   2700  loss 2.9496  ppl   19.10  lr 2.73e-04  513 tok/s
+  [skip] step 2701  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2713  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2725  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2737  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2748  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2760  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2772  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2783  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2794  non-finite loss=nan — zeroing grads and resetting states
+step   2800  loss 2.6532  ppl   14.20  lr 2.70e-04  1,356 tok/s
+  [skip] step 2805  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2816  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2828  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2839  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2851  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2862  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2874  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2885  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2896  non-finite loss=nan — zeroing grads and resetting states
+step   2900  loss 2.7586  ppl   15.78  lr 2.67e-04  1,390 tok/s
+  [skip] step 2908  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2919  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2931  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2942  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2954  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2966  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2977  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 2989  non-finite loss=nan — zeroing grads and resetting states
+step   3000  loss 2.6875  ppl   14.70  lr 2.65e-04  1,404 tok/s
+  Checkpoint saved → checkpoints/poc_2b_s43/step_0003000.safetensors
+  [val] step   3000  val_loss 0.0450  val_ppl    1.05
+  [skip] step 3000  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3012  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3024  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3035  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3046  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3058  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3070  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3081  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3093  non-finite loss=nan — zeroing grads and resetting states
+step   3100  loss 2.6784  ppl   14.56  lr 2.62e-04  289 tok/s
+  [skip] step 3104  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3115  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3127  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3139  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3151  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3162  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3174  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3186  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3198  non-finite loss=nan — zeroing grads and resetting states
+step   3200  loss 2.5415  ppl   12.70  lr 2.59e-04  1,391 tok/s
+  [skip] step 3210  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3222  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3234  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3246  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3258  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3270  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3282  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3294  non-finite loss=nan — zeroing grads and resetting states
+step   3300  loss 2.4924  ppl   12.09  lr 2.56e-04  1,363 tok/s
+  [skip] step 3306  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3318  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3330  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3342  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3354  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3366  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3378  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3390  non-finite loss=nan — zeroing grads and resetting states
+step   3400  loss 2.5549  ppl   12.87  lr 2.53e-04  1,362 tok/s
+  [skip] step 3402  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3414  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3426  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3438  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3450  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3462  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3474  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3486  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3498  non-finite loss=nan — zeroing grads and resetting states
+step   3500  loss 2.5427  ppl   12.71  lr 2.50e-04  1,372 tok/s
+  [val] step   3500  val_loss 0.0267  val_ppl    1.03
+  [skip] step 3510  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3522  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3534  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3546  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3558  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3570  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3582  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3594  non-finite loss=nan — zeroing grads and resetting states
+step   3600  loss 2.4873  ppl   12.03  lr 2.47e-04  299 tok/s
+  [skip] step 3606  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3618  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3630  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3642  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3654  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3666  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3678  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3690  non-finite loss=nan — zeroing grads and resetting states
+step   3700  loss 2.4957  ppl   12.13  lr 2.43e-04  1,385 tok/s
+  [skip] step 3702  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3714  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3726  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3738  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3750  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3762  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3774  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3786  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3798  non-finite loss=nan — zeroing grads and resetting states
+step   3800  loss 2.5489  ppl   12.79  lr 2.40e-04  1,349 tok/s
+  [skip] step 3810  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3822  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3834  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3846  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3858  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3870  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3882  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3894  non-finite loss=nan — zeroing grads and resetting states
+step   3900  loss 2.5694  ppl   13.06  lr 2.37e-04  1,388 tok/s
+  [skip] step 3906  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3918  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3930  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3942  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3954  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3966  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3978  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 3990  non-finite loss=nan — zeroing grads and resetting states
+step   4000  loss 2.4108  ppl   11.14  lr 2.33e-04  1,409 tok/s
+  Checkpoint saved → checkpoints/poc_2b_s43/step_0004000.safetensors
+  [val] step   4000  val_loss 0.0617  val_ppl    1.06
+  [skip] step 4002  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4014  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4026  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4038  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4050  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4062  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4074  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4086  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4098  non-finite loss=nan — zeroing grads and resetting states
+step   4100  loss 2.6158  ppl   13.68  lr 2.29e-04  285 tok/s
+  [skip] step 4110  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4122  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4134  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4146  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4158  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4170  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4182  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4194  non-finite loss=nan — zeroing grads and resetting states
+step   4200  loss 2.5077  ppl   12.28  lr 2.26e-04  1,345 tok/s
+  [skip] step 4206  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4218  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4230  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4242  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4254  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4266  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4278  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4290  non-finite loss=nan — zeroing grads and resetting states
+step   4300  loss 2.4992  ppl   12.17  lr 2.22e-04  1,399 tok/s
+  [skip] step 4302  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4314  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4326  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4338  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4350  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4362  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4374  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4386  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4398  non-finite loss=nan — zeroing grads and resetting states
+step   4400  loss 2.6359  ppl   13.96  lr 2.18e-04  1,639 tok/s
+  [skip] step 4410  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4422  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4434  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4446  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4458  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4470  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4482  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4494  non-finite loss=nan — zeroing grads and resetting states
+step   4500  loss 2.5609  ppl   12.95  lr 2.15e-04  5,122 tok/s
+  [val] step   4500  val_loss 0.0592  val_ppl    1.06
+  [skip] step 4506  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4518  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4530  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4542  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4554  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4566  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4578  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4590  non-finite loss=nan — zeroing grads and resetting states
+step   4600  loss 2.6898  ppl   14.73  lr 2.11e-04  349 tok/s
+  [skip] step 4602  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4614  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4626  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4638  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4650  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4662  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4674  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4686  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4698  non-finite loss=nan — zeroing grads and resetting states
+step   4700  loss 2.6159  ppl   13.68  lr 2.07e-04  1,682 tok/s
+  [skip] step 4710  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4722  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4734  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4746  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4758  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4770  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4782  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4794  non-finite loss=nan — zeroing grads and resetting states
+step   4800  loss 2.5001  ppl   12.18  lr 2.03e-04  1,687 tok/s
+  [skip] step 4806  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4818  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4830  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4842  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4854  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4866  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4878  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4890  non-finite loss=nan — zeroing grads and resetting states
+step   4900  loss 2.4399  ppl   11.47  lr 1.99e-04  1,711 tok/s
+  [skip] step 4902  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4914  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4926  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4938  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4950  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4962  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4974  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4986  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 4998  non-finite loss=nan — zeroing grads and resetting states
+step   5000  loss 2.3064  ppl   10.04  lr 1.95e-04  1,697 tok/s
+  Checkpoint saved → checkpoints/poc_2b_s43/step_0005000.safetensors
+  [val] step   5000  val_loss 0.0775  val_ppl    1.08
+  [skip] step 5010  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5022  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5034  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5046  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5058  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5070  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5082  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5094  non-finite loss=nan — zeroing grads and resetting states
+step   5100  loss 2.4409  ppl   11.48  lr 1.91e-04  358 tok/s
+  [skip] step 5106  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5118  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5130  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5142  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5154  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5166  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5178  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5190  non-finite loss=nan — zeroing grads and resetting states
+step   5200  loss 2.6144  ppl   13.66  lr 1.87e-04  4,871 tok/s
+  [skip] step 5202  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5214  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5226  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5238  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5250  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5262  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5274  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5286  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5298  non-finite loss=nan — zeroing grads and resetting states
+step   5300  loss 2.5494  ppl   12.80  lr 1.83e-04  6,330 tok/s
+  [skip] step 5310  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5322  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5334  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5346  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5358  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5370  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5382  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5394  non-finite loss=nan — zeroing grads and resetting states
+step   5400  loss 2.5340  ppl   12.60  lr 1.79e-04  6,371 tok/s
+  [skip] step 5406  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5418  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5430  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5442  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5454  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5466  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5478  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5490  non-finite loss=nan — zeroing grads and resetting states
+step   5500  loss 2.5598  ppl   12.93  lr 1.75e-04  6,387 tok/s
+  [val] step   5500  val_loss 0.0950  val_ppl    1.10
+  [skip] step 5502  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5514  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5526  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5538  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5550  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5562  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5574  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5586  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5598  non-finite loss=nan — zeroing grads and resetting states
+step   5600  loss 2.6897  ppl   14.73  lr 1.71e-04  602 tok/s
+  [skip] step 5610  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5622  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5634  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5646  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5658  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5670  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5682  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5694  non-finite loss=nan — zeroing grads and resetting states
+step   5700  loss 2.6528  ppl   14.19  lr 1.67e-04  2,755 tok/s
+  [skip] step 5706  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5718  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5730  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5742  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5754  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5766  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5778  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5790  non-finite loss=nan — zeroing grads and resetting states
+step   5800  loss 2.6520  ppl   14.18  lr 1.63e-04  2,980 tok/s
+  [skip] step 5802  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5814  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5826  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5838  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5850  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5862  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5874  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5886  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5898  non-finite loss=nan — zeroing grads and resetting states
+step   5900  loss 2.6520  ppl   14.18  lr 1.59e-04  2,718 tok/s
+  [skip] step 5910  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5922  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5934  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5946  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5958  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5970  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5982  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 5994  non-finite loss=nan — zeroing grads and resetting states
+step   6000  loss 2.5728  ppl   13.10  lr 1.54e-04  4,435 tok/s
+  Checkpoint saved → checkpoints/poc_2b_s43/step_0006000.safetensors
+  [val] step   6000  val_loss 0.1806  val_ppl    1.20
+  [skip] step 6006  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6018  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6030  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6042  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6054  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6066  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6078  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6090  non-finite loss=nan — zeroing grads and resetting states
+step   6100  loss 2.5998  ppl   13.46  lr 1.50e-04  582 tok/s
+  [skip] step 6102  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6114  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6126  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6138  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6150  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6162  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6174  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6186  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6198  non-finite loss=nan — zeroing grads and resetting states
+step   6200  loss 2.5857  ppl   13.27  lr 1.46e-04  2,611 tok/s
+  [skip] step 6210  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6222  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6234  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6246  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6258  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6270  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6282  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6294  non-finite loss=nan — zeroing grads and resetting states
+step   6300  loss 2.5560  ppl   12.88  lr 1.42e-04  4,891 tok/s
+  [skip] step 6306  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6318  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6330  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6342  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6354  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6366  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6378  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6390  non-finite loss=nan — zeroing grads and resetting states
+step   6400  loss 2.5547  ppl   12.87  lr 1.38e-04  6,382 tok/s
+  [skip] step 6402  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6414  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6426  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6438  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6450  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6462  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6474  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6486  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6498  non-finite loss=nan — zeroing grads and resetting states
+step   6500  loss 2.5202  ppl   12.43  lr 1.34e-04  6,292 tok/s
+  [val] step   6500  val_loss 0.0417  val_ppl    1.04
+  [skip] step 6510  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6522  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6534  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6546  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6558  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6570  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6582  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6594  non-finite loss=nan — zeroing grads and resetting states
+step   6600  loss 2.8436  ppl   17.18  lr 1.30e-04  381 tok/s
+  [skip] step 6606  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6618  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6630  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6642  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6654  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6666  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6678  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6690  non-finite loss=nan — zeroing grads and resetting states
+step   6700  loss 2.6761  ppl   14.53  lr 1.26e-04  1,209 tok/s
+  [skip] step 6702  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6714  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6726  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6738  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6750  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6762  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6774  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6786  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6798  non-finite loss=nan — zeroing grads and resetting states
+step   6800  loss 2.7922  ppl   16.32  lr 1.22e-04  1,284 tok/s
+  [skip] step 6810  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6822  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6834  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6846  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6858  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6870  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6882  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6894  non-finite loss=nan — zeroing grads and resetting states
+step   6900  loss 2.8580  ppl   17.43  lr 1.19e-04  1,318 tok/s
+  [skip] step 6906  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6918  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6930  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6942  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6954  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6966  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6978  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 6990  non-finite loss=nan — zeroing grads and resetting states
+step   7000  loss 2.6598  ppl   14.29  lr 1.15e-04  1,274 tok/s
+  Checkpoint saved → checkpoints/poc_2b_s43/step_0007000.safetensors
+  [val] step   7000  val_loss 0.0068  val_ppl    1.01
+  [skip] step 7002  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7014  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7026  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7038  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7050  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7062  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7074  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7086  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7098  non-finite loss=nan — zeroing grads and resetting states
+step   7100  loss 2.6552  ppl   14.23  lr 1.11e-04  277 tok/s
+  [skip] step 7110  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7122  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7134  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7146  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7158  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7170  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7182  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7194  non-finite loss=nan — zeroing grads and resetting states
+step   7200  loss 2.6622  ppl   14.33  lr 1.07e-04  1,273 tok/s
+  [skip] step 7206  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7218  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7230  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7242  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7254  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7266  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7278  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7290  non-finite loss=nan — zeroing grads and resetting states
+step   7300  loss 2.6591  ppl   14.28  lr 1.04e-04  1,283 tok/s
+  [skip] step 7302  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7314  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7326  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7338  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7350  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7362  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7374  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7386  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7398  non-finite loss=nan — zeroing grads and resetting states
+step   7400  loss 2.6948  ppl   14.80  lr 1.00e-04  1,272 tok/s
+  [skip] step 7410  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7422  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7434  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7446  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7458  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7470  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7482  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7494  non-finite loss=nan — zeroing grads and resetting states
+step   7500  loss 2.7072  ppl   14.99  lr 9.64e-05  1,256 tok/s
+  [val] step   7500  val_loss 0.0242  val_ppl    1.02
+  [skip] step 7506  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7518  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7530  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7542  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7554  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7566  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7578  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7590  non-finite loss=nan — zeroing grads and resetting states
+step   7600  loss 2.7121  ppl   15.06  lr 9.29e-05  262 tok/s
+  [skip] step 7602  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7614  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7626  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7638  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7650  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7662  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7674  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7686  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7698  non-finite loss=nan — zeroing grads and resetting states
+step   7700  loss 2.6003  ppl   13.47  lr 8.95e-05  1,320 tok/s
+  [skip] step 7710  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7722  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7734  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7746  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7758  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7770  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7782  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7794  non-finite loss=nan — zeroing grads and resetting states
+step   7800  loss 2.6500  ppl   14.15  lr 8.61e-05  1,317 tok/s
+  [skip] step 7806  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7818  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7830  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7842  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7854  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7866  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7878  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7890  non-finite loss=nan — zeroing grads and resetting states
+step   7900  loss 2.7236  ppl   15.24  lr 8.28e-05  1,296 tok/s
+  [skip] step 7902  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7914  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7926  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7938  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7950  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7962  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7974  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7986  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 7998  non-finite loss=nan — zeroing grads and resetting states
+step   8000  loss 2.8027  ppl   16.49  lr 7.96e-05  1,296 tok/s
+  Checkpoint saved → checkpoints/poc_2b_s43/step_0008000.safetensors
+  [val] step   8000  val_loss 0.0248  val_ppl    1.03
+  [skip] step 8010  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8022  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8034  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8046  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8058  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8070  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8082  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8094  non-finite loss=nan — zeroing grads and resetting states
+step   8100  loss 2.5331  ppl   12.59  lr 7.65e-05  301 tok/s
+  [skip] step 8106  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8118  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8130  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8142  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8154  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8166  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8178  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8190  non-finite loss=nan — zeroing grads and resetting states
+step   8200  loss 2.5538  ppl   12.86  lr 7.34e-05  6,166 tok/s
+  [skip] step 8202  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8214  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8226  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8238  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8250  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8262  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8274  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8286  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8298  non-finite loss=nan — zeroing grads and resetting states
+step   8300  loss 2.5269  ppl   12.51  lr 7.05e-05  6,163 tok/s
+  [skip] step 8310  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8322  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8334  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8346  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8358  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8370  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8382  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8394  non-finite loss=nan — zeroing grads and resetting states
+step   8400  loss 2.5247  ppl   12.49  lr 6.76e-05  6,581 tok/s
+  [skip] step 8406  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8418  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8430  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8442  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8454  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8466  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8478  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8490  non-finite loss=nan — zeroing grads and resetting states
+step   8500  loss 2.5498  ppl   12.80  lr 6.48e-05  6,493 tok/s
+  [val] step   8500  val_loss 0.0587  val_ppl    1.06
+  [skip] step 8502  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8514  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8526  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8538  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8550  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8562  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8574  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8586  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8598  non-finite loss=nan — zeroing grads and resetting states
+step   8600  loss 2.5571  ppl   12.90  lr 6.21e-05  327 tok/s
+  [skip] step 8610  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8622  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8634  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8646  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8658  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8670  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8682  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8694  non-finite loss=nan — zeroing grads and resetting states
+step   8700  loss 2.6900  ppl   14.73  lr 5.95e-05  1,253 tok/s
+  [skip] step 8706  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8718  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8730  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8742  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8754  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8766  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8778  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8790  non-finite loss=nan — zeroing grads and resetting states
+step   8800  loss 2.7940  ppl   16.35  lr 5.70e-05  1,205 tok/s
+  [skip] step 8802  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8814  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8826  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8838  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8850  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8862  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8874  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8886  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8898  non-finite loss=nan — zeroing grads and resetting states
+step   8900  loss 2.6429  ppl   14.05  lr 5.46e-05  1,331 tok/s
+  [skip] step 8910  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8922  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8934  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8946  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8958  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8970  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8982  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 8994  non-finite loss=nan — zeroing grads and resetting states
+step   9000  loss 2.6154  ppl   13.67  lr 5.23e-05  1,277 tok/s
+  Checkpoint saved → checkpoints/poc_2b_s43/step_0009000.safetensors
+  [val] step   9000  val_loss 0.0600  val_ppl    1.06
+  [skip] step 9006  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9018  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9030  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9042  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9054  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9066  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9078  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9090  non-finite loss=nan — zeroing grads and resetting states
+step   9100  loss 2.7165  ppl   15.13  lr 5.01e-05  282 tok/s
+  [skip] step 9102  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9114  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9126  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9138  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9150  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9162  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9174  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9186  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9198  non-finite loss=nan — zeroing grads and resetting states
+step   9200  loss 2.6469  ppl   14.11  lr 4.80e-05  1,244 tok/s
+  [skip] step 9210  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9222  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9234  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9246  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9258  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9270  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9282  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9294  non-finite loss=nan — zeroing grads and resetting states
+step   9300  loss 2.7918  ppl   16.31  lr 4.60e-05  1,350 tok/s
+  [skip] step 9306  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9318  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9330  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9342  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9354  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9366  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9378  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9390  non-finite loss=nan — zeroing grads and resetting states
+step   9400  loss 2.6628  ppl   14.34  lr 4.41e-05  1,243 tok/s
+  [skip] step 9402  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9414  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9426  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9438  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9450  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9462  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9474  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9486  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9498  non-finite loss=nan — zeroing grads and resetting states
+step   9500  loss 2.6292  ppl   13.86  lr 4.24e-05  1,212 tok/s
+  [val] step   9500  val_loss 0.0593  val_ppl    1.06
+  [skip] step 9510  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9522  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9534  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9546  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9558  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9570  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9582  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9594  non-finite loss=nan — zeroing grads and resetting states
+step   9600  loss 2.6425  ppl   14.05  lr 4.07e-05  279 tok/s
+  [skip] step 9606  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9618  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9630  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9642  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9653  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9665  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9677  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9689  non-finite loss=nan — zeroing grads and resetting states
+step   9700  loss 2.6806  ppl   14.59  lr 3.92e-05  1,237 tok/s
+  [skip] step 9701  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9713  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9725  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9737  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9749  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9761  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9773  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9785  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9797  non-finite loss=nan — zeroing grads and resetting states
+step   9800  loss 2.5776  ppl   13.16  lr 3.78e-05  1,288 tok/s
+  [skip] step 9809  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9821  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9833  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9845  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9857  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9869  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9881  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9893  non-finite loss=nan — zeroing grads and resetting states
+step   9900  loss 2.7196  ppl   15.17  lr 3.64e-05  1,324 tok/s
+  [skip] step 9905  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9917  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9929  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9941  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9953  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9965  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9977  non-finite loss=nan — zeroing grads and resetting states
+  [skip] step 9989  non-finite loss=nan — zeroing grads and resetting states
+step  10000  loss 2.6928  ppl   14.77  lr 3.52e-05  1,331 tok/s
+  Checkpoint saved → checkpoints/poc_2b_s43/step_0010000.safetensors
+  [val] step  10000  val_loss 0.1147  val_ppl    1.12
+
+Training complete. Final checkpoint → checkpoints/poc_2b_s43/step_0010000_final.safetensors
