@@ -236,9 +236,9 @@ function App() {
 
       <div style={{ display:"flex", flex:1, flexWrap:"wrap" }}>
         {/* SVG Diagram */}
-        <div style={{ flex:"0 0 auto", padding:"24px 16px 24px 28px" }}>
+        <div style={{ flex:"0 0 50%", minWidth:0, padding:"24px 16px 24px 28px", boxSizing:"border-box", display:"flex", alignItems:"flex-start" }}>
           <svg width={SVG_W} height={SVG_H} viewBox={`0 0 ${SVG_W} ${SVG_H}`}
-               style={{ display:"block", maxWidth:"100%" }}>
+               style={{ display:"block", width:"100%", height:"auto" }}>
             <defs>
               <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
                 <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#090e1c" strokeWidth="1"/>
@@ -337,7 +337,7 @@ function App() {
         </div>
 
         {/* Detail Panel */}
-        <div style={{ flex:"1 1 300px", padding:"24px 24px 24px 8px", display:"flex", flexDirection:"column" }}>
+        <div style={{ flex:"0 0 50%", minWidth:0, padding:"24px 24px 24px 8px", display:"flex", flexDirection:"column", boxSizing:"border-box" }}>
           {sel ? (
             <div style={{
               background:"#080d1a",
