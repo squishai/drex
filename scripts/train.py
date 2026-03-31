@@ -481,6 +481,12 @@ def train(args: argparse.Namespace) -> None:
         scheduler.step()
         global_step += 1
 
+        # Periodic TBPTT state reset — prevents unbounded state growth on CUDA.
+        # On MPS this happened accidentally via the NaN guard firing at step%12==11;
+        # on CUDA the state grows without NaN-ing, causing gradient instability.
+        if args.tbptt_reset_every > 0 and global_step % args.tbptt_reset_every == 0:
+            states = model.init_states(args.batch_size, device)
+
         running_loss += loss.item()
         running_n += 1
 
@@ -607,6 +613,14 @@ def _parser() -> argparse.ArgumentParser:
     p.add_argument("--weight-decay", type=float, default=0.1)
     p.add_argument("--warmup-steps", type=int, default=500)
     p.add_argument("--grad-clip", type=float, default=1.0)
+    p.add_argument(
+        "--tbptt-reset-every",
+        type=int,
+        default=0,
+        metavar="N",
+        help="Reset TBPTT states to zero every N optimizer steps (0 = disabled). "
+             "Use 12 for char-level transformers to replicate MPS NaN-guard behavior on CUDA.",
+    )
 
     # L3
     p.add_argument("--use-l3", action="store_true",

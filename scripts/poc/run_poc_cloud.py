@@ -89,6 +89,11 @@ _BASE_FLAGS_S1_4 = [
     "--val-every", "500",
     "--log-every", "100",
     "--save-every", "5000",
+    # Replicate the MPS NaN-guard state-reset behaviour on CUDA.
+    # Local MPS runs fire NaN at exactly step%12==11, resetting TBPTT states;
+    # CUDA never NaNs so states grow unboundedly → val_ppl plateaus at ~5.6.
+    # --tbptt-reset-every 12 gives identical bounded-state dynamics on all platforms.
+    "--tbptt-reset-every", "12",
 ]
 
 _BASE_FLAGS_S5 = [
