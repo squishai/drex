@@ -65,10 +65,18 @@ _DEFAULT_SEEDS = {
     5: [42],  # Sprint 5 is single-seed — it's a 50k-step scale run
 }
 
-# Sprint 5 uses segment-len=512 with Mamba, which creates (B,S,d_inner,d_state)
-# tensors per SSM layer. On a 14-16 GB T4/P100, batch_size=32 overflows VRAM.
-# Cap batch_size to 8 for Sprint 5 regardless of the --batch-size flag.
-_SPRINT5_MAX_BATCH = 8
+# ALL sprints must use batch_size ≤ 8.
+#
+# Background: LR=3e-4 is tuned for batch=8.  Running batch=32 with the same LR
+# causes gradient instability on CUDA that is NOT caught by the [skip] NaN
+# guard (unlike on MPS where NaN is generated and skipped).  Cloud Sprint 1
+# with batch=32 converged to val_ppl=3.98 instead of the expected ~1.12,
+# reproducing locally as NaN on 12/13 steps.  Fixing to batch=8 makes cloud
+# results directly comparable to local experiments.
+#
+# Sprint 5 additionally has a VRAM constraint: segment-len=512 with Mamba
+# creates large (B,S,d_inner,d_state) tensors that overflow T4 at batch>8.
+_MAX_BATCH = 8
 
 # Base architecture flags (override per sprint where needed)
 _BASE_FLAGS_S1_4 = [
@@ -183,13 +191,20 @@ def run_sprint(
     ckpt_base.mkdir(parents=True, exist_ok=True)
 
     effective_batch = batch_size
-    if sprint == 5 and batch_size > _SPRINT5_MAX_BATCH:
+    if batch_size > _MAX_BATCH:
+        reason = (
+            "Mamba segment-len=512 on T4/P100 overflows VRAM at larger sizes"
+            if sprint == 5
+            else "LR=3e-4 is tuned for batch=8; larger batches cause gradient "
+                 "instability on CUDA (validated: batch=32 → val_ppl=3.98 vs "
+                 "expected ~1.12)"
+        )
         print(
-            f"Sprint 5: capping batch_size {batch_size} → {_SPRINT5_MAX_BATCH} "
-            f"(Mamba segment-len=512 on T4/P100 overflows VRAM at larger sizes)",
+            f"Sprint {sprint}: capping batch_size {batch_size} → {_MAX_BATCH} "
+            f"({reason})",
             flush=True,
         )
-        effective_batch = _SPRINT5_MAX_BATCH
+        effective_batch = _MAX_BATCH
 
     for seed in seeds:
         seed_name = f"{name}_s{seed}"
