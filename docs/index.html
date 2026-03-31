@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DREX-UNIFIED Architecture · Konjo AI Research</title>
+  <meta name="description" content="Interactive architecture diagram for DREX-UNIFIED: a post-transformer hybrid combining ESN, HDC, Mamba SSM, NoProp, KAN, and tiered memory." />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #050810; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+const PALETTE = {
+  bg: "#050810",
+  grid: "#0a0f1e",
+  panel: "#080d1a",
+  border: "#0d1633",
+  input:      "#00d4ff",
+  hdc:        "#00ffcc",
+  mamba:      "#3b82f6",
+  controller: "#f59e0b",
+  esn:        "#f97316",
+  episodic:   "#fb923c",
+  semantic:   "#8b5cf6",
+  kan:        "#84cc16",
+  sparse:     "#ec4899",
+  output:     "#00d4ff",
+  free:       "#10b981",
+  local:      "#3b82f6",
+  rl:         "#f59e0b",
+  zero:       "#10b981",
+};
+
+const components = {
+  input: {
+    id: "input", label: "INPUT", sublabel: "Raw bytes / tokens",
+    color: PALETTE.input, trainCost: "None", trainMethod: "—",
+    source: "—",
+    desc: "Raw unprocessed bytes or BPE tokens enter the system. No tokenization overhead required — Mamba operates well on raw bytes, improving compression and eliminating the vocabulary bottleneck of transformers.",
+    why: "Byte-level input removes the vocabulary assumption entirely. Mamba outperforms transformers on byte-level tasks — the SSM naturally compresses high-resolution signals.",
+  },
+  hdc: {
+    id: "hdc", label: "HDC ENCODER", sublabel: "Hyperdimensional projection",
+    color: PALETTE.hdc, trainCost: "~Zero", trainMethod: "Random projection (fixed)",
+    source: "Kanerva 1988–2009 / ACM HDC Survey 2023",
+    desc: "Projects input into a high-dimensional random vector space (10,000+ dims). Binding (×), bundling (+), and permutation (↻) encode associations, sequences, and roles. No training — random projections preserve geometry by the Johnson-Lindenstrauss lemma.",
+    why: "Gives the controller a naturally compositional, symbolic representation without any gradient cost. Noise-robust by construction. O(d) per operation.",
+  },
+  mamba: {
+    id: "mamba", label: "MAMBA SSM", sublabel: "Selective state space backbone",
+    color: PALETTE.mamba, trainCost: "Low", trainMethod: "Predictive Coding (local, parallel)",
+    source: "Gu & Dao 2023 / Mamba-2 2024",
+    desc: "Selective state space model with hardware-aware parallel scan. O(n) training, O(1) inference memory per token. Replaces the O(n²) self-attention bottleneck. Each layer trains locally via predictive coding — no full backward pass through the network.",
+    why: "The transformer's quadratic attention is its primary structural weakness. Mamba eliminates it while matching quality. With predictive coding training, layers train in parallel — no sequential gradient dependency.",
+  },
+  controller: {
+    id: "controller", label: "DREX CONTROLLER", sublabel: "HDC-based memory router",
+    color: PALETTE.controller, trainCost: "Tiny", trainMethod: "REINFORCE / Q-learning",
+    source: "DREX Phase 7 findings / Behrouz et al. Titans 2025",
+    desc: "A small RL-trained policy that decides what to write to each memory tier, what to read, and when to activate sparse execution modules. Operates on hypervectors from the HDC encoder — naturally compositional decisions. Reward signal: downstream prediction accuracy.",
+    why: "The write gate multi-stability problem (DREX Phase 7) disappears when the controller is trained as a discrete RL policy rather than a continuous differentiable function. Small policy = tiny training cost.",
+  },
+  esn: {
+    id: "esn", label: "WORKING MEMORY", sublabel: "ESN Reservoir (L1)",
+    color: PALETTE.esn, trainCost: "Zero", trainMethod: "None — fixed random weights",
+    source: "Jaeger & Haas 2004 / BabyLM 2025",
+    desc: "A sparsely connected (~1% density) recurrent network with fixed random weights. Never updated. The reservoir creates a high-dimensional echo of recent inputs. Only the linear readout is trained via ridge regression (milliseconds). Feedback from the controller creates attractor states, lifting the memory ceiling beyond reservoir size N.",
+    why: "Zero training cost for the temporal memory bank. Adding output feedback reduces average error by 30–60% — equivalent to doubling the reservoir size, for free.",
+  },
+  episodic: {
+    id: "episodic", label: "EPISODIC MEMORY", sublabel: "ESN + feedback controller (L2)",
+    color: PALETTE.episodic, trainCost: "Near Zero", trainMethod: "EMA delta writes (α≈0.90)",
+    source: "DREX Phase 7 / Titans STM analogy",
+    desc: "Extended reservoir with learned feedback from the controller. Stores episode-level context — paragraphs, conversations, task histories. EMA delta writes (α≈0.90) improve both accuracy and noise resilience (DREX Phase 7 finding). The episodic/semantic split comes from hand-designed inductive bias, not learned routing.",
+    why: "DREX Phase 7 proved EMA writes outperform learned gating for this tier. Biological analog: hippocampal episodic memory. Training cost is EMA parameter — no gradient needed.",
+  },
+  semantic: {
+    id: "semantic", label: "SEMANTIC MEMORY", sublabel: "Small SSM, trained (L3)",
+    color: PALETTE.semantic, trainCost: "Low", trainMethod: "NoProp (local block denoising)",
+    source: "NoProp arXiv 2503.24322 / Titans LTM analogy",
+    desc: "A small trained state space model that stores generalized, compressed world knowledge. Each block trains independently using NoProp — denoising a noisy target locally, no global backprop. Analogous to Titans' Long-Term Memory MLP, but SSM-based for linear inference cost. Updates parameters during inference for continual learning.",
+    why: "NoProp enables parallel block training with no gradient flow between blocks. Comparable accuracy to full backprop on CIFAR-100. Updates at inference = zero catastrophic forgetting.",
+  },
+  sparse: {
+    id: "sparse", label: "SPARSE ROUTER", sublabel: "Conditional compute gate",
+    color: PALETTE.sparse, trainCost: "Tiny", trainMethod: "Top-k gating (load balanced)",
+    source: "MoE literature / DREX sparse execution thesis",
+    desc: "Only activates the subset of modules needed for the current input. Dead modules cost zero compute and receive zero gradient. Inspired by Mixture-of-Experts but applied to the full memory + backbone stack, not just FFN layers. The controller signals which paths activate.",
+    why: "Compute savings compound: if 30% of modules activate on average, you've reduced cost by 70% with no quality loss on routed tasks. This is how DREX scales cheaply.",
+  },
+  kan: {
+    id: "kan", label: "KAN READOUT", sublabel: "Learnable spline functions",
+    color: PALETTE.kan, trainCost: "Very Low", trainMethod: "Spline fitting (closed form)",
+    source: "Liu et al. MIT/Caltech ICLR 2025",
+    desc: "Replaces the final linear projection with Kolmogorov-Arnold Network layers — learnable spline functions on edges instead of fixed weights. Smaller KANs match larger MLPs. The learned functions are interpretable and can sometimes be recovered as closed-form symbolic expressions.",
+    why: "Interpretability + faster scaling laws than MLP. The readout becomes auditable — you can visualize what transformation maps memory state to output. Pairs naturally with the HDC encoder's symbolic structure.",
+  },
+  output: {
+    id: "output", label: "OUTPUT", sublabel: "Tokens / generation",
+    color: PALETTE.output, trainCost: "—", trainMethod: "—",
+    source: "—",
+    desc: "Generated tokens or task outputs. Autoregressive or diffusion-style generation is possible — the architecture is agnostic to the decoding strategy. With sparse execution and O(1) SSM inference, per-token cost is constant regardless of sequence length.",
+    why: "O(1) inference cost per token at any context length. No KV cache explosion. Memory tiers handle long-range context without quadratic cost.",
+  },
+};
+
+const layers = [
+  { id: "input",      x: 50, y: 40,  w: 220, h: 52 },
+  { id: "hdc",        x: 50, y: 130, w: 220, h: 52 },
+  { id: "mamba",      x: 50, y: 220, w: 220, h: 52 },
+  { id: "controller", x: 310, y: 220, w: 220, h: 52 },
+  { id: "esn",        x: 50,  y: 330, w: 140, h: 52 },
+  { id: "episodic",   x: 210, y: 330, w: 140, h: 52 },
+  { id: "semantic",   x: 370, y: 330, w: 140, h: 52 },
+  { id: "sparse",     x: 50,  y: 430, w: 460, h: 52 },
+  { id: "kan",        x: 50,  y: 520, w: 460, h: 52 },
+  { id: "output",     x: 165, y: 610, w: 230, h: 52 },
+];
+
+const connections = [
+  ["input",      "hdc",        PALETTE.input,      ""],
+  ["hdc",        "mamba",      PALETTE.hdc,        "hypervectors"],
+  ["hdc",        "controller", PALETTE.hdc,        "hypervectors"],
+  ["mamba",      "controller", PALETTE.mamba,      "state"],
+  ["mamba",      "esn",        PALETTE.mamba,      ""],
+  ["mamba",      "episodic",   PALETTE.mamba,      ""],
+  ["mamba",      "semantic",   PALETTE.mamba,      ""],
+  ["controller", "esn",        PALETTE.controller, "write"],
+  ["controller", "episodic",   PALETTE.controller, "write"],
+  ["controller", "semantic",   PALETTE.controller, "write"],
+  ["esn",        "sparse",     PALETTE.esn,        "read"],
+  ["episodic",   "sparse",     PALETTE.episodic,   "read"],
+  ["semantic",   "sparse",     PALETTE.semantic,   "read"],
+  ["sparse",     "kan",        PALETTE.sparse,     ""],
+  ["kan",        "output",     PALETTE.kan,        ""],
+  ["output",     "controller", PALETTE.output,     "reward"],
+];
+
+function getLayerById(id) { return layers.find(l => l.id === id); }
+function getCenterX(l)    { return l.x + l.w / 2; }
+function getCenterY(l)    { return l.y + l.h / 2; }
+
+function getConnectionPath(fromId, toId) {
+  const f = getLayerById(fromId);
+  const t = getLayerById(toId);
+  if (!f || !t) return "";
+  const fx = getCenterX(f), fy = f.y + f.h;
+  const tx = getCenterX(t), ty = t.y;
+
+  if (fromId === "output" && toId === "controller") {
+    const startX = f.x + f.w, startY = getCenterY(f);
+    const endX   = t.x + t.w, endY   = getCenterY(t);
+    return `M ${startX} ${startY} C ${startX+80} ${startY} ${endX+80} ${endY} ${endX} ${endY}`;
+  }
+  if (fromId === "controller" && ["esn","episodic","semantic"].includes(toId)) {
+    const cfx = getCenterX(f), cfy = f.y + f.h;
+    return `M ${cfx} ${cfy} C ${cfx} ${cfy+30} ${tx} ${ty-30} ${tx} ${ty}`;
+  }
+  if (fromId === "mamba" && ["esn","episodic","semantic"].includes(toId)) {
+    const mfx = f.x, mfy = getCenterY(f);
+    return `M ${mfx} ${mfy} C ${mfx-20} ${mfy} ${tx} ${ty-30} ${tx} ${ty}`;
+  }
+  const midY = (fy + ty) / 2;
+  if (Math.abs(fx - tx) < 10) return `M ${fx} ${fy} L ${tx} ${ty}`;
+  return `M ${fx} ${fy} C ${fx} ${midY} ${tx} ${midY} ${tx} ${ty}`;
+}
+
+const trainColors = {
+  "None — fixed random weights":       "#10b981",
+  "Random projection (fixed)":         "#10b981",
+  "EMA delta writes (α≈0.90)":         "#f97316",
+  "NoProp (local block denoising)":    "#8b5cf6",
+  "Predictive Coding (local, parallel)":"#3b82f6",
+  "REINFORCE / Q-learning":            "#f59e0b",
+  "Top-k gating (load balanced)":      "#ec4899",
+  "Spline fitting (closed form)":      "#84cc16",
+  "—":                                 "#334155",
+};
+
+const costToWidth = {
+  "None":0, "~Zero":2, "Near Zero":4, "Tiny":8,
+  "Very Low":14, "Low":28, "Medium":55, "High":80, "Extreme":100,
+};
+
+function App() {
+  const [active, setActive] = useState("controller");
+  const [tick,   setTick]   = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => setTick(t => t + 1), 60);
+    return () => clearInterval(id);
+  }, []);
+
+  const sel    = active ? components[active] : null;
+  const SVG_W  = 560, SVG_H = 680;
+
+  return (
+    <div style={{
+      background: PALETTE.bg,
+      minHeight: "100vh",
+      fontFamily: "'JetBrains Mono','Fira Code',monospace",
+      color: "#e2e8f0",
+      display: "flex",
+      flexDirection: "column",
+    }}>
+      {/* Header */}
+      <div style={{
+        padding: "20px 28px 14px",
+        borderBottom: "1px solid #0d1633",
+        background: "linear-gradient(180deg,#060a14 0%,#050810 100%)",
+      }}>
+        <div style={{ fontSize:10, letterSpacing:"0.25em", color:"#1e3a5f", textTransform:"uppercase", marginBottom:6 }}>
+          Konjo AI Research · DREX Unified Architecture v0.1
+        </div>
+        <h1 style={{
+          margin:0, fontSize:"clamp(18px,2.5vw,26px)", fontWeight:700, letterSpacing:"-0.02em",
+          background:"linear-gradient(90deg,#00d4ff 0%,#f59e0b 50%,#84cc16 100%)",
+          WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent",
+        }}>
+          DREX-UNIFIED: Post-Transformer Hybrid Architecture
+        </h1>
+        <p style={{ margin:"6px 0 0", fontSize:12, color:"#334155", lineHeight:1.5 }}>
+          ESN · HDC · Mamba SSM · Predictive Coding · NoProp · KAN · Sparse Execution · Titans-style Tiered Memory
+        </p>
+      </div>
+
+      <div style={{ display:"flex", flex:1, flexWrap:"wrap" }}>
+        {/* SVG Diagram */}
+        <div style={{ flex:"0 0 auto", padding:"24px 16px 24px 28px" }}>
+          <svg width={SVG_W} height={SVG_H} viewBox={`0 0 ${SVG_W} ${SVG_H}`}
+               style={{ display:"block", maxWidth:"100%" }}>
+            <defs>
+              <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#090e1c" strokeWidth="1"/>
+              </pattern>
+              {Object.entries(PALETTE).map(([k,v]) => (
+                <marker key={k} id={`arrow-${k}`} markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                  <path d="M0,0 L0,6 L6,3 z" fill={v} opacity="0.7"/>
+                </marker>
+              ))}
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+              <filter id="glowStrong">
+                <feGaussianBlur stdDeviation="5" result="coloredBlur"/>
+                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <rect width={SVG_W} height={SVG_H} fill="url(#grid)"/>
+
+            {/* Memory tier bracket */}
+            <rect x={40} y={316} width={480} height={78}
+              fill="#0a0f1e" stroke="#1e293b" strokeWidth="1" rx={6}
+              strokeDasharray="4,3"/>
+            <text x={44} y={310} fontSize="8" fill="#1e3a5f" letterSpacing="0.15em" fontFamily="monospace">
+              TIERED MEMORY SYSTEM (DREX)
+            </text>
+
+            {/* Connection lines */}
+            {connections.map(([fromId,toId,color],i) => {
+              const path     = getConnectionPath(fromId, toId);
+              const isActive = active === fromId || active === toId;
+              const offset   = ((tick * 0.8 + i * 15) % 60);
+              const paletteKey = Object.keys(PALETTE).find(k => PALETTE[k] === color) || "border";
+              return (
+                <g key={`${fromId}-${toId}`}>
+                  <path d={path} fill="none" stroke={color}
+                    strokeWidth={isActive ? 3 : 1}
+                    opacity={isActive ? 0.3 : 0.08}
+                    strokeLinecap="round"
+                    filter={isActive ? "url(#glow)" : undefined}/>
+                  <path d={path} fill="none" stroke={color}
+                    strokeWidth={isActive ? 2 : 1}
+                    opacity={isActive ? 0.9 : 0.25}
+                    strokeDasharray={isActive ? "6,4" : "3,6"}
+                    strokeDashoffset={-offset}
+                    strokeLinecap="round"
+                    markerEnd={`url(#arrow-${paletteKey})`}/>
+                </g>
+              );
+            })}
+
+            {/* Component boxes */}
+            {layers.map(l => {
+              const comp     = components[l.id];
+              if (!comp) return null;
+              const isActive = active === l.id;
+              return (
+                <g key={l.id} onClick={() => setActive(l.id)} style={{ cursor:"pointer" }}>
+                  {isActive && (
+                    <rect x={l.x-4} y={l.y-4} width={l.w+8} height={l.h+8}
+                      rx={8} fill={comp.color} opacity={0.12} filter="url(#glowStrong)"/>
+                  )}
+                  <rect x={l.x} y={l.y} width={l.w} height={l.h} rx={5}
+                    fill={isActive ? `${comp.color}18` : "#080c18"}
+                    stroke={isActive ? comp.color : `${comp.color}40`}
+                    strokeWidth={isActive ? 2 : 1}/>
+                  <rect x={l.x} y={l.y} width={3} height={l.h}
+                    rx={2} fill={comp.color} opacity={isActive ? 1 : 0.5}/>
+                  <text x={l.x+14} y={l.y+20} fontSize="11" fontWeight="700"
+                    fill={isActive ? comp.color : "#94a3b8"} fontFamily="monospace" letterSpacing="0.08em">
+                    {comp.label}
+                  </text>
+                  <text x={l.x+14} y={l.y+35} fontSize="9"
+                    fill={isActive ? `${comp.color}aa` : "#334155"} fontFamily="monospace">
+                    {comp.sublabel}
+                  </text>
+                  <rect x={l.x+l.w-68} y={l.y+13} width={60} height={16}
+                    rx={3} fill="#050810" stroke="#0d1633" strokeWidth="1"/>
+                  <text x={l.x+l.w-63} y={l.y+24} fontSize="8"
+                    fill={trainColors[comp.trainMethod] || "#334155"} fontFamily="monospace">
+                    {comp.trainCost}
+                  </text>
+                  {isActive && (
+                    <circle cx={l.x+l.w-8} cy={l.y+8} r={3} fill={comp.color} opacity={0.9}/>
+                  )}
+                </g>
+              );
+            })}
+
+            <text x={530} y={246} fontSize="8" fill="#1e3a5f" fontFamily="monospace"
+              transform="rotate(-90,530,246)">
+              O(n) TRAIN · O(1) INFER →
+            </text>
+          </svg>
+        </div>
+
+        {/* Detail Panel */}
+        <div style={{ flex:"1 1 300px", padding:"24px 24px 24px 8px", display:"flex", flexDirection:"column" }}>
+          {sel ? (
+            <div style={{
+              background:"#080d1a",
+              border:`1px solid ${sel.color}30`,
+              borderTop:`3px solid ${sel.color}`,
+              borderRadius:8, padding:"20px",
+              height:"100%", boxSizing:"border-box",
+            }}>
+              <div style={{ fontSize:9, letterSpacing:"0.2em", color:"#1e3a5f", textTransform:"uppercase", marginBottom:8 }}>
+                Component Detail
+              </div>
+              <div style={{ fontSize:20, fontWeight:700, color:sel.color, marginBottom:4, letterSpacing:"-0.01em" }}>
+                {sel.label}
+              </div>
+              <div style={{ fontSize:12, color:"#334155", marginBottom:16 }}>{sel.sublabel}</div>
+              <div style={{ fontSize:13, color:"#94a3b8", lineHeight:1.7, marginBottom:20 }}>{sel.desc}</div>
+
+              <div style={{ background:"#050810", border:"1px solid #0d1633", borderRadius:6, padding:"12px 14px", marginBottom:12 }}>
+                <div style={{ fontSize:9, letterSpacing:"0.15em", textTransform:"uppercase", color:"#1e3a5f", marginBottom:8 }}>
+                  Training
+                </div>
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:10 }}>
+                  <span style={{ fontSize:11, color:trainColors[sel.trainMethod]||"#334155" }}>{sel.trainMethod}</span>
+                  <span style={{ fontSize:12, fontWeight:700, color:trainColors[sel.trainMethod]||"#334155" }}>{sel.trainCost}</span>
+                </div>
+                <div style={{ background:"#0a0f1e", borderRadius:2, height:4, overflow:"hidden" }}>
+                  <div style={{
+                    height:"100%", width:`${costToWidth[sel.trainCost]||0}%`,
+                    background:trainColors[sel.trainMethod]||"#334155",
+                    borderRadius:2, transition:"width 0.4s",
+                  }}/>
+                </div>
+                <div style={{ display:"flex", justifyContent:"space-between", marginTop:4 }}>
+                  <span style={{ fontSize:8, color:"#10b981", letterSpacing:"0.1em" }}>FREE</span>
+                  <span style={{ fontSize:8, color:"#ef4444", letterSpacing:"0.1em" }}>EXTREME</span>
+                </div>
+              </div>
+
+              <div style={{
+                background:`${sel.color}08`, border:`1px solid ${sel.color}20`,
+                borderRadius:6, padding:"12px 14px", marginBottom:12,
+              }}>
+                <div style={{ fontSize:9, letterSpacing:"0.15em", textTransform:"uppercase", color:`${sel.color}80`, marginBottom:6 }}>
+                  Why this piece?
+                </div>
+                <div style={{ fontSize:12, color:"#64748b", lineHeight:1.6 }}>{sel.why}</div>
+              </div>
+
+              {sel.source && sel.source !== "—" && (
+                <div style={{ fontSize:10, color:"#1e3a5f", marginTop:8 }}>↗ {sel.source}</div>
+              )}
+            </div>
+          ) : (
+            <div style={{ background:"#080d1a", border:"1px solid #0d1633", borderRadius:8, padding:20, color:"#1e3a5f", fontSize:13 }}>
+              Click any component to explore
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div style={{ borderTop:"1px solid #0d1633", padding:"14px 28px", display:"flex", gap:24, flexWrap:"wrap", alignItems:"center" }}>
+        <span style={{ fontSize:9, letterSpacing:"0.2em", color:"#1e3a5f", textTransform:"uppercase" }}>
+          Training Cost Scale:
+        </span>
+        {[
+          ["Zero / Near Zero",             "#10b981"],
+          ["Local (NoProp / Pred. Coding)", "#3b82f6"],
+          ["RL Policy",                    "#f59e0b"],
+          ["Closed Form",                  "#84cc16"],
+        ].map(([label, color]) => (
+          <div key={label} style={{ display:"flex", alignItems:"center", gap:6 }}>
+            <div style={{ width:8, height:8, borderRadius:"50%", background:color }}/>
+            <span style={{ fontSize:10, color:"#334155" }}>{label}</span>
+          </div>
+        ))}
+        <div style={{ marginLeft:"auto", fontSize:10, color:"#1e3a5f" }}>
+          Click components for details · <a href="https://github.com/squishai/drex" style={{ color:"#1e3a5f" }}>GitHub</a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App />);
+  </script>
+</body>
+</html>

@@ -2,6 +2,8 @@
 
 <img width="500" height="500" alt="Drex Logo" src="https://github.com/user-attachments/assets/36126030-18b5-483d-85c2-5387dcb3b69f" />
 
+**[→ Interactive Architecture Diagram](https://squishai.github.io/drex/)**
+
 Drex is an experimental transformer architecture with a four-tier memory hierarchy,
 implementing a validated episodic/semantic split associative memory module. The
 architecture was developed through 16 phases of hypothesis-driven research across 247+
